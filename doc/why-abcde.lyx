@@ -1,0 +1,409 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+abcde
+\end_layout
+
+\begin_layout Title
+Motivation et principes de conception
+\end_layout
+
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout Itemize
+Pratiquer Python3
+\end_layout
+
+\begin_layout Itemize
+L'ecosystème des éditeurs ABC ne gère pas bien le playback (eg répétitions
+ contrôlables) et ne permet pas d'entendre ce qu'on saisit
+\end_layout
+
+\begin_layout Section
+Fonctionnalités principales
+\end_layout
+
+\begin_layout Itemize
+Edition: aperçu musical (Musical feedback)
+\end_layout
+
+\begin_layout Itemize
+Edition: uniquement le morceau courant est visible dans l'éditeur
+\end_layout
+
+\begin_layout Itemize
+Edition: coloration syntaxique
+\end_layout
+
+\begin_layout Itemize
+Playback: une palette d'outils riche est disponible et occupe une place
+ importante de l'éditeur (eg 1/4 de la fenêre)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+répétition
+\end_layout
+
+\begin_layout Itemize
+réglage du tempo, avec des valeurs prédéfinies par type de morceau (eg 
+\begin_inset Quotes eld
+\end_inset
+
+reel lent
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+reel medium
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+reel de ceili
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+playback de la mesure en cours, de la ligne en cours, de la partie en cours
+ (partie A, partie B, ...), de la sélection
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Playback: jouer avec style (!)
+\end_layout
+
+\begin_layout Itemize
+Playback: pouvoir sélectionner un instrument MIDI
+\end_layout
+
+\begin_layout Itemize
+Bibliothèque: navigation dans la bibliothèque
+\end_layout
+
+\begin_layout Itemize
+Bibliothèque: recherche dans la bibliothèque
+\end_layout
+
+\begin_layout Itemize
+Fichier: index des morceaux, avec possibilité d'atteindre le morceau désiré
+\end_layout
+
+\begin_layout Section
+Fonctionnalités optionnelles
+\end_layout
+
+\begin_layout Standard
+Qui seront traitées dans un second temps, ou pas.
+\end_layout
+
+\begin_layout Itemize
+Affichage de la partition
+\end_layout
+
+\begin_layout Section
+Principes généraux
+\end_layout
+
+\begin_layout Itemize
+Respect de la version 1.6 du "standard" qui est la dernière version officielle
+ de Chris Walshaw (http://abcnotation.com/abc2mtex/abc.txt):
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+une seule portée
+\end_layout
+
+\begin_layout Itemize
+édition des champs informatifs
+\end_layout
+
+\begin_layout Itemize
+[TBC: voir ce qu'apporte la version 2.1 du standard: http://abcnotation.com/wiki/a
+bc:standard:v2.1]
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Concepts: livre ABC (ABC book = 1 fichier ABC), bibliothèque ABC (un ensemble
+ de fichiers ABC), morceau ABC (tune) (un morceau dans un fichier ABC)
+\end_layout
+
+\begin_layout Section
+Choix techniques
+\end_layout
+
+\begin_layout Subsection
+Principes
+\end_layout
+
+\begin_layout Itemize
+Multiplateforme Linux, Windows (pour les amis du RCB) et éventuellement
+ Mac (mais c'est la cerise sur le gâteau)
+\end_layout
+
+\begin_layout Itemize
+Python 3, dernière version stable à jour
+\end_layout
+
+\begin_layout Itemize
+Idéalement: pur Python: ne pas dépendre de programmes extérieurs (pour être
+ le plus portable possible et le plus facile à installer)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+A défaut: pur pip: toutes les dépendances doivent pouvoir être installées
+ avec pip
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+A défaut: toutes les dépendances doivent être multi-plateforme Linux/Windows
+ (eg le synthé)
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+Utiliser le plus possible les bibliothèques Python standard
+\end_layout
+
+\begin_layout Subsection
+Toolkit graphique
+\end_layout
+
+\begin_layout Standard
+Idéalement: utiliser tkinter.
+ Pas ce qui se fait de plus beau, mais le seul toolkit en standard: le plus
+ portable.
+\end_layout
+
+\begin_layout Subsection
+Editeur de texte
+\end_layout
+
+\begin_layout Subsubsection
+Choix
+\end_layout
+
+\begin_layout Standard
+TODO
+\end_layout
+
+\begin_layout Subsubsection
+Options
+\end_layout
+
+\begin_layout Paragraph
+Scintilla
+\end_layout
+
+\begin_layout Standard
+easyABC utilise scintilla, mais c'est un composant écrit en C++ fait pour
+ travailler en GTK+ sous Linux (cf.
+ https://sourceforge.net/p/scintilla/code/ci/default/tree/a).
+ Installation compliquée du coup.
+\end_layout
+
+\begin_layout Paragraph
+TedPy
+\end_layout
+
+\begin_layout Standard
+https://github.com/PierreQuentel/TedPy
+\end_layout
+
+\begin_layout Standard
+Un seul fichier, en tkinter.
+\end_layout
+
+\begin_layout Subsection
+Jouer un son midi
+\end_layout
+
+\begin_layout Subsubsection
+PyGame
+\end_layout
+
+\begin_layout Standard
+http://www.pygame.org/hifi.html:
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Comes with many Operating systems.
+ Just an apt-get, emerge, pkg_add, or yast install away.
+ No need to mess with installing it outside of your operating systems package
+ manager.
+ Comes with binary installers (and uninstallers) for Windows or MacOS X.
+ Pygame does not require setuptools, or ctypes to install.
+\end_layout
+
+\begin_layout Standard
+Mais:
+\end_layout
+
+\begin_layout Itemize
+hyper vieux, dernière version en 2009! cf.
+ http://www.pygame.org/download.shtml
+\end_layout
+
+\begin_layout Itemize
+pas sur pypi
+\end_layout
+
+\begin_layout Itemize
+semble python 2 uniquement
+\end_layout
+
+\begin_layout Itemize
+c'est avant tout orienté graphique, avec un wrapper autour de la SDL
+\end_layout
+
+\begin_layout Standard
+Ceci dit: ça semble encore activement utilisé d'après le site.
+\end_layout
+
+\begin_layout Subsubsection
+FluidSynth
+\end_layout
+
+\begin_layout Standard
+Un synthétiseur logiciel sans GUI multi-plateforme et écrit en C.
+\end_layout
+
+\begin_layout Standard
+Pourrait être commandé depuis Python: 
+\end_layout
+
+\begin_layout Itemize
+cf.
+ https://pypi.python.org/pypi/pyFluidSynth/1.2.4
+\end_layout
+
+\begin_layout Itemize
+ou bien https://pypi.python.org/pypi/fluidsynth/0.2 
+\end_layout
+
+\begin_layout Standard
+Dispo via pip3:
+\end_layout
+
+\begin_layout LyX-Code
+$ pip3 search fluidsynth
+\end_layout
+
+\begin_layout LyX-Code
+fluidsynth - Fluidsynth bindings
+\end_layout
+
+\begin_layout LyX-Code
+pyFluidSynth - Python bindings for FluidSynth, a MIDI synthesizer that uses
+ SoundFont instruments
+\end_layout
+
+\begin_layout Subsubsection
+Etat de l'art des soft python qui font de la sortie MIDI
+\end_layout
+
+\begin_layout Paragraph
+Freescobaldi
+\end_layout
+
+\begin_layout Standard
+Voir Freescobaldi (http://www.frescobaldi.org/), c'est un éditeur de fichiers
+ lilypond écrit en python 3 (cf.
+ https://github.com/wbsoft/frescobaldi/blob/master/INSTALL) qui contient
+ la fonctionnalité: 
+\begin_inset Quotes eld
+\end_inset
+
+Midi player to proof-listen LilyPond-generated MIDI files
+\begin_inset Quotes erd
+\end_inset
+
+ => d'après le readme, utiliser PortMidi (C ou C++ je sais plus) et ses
+ bindings Python; et il faut un synthé derrière; et il faut choisir le bon
+ device midi
+\end_layout
+
+\begin_layout Paragraph
+EasyABC
+\end_layout
+
+\end_body
+\end_document
