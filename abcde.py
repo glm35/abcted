@@ -2,6 +2,7 @@
 
 from pyfluidsynth3 import fluidaudiodriver, fluidhandle, fluidsettings, fluidsynth
 import time
+from getch import getch
 
 handle = fluidhandle.FluidHandle()
 settings = fluidsettings.FluidSettings(handle)
@@ -26,12 +27,29 @@ def abc2midi_note_number(abc_note_string):
     midi_note_number += c_major_scale_intervals[abc_note_string]
     return midi_note_number
 
-#synth.noteon(0, 79, 1.0)
-#time.sleep(1)
-#synth.noteoff(0, 79)
+def demo_play_single_note():
+    synth.noteon(0, 79, 1.0)
+    time.sleep(1)
+    synth.noteoff(0, 79)
 
-for note in c_major_scale + list(map(str.lower, c_major_scale)):
-    midi_note_number = abc2midi_note_number(note)
-    synth.noteon(0, midi_note_number, 1.0)
-    time.sleep(0.5)
-    synth.noteoff(0, midi_note_number)
+def demo_play_scale():
+    for note in c_major_scale + list(map(str.lower, c_major_scale)):
+        midi_note_number = abc2midi_note_number(note)
+        synth.noteon(0, midi_note_number, 1.0)
+        time.sleep(0.5)
+        synth.noteoff(0, midi_note_number)
+
+def demo_play_interactive():
+    print('Press a key for an ABC note from C to b... (Ctrl+C to finish)')
+    two_octaves_c_major_scale = c_major_scale + list(map(str.lower, c_major_scale))
+    while True:
+        key = getch()
+        if key is '\x03': # Ctrl+C
+            break
+        if key in two_octaves_c_major_scale:
+            midi_note_number = abc2midi_note_number(key)
+            synth.noteon(0, midi_note_number, 1.0)
+            time.sleep(0.5)
+            synth.noteoff(0, midi_note_number)
+
+demo_play_interactive()
