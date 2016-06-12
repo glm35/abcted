@@ -1,0 +1,30 @@
+Installing abcde (development version)
+======================================
+
+Install FluidSynth and sound fonts
+----------------------------------
+
+  $ sudo apt install fluidsynth fluid-soundfont-gm fluid-soundfont-gs
+
+Create a venv and install abcde pip dependencies
+------------------------------------------------
+
+  $ pyvenv-3.4 create ~/.tmp/venv-devel-abcde/
+  $ source ~/.tmp/venv-devel-abcde/bin/activate
+  $ pip install py-getch
+
+Install pyfluidsynth3 (in the venv)
+-----------------------------------
+
+  $ cd ~/code
+  $ git clone -b gl-devel ssh://radisnoir/home/gwen/code/git/pyfluidsynth3.git
+#  $ git clone https://github.com/tea2code/pyfluidsynth3
+  $ cd ~/code pyfluidsynth3
+  $ python setup.py install
+
+Start abcde
+-----------
+
+  $ cd ~/code/abcde
+  $ python abcde.py
+
