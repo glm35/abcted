@@ -111,4 +111,38 @@ def demo_play_interactive_timer():
             play_note(0, midi_note_number, 1.0, 0.5)
 
 
+def demo_play_tick():
+    # !!! use 9 for channel 10 (perc)
+    # Valeurs de 'note' qui pourraient le faire pour un tick métronome:
+    # 37: stick
+    # 42: Closed Hi-hat
+    # 56: Cowbell
+    # ~ 60-62
+    # ~ 75-77
+    for note in range(35, 82):
+        print("playing note {} on channel 10 (perc)".format(note))
+        play_note(9, note, 1.0, 0.5)
+        time.sleep(0.5)
+
+demo_play_tick()
+exit()
+
+
+#bank_no = 25
+#res = synth.bank_select(0, bank_no)
+#print("bank select: " + str(res))
+
+midi_programs = {
+    'Acoustic Grand Piano': 0,
+    'Accordion': 21,
+    'Flute': 73,
+    'Fiddle': 110
+}
+
+program_no = midi_programs['Fiddle']
+#program_no = midi_programs['Flute']
+res = synth.program_change(0, program_no)
+print("program change: channel={}, program={} -- res={}".format(0, program_no, res))
+
+
 demo_play_interactive_timer()
