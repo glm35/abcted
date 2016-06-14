@@ -3,7 +3,7 @@
 from pyfluidsynth3 import fluidaudiodriver, fluidhandle, fluidsettings, fluidsynth
 import time
 from getch import getch
-from threading import Timer
+from threading import Timer, Lock
 
 handle = fluidhandle.FluidHandle()
 settings = fluidsettings.FluidSettings(handle)
@@ -64,43 +64,47 @@ current_midi_note_number = None
 current_midi_channel = 0
 current_timer = None
 
+# 'lock' protects both:
+# (1) the above global variables
+#  and (2) libfluidsynth (in case it is not reentrant, which is unkown to me at the moment)
+lock = Lock()
+
+
 def on_timeout():
-    global current_midi_note_number
-    global current_midi_channel
+    global current_midi_note_number, current_midi_channel, lock
 
-    # TODO: begin critical section
-    # (sécuriser la sortie de section critique)
-    synth.noteoff(current_midi_channel, current_midi_note_number)
+    try:
+        lock.acquire()
+        synth.noteoff(current_midi_channel, current_midi_note_number)
+        current_midi_note_number = None
+    finally:
+        lock.release()
 
-    # TODO current_midi_note_number = None (after crit)
-
-    # TODO: end critical section
 
 def play_note(channel, note_number, velocity, delay_s):
-    global current_midi_note_number
-    global current_midi_channel
-    global current_timer
+    global current_midi_note_number, current_midi_channel, current_timer, lock
 
-    # TODO: begin critical section
+    try:
+        lock.acquire()
+        if current_midi_note_number is not None:
+            synth.noteoff(current_midi_channel, current_midi_note_number)
+            current_timer.cancel()
 
-    if current_midi_note_number is not None:
-        synth.noteoff(current_midi_channel, current_midi_note_number)
-        current_timer.cancel()
+        current_midi_channel = channel
+        current_midi_note_number = note_number
+        synth.noteon(current_midi_channel, current_midi_note_number, velocity)
+        current_timer = Timer(delay_s, on_timeout)
+        current_timer.start()
+    finally:
+        lock.release()
 
-    current_midi_channel = channel
-    current_midi_note_number = note_number
-    synth.noteon(current_midi_channel, current_midi_note_number, velocity)
-    current_timer = Timer(delay_s, on_timeout)
-    current_timer.start()
-
-    # TODO: end critical section
 
 def demo_play_interactive_timer():
-    print('Press a key for an ABC note from C to b... (Ctrl+C to finish)')
+    print('Press a key for an ABC note from C to b... (Ctrl+C or q or Q to finish)')
     two_octaves_c_major_scale = c_major_scale + list(map(str.lower, c_major_scale))
     while True:
         key = getch()
-        if key is '\x03': # Ctrl+C
+        if key in ['\x03', 'q', 'Q']: # '\x03' = Ctrl+C
             break
         if key in two_octaves_c_major_scale:
             midi_note_number = abc2midi_note_number(key)
