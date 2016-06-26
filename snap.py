@@ -50,6 +50,7 @@ class SingleNoteAbcPlayer:
             # - libfluidsynth (in case it is not reentrant, which is unkown to me at the moment)
 
         self.setup_synth()
+        self.select_instrument('Acoustic Grand Piano')
 
     def setup_synth(self):
         self.handle = fluidhandle.FluidHandle()
@@ -119,9 +120,9 @@ def demo_play_tick():
         synth.play_midi_note(note)
         time.sleep(0.5)
 
+if __name__ == "__main__":
+    # Choose your demo:
 
-# Choose your demo:
-
-demo_play_interactive()
-#demo_play_interactive('Accordion')
-#demo_play_tick()
+    demo_play_interactive()
+    #demo_play_interactive('Accordion')
+    #demo_play_tick()
