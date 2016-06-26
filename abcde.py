@@ -15,7 +15,10 @@ class Theme():
         self.selectbg = '#630'  # Select background color
 
         self.font_family = "courier new"
-        self.font = None
+        self.font_size = 12
+
+    def get_font(self):
+        return tkinter.font.Font(family=self.font_family, size=self.font_size)
 
 
 def maximize_root_window(root):
@@ -29,11 +32,7 @@ root.title("abcde")
 #maximize_root_window(root)
 
 theme = Theme()
-theme.font = tkinter.font.Font(family=theme.font_family,
-                               size=-int(root.winfo_screenwidth() / 120))
-                               # font size computation stolen from TedPy
-
-edit_zone = tkinter.scrolledtext.ScrolledText(root, font=theme.font,
+edit_zone = tkinter.scrolledtext.ScrolledText(root, font=theme.get_font(),
                                               background=theme.bg, foreground=theme.fg,
 
                                               # Cursor configuration:
