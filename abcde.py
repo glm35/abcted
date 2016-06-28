@@ -48,6 +48,8 @@ class EditZone(tkinter.Frame):
         self.control = False
         self.alt = False
 
+        self.edit_zone.focus() # Set the focus on the edit zone
+
         self.edit_zone.bind('<Key>', self.on_key_press)
         self.edit_zone.bind('<KeyRelease>', self.on_key_release)
 
@@ -68,6 +70,12 @@ class EditZone(tkinter.Frame):
         elif not self.control and not self.alt and \
                         event.keysym.upper() in snap.c_major_scale:
             self.snap.play_abc_note(event.keysym)
+        elif event.keysym in ['t']: # Test!
+            print("Current cursor position: " + self.edit_zone.index(tkinter.INSERT))
+
+            print(self.edit_zone.get('1.0'))
+            print(self.edit_zone.get(tkinter.INSERT))
+            print(self.edit_zone.get('1.0', tkinter.END))
 
     def on_key_release(self, event):
         if event.keysym in ['Shift_R','Shift_L']:
