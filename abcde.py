@@ -118,7 +118,11 @@ class EditZone(tkinter.Frame):
             # There is a '%' before the text cursor => we are in comment context
             return None
 
-        # Check whether we are in informative field context
+        # Check whether we are in an information line
+        if len(cur_line_to_insert) >= 2:
+            if cur_line_to_insert[1] is ':':
+                if 'A' <= cur_line_to_insert[0] <= 'Z':
+                    return  None
 
         # Find the tune key (default to C)
 
