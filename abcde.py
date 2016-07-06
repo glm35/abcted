@@ -101,6 +101,37 @@ class EditZone(tkinter.Frame):
         cur_line_to_insert = self.edit_zone.get(line_start_index, insert_index)
         return cur_line_to_insert
 
+    def get_line(self, line_no):
+        index_start = str(line_no) + ".0"
+        index_end = str(line_no) + ".end"
+        return self.edit_zone.get(index_start, index_end)
+
+    def get_key_at_insert(self):
+        """Get the tune key at the insertion point (text cursor).
+
+        :return: a string with the tune key, eg 'C' or 'Eb minor' or 'A mix'
+        """
+
+        # Assume 'C major' if no key is specified
+        key = 'C'
+
+        # For each line going upward until until the line starts with 'X:'
+        # (beginning of the tune found) or until there are no more lines,
+        # look for the key:
+
+        line_no = int(self.edit_zone.index(tkinter.INSERT).split('.')[0])
+        while line_no > 0:
+            line = self.get_line(line_no)
+            if line.startswith('K:'):
+                key = line[2:]
+                break
+            if line.startswith('X:'):
+                # We reached the beginning of the tune
+                break
+            line_no -= 1
+
+        return key
+
     def get_note_to_play(self, keysym):
         """Given a keysym following a key press, check whether there is a
          note to play. If so, return the note.
@@ -124,13 +155,16 @@ class EditZone(tkinter.Frame):
                 if 'A' <= cur_line_to_insert[0] <= 'Z':
                     return  None
 
-        # Find the tune key (default to C)
+        # Find the tune key at the insertion point
+        key = self.get_key_at_insert()
+        print("Key at insert: " + key)
+
+        # Find whether there is an accidental before the note
 
         # Get the note to play with all the useful attributes (accidentals,
         # octave changes, ...)
 
         # Normalize the note
-
 
         return keysym
 
