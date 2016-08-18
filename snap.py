@@ -6,6 +6,7 @@ import time
 from getch import getch
 from threading import Timer, Lock
 
+import abc2midi
 
 # midi utils
 
@@ -15,24 +16,6 @@ midi_programs = {
     'Flute': 73,
     'Fiddle': 110
 }
-
-
-# abc2midi utils
-
-c_major_scale = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
-major_scale_intervals = [0, 2, 4, 5, 7, 9, 11]
-c_major_scale_intervals = dict(zip(c_major_scale, major_scale_intervals))
-
-
-def abc2midi_note(abc_note_string):
-    """"Convert an ABC note to a midi number"""
-    midi_c4_number = 60
-    midi_note_number = midi_c4_number
-    if abc_note_string.islower():
-        midi_note_number += 12
-        abc_note_string = abc_note_string.upper()
-    midi_note_number += c_major_scale_intervals[abc_note_string]
-    return midi_note_number
 
 
 class SingleNoteAbcPlayer:
@@ -81,7 +64,7 @@ class SingleNoteAbcPlayer:
             self.lock.release()
 
     def play_abc_note(self, abc_note):
-        self.play_midi_note(abc2midi_note(abc_note))
+        self.play_midi_note(abc2midi.get_midi_note(abc_note))
 
     def on_timeout(self):
         try:
@@ -96,7 +79,7 @@ def demo_play_interactive(instrument ='Acoustic Grand Piano'):
     synth = SingleNoteAbcPlayer()
     synth.select_instrument(instrument)
     print('Press a key for an ABC note from C to b... (Ctrl+C or q or Q to finish)')
-    two_octaves_c_major_scale = c_major_scale + list(map(str.lower, c_major_scale))
+    two_octaves_c_major_scale = abc2midi.c_major_scale + list(map(str.lower, abc2midi.c_major_scale))
     while True:
         key = getch()
         if key in ['\x03', 'q', 'Q']: # '\x03' = Ctrl+C

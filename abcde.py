@@ -6,6 +6,7 @@ import tkinter.font
 import tkinter.scrolledtext
 
 import snap
+import abc2midi
 
 
 class Theme():
@@ -68,7 +69,7 @@ class EditZone(tkinter.Frame):
         elif event.keysym in ['Alt_L']:
             self.alt = True
         elif not self.control and not self.alt and \
-                        event.keysym.upper() in snap.c_major_scale:
+                        event.keysym.upper() in abc2midi.c_major_scale:
             note = self.get_note_to_play(event.keysym)
             if note is not None:
                 self.snap.play_abc_note(event.keysym)
