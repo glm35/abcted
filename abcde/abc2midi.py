@@ -17,6 +17,16 @@ MAJOR_SCALES = {
     'Dmaj' : ['D', 'E', 'F#', 'G', 'A', 'B', 'c#']
 }
 
+MODE_ALTERATIONS = {
+    'maj': [0, 0, 0, 0, 0, 0, 0],
+    'dor': [0, 0, -1, 0, 0, 0, -1], # b3, b7
+    'phr': [0, -1, -1, 0, 0, -1, -1], # b2, b3, b6, b7
+    'lyd': [0, 0, 0, 1, 0, 0, 0], # #4
+    'mix': [0, 0, 0, 0, 0, 0, -1], # b7
+    'min': [0, 0, -1, 0, 0, -1, -1], # b3, b6, b7
+    'loc': [0, -1, -1, 0, -1, -1, -1], # b2, b3, b5, b6, b7
+}
+
 
 def get_midi_note(abc_note, abc_key = 'C'):
     """"Convert an ABC note to a midi number
