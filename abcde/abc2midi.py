@@ -13,8 +13,22 @@ c_major_scale_intervals = dict(zip(c_major_scale, major_scale_intervals))
 
 MAJOR_SCALES = {
     'Cmaj' : ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+
     'Gmaj' : ['G', 'A', 'B', 'c', 'd', 'e', 'f#'],
-    'Dmaj' : ['D', 'E', 'F#', 'G', 'A', 'B', 'c#']
+    'Dmaj' : ['D', 'E', 'F#', 'G', 'A', 'B', 'c#'],
+    'Amaj' : ['A', 'B', 'c#', 'd', 'e', 'f#', 'g#'],
+    'Emaj' : ['E', 'F#', 'G#', 'A', 'B', 'c#', 'd#'],
+    'Bmaj' : ['B', 'c#', 'd#', 'e', 'f#', 'g#', 'a#'],
+    'F#maj' : ['F#', 'G#', 'A#', 'B', 'c#', 'd#', 'e#'],
+    'C#maj' : ['C#', 'D#', 'E#', 'F#', 'G#', 'A#', 'B#'],
+
+    'Fmaj' : ['F', 'G', 'A', 'Bb', 'c', 'd', 'e', 'f'],
+    'Bbmaj' : ['Bb', 'c', 'd', 'eb', 'f', 'g', 'a'],
+    'Ebmaj' : ['Eb', 'F', 'G', 'Ab', 'Bb', 'c', 'd'],
+    'Abmaj' : ['Ab', 'Bb', 'c', 'db', 'eb', 'f', 'g'],
+    'Dbmaj' : ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'c'],
+    'Gbmaj' : ['Gb', 'Ab', 'Bb', 'cb', 'db', 'eb', 'f'],
+    'Cbmaj' : ['Cb', 'Db', 'Eb', 'Fb', 'Gb', 'Ab', 'Bb']
 }
 
 MODE_ALTERATIONS = {
