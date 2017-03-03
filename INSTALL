@@ -4,7 +4,9 @@ Installing abcde (development version)
 Install Python3
 ---------------
 
-  $ sudo apt install python3 python3-tk
+To just run abcde:
+
+  $ sudo apt install python3 python3-venv python3-tk
 
 Install FluidSynth and sound fonts
 ----------------------------------
@@ -14,7 +16,7 @@ Install FluidSynth and sound fonts
 Create a venv and install abcde pip dependencies
 ------------------------------------------------
 
-  $ pyvenv-3.4 create ~/.tmp/venv-devel-abcde/
+  $ python3 -m venv ~/.tmp/venv-devel-abcde/
   $ source ~/.tmp/venv-devel-abcde/bin/activate
   $ pip install py-getch
 
@@ -23,7 +25,7 @@ Install pyfluidsynth3 (in the venv)
 
   $ cd ~/code
   $ git clone https://github.com/glm35/pyfluidsynth3.git
-  $ cd ~/code pyfluidsynth3
+  $ cd ~/code/pyfluidsynth3
   $ python setup.py install
 
 Get abcde source code
@@ -35,6 +37,5 @@ Get abcde source code
 Start abcde
 -----------
 
-  $ cd ~/code/abcde
+  $ cd ~/code/abcde/abcde
   $ python abcde.py
-
