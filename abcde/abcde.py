@@ -5,8 +5,10 @@ import tkinter
 import tkinter.font
 import tkinter.scrolledtext
 
-import snap
+import abcparser
 import abc2midi
+import musictheory
+import snap
 
 
 class Theme():
@@ -69,7 +71,7 @@ class EditZone(tkinter.Frame):
         elif event.keysym in ['Alt_L']:
             self.alt = True
         elif not self.control and not self.alt and \
-                        event.keysym.upper() in abc2midi.c_major_scale:
+                        event.keysym.upper() in musictheory.c_major_scale:
             note = self.get_note_to_play(event.keysym)
             if note is not None:
                 self.snap.play_abc_note(event.keysym)
@@ -159,6 +161,7 @@ class EditZone(tkinter.Frame):
         # Find the tune key at the insertion point
         key = self.get_key_at_insert()
         print("Key at insert: " + key)
+        (root, mode) = abcparser.normalize_abc_key(key)
 
         # Find whether there is an accidental before the note
 

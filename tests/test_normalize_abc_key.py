@@ -1,7 +1,7 @@
 import unittest
 
 
-from abcde.abc2midi import normalize_abc_key
+from abcde.abcparser import normalize_abc_key
 
 
 class TestNormalizeAbcKey(unittest.TestCase):

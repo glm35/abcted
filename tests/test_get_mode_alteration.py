@@ -1,7 +1,7 @@
 import unittest
 
 
-from abcde.abc2midi import get_mode_alteration
+from abcde.musictheory import get_mode_alteration
 
 
 class TestGetModeAlteration(unittest.TestCase):
