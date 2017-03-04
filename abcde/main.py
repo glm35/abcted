@@ -173,11 +173,16 @@ class EditZone(tkinter.Frame):
         return keysym
 
 
-root = tkinter.Tk()
-root.title("abcde")
-#maximize_root_window(root)
+def main():
+    root = tkinter.Tk()
+    root.title("abcde")
+    #maximize_root_window(root)
 
-theme = Theme()
-edit_zone = EditZone(root, theme)
+    theme = Theme()
+    edit_zone = EditZone(root, theme)
 
-root.mainloop()
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()

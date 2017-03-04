@@ -37,5 +37,5 @@ Get abcde source code
 Start abcde
 -----------
 
-  $ cd ~/code/abcde/abcde
-  $ python abcde.py
+  $ cd ~/code/abcde
+  $ python abcde/main.py

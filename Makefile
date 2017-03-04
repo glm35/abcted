@@ -1,3 +1,6 @@
 test:
-	python -m unittest discover
+	./tools/runtests.sh
+
+run:
+	python3 abcde/main.py
 
