@@ -41,27 +41,28 @@ major_scale_intervals = [0, 2, 4, 5, 7, 9, 11]
 c_major_scale_intervals = dict(zip(c_major_scale, major_scale_intervals))
 
 
-def get_mode_alteration(abc_note, abc_key):
+def get_note_alteration_in_key(abc_note, abc_key):
     """Given a note without ABC alteration (no '_', '^' or '=') and a
-    normalized mode, return 0 if the note is unaltered, -1 if the note must be
-    flattened or +1 if the note must be sharpened.
+    normalized key, tell whether the note is natural, sharp or flat in the key.
 
     :param abc_note: A text string representing an ABC note eg 'b'
-    :param abc_key: A normalized string representing the key of the note
-        eg 'Cmaj' or 'Dmix'.
+    :param abc_key: A tuple representing a normalized ABC key, eg ('D', 'mix')
+                    or ('Bb', 'min'). Defaults to ('C', 'maj').
 
-    :return: 0 (natural), -1 (flat), +1 (sharp)
+    :return: '' (natural), '_' (flat), '^' (sharp)
     """
 
-    # TODO: input: abc_key = a normalized ABC key: (tonic, mode) tuple
+    (root, mode) = abc_key
+    if mode != 'maj':
+        return ''
 
-    scale = MAJOR_SCALES[abc_key]
+    scale = MAJOR_SCALES[root + mode]
     for note in scale:
         if note[0].lower() == abc_note.lower():
             if len(note) == 1:
-                return 0
+                return ''
             if note[1] == '#':
-                return 1
+                return '^'
             elif note[1] == 'b':
-                return -1
-    return 0
+                return '_'
+    return ''

@@ -8,12 +8,12 @@ Tools that parse the ABC input
 def normalize_abc_key(abc_key):
     """
     Given a key in ABC format (eg. 'C' or 'Gmaj' or 'Dmajor' or 'Amixo' or 'F#m'),
-    return a normalized tuple where the first element is the scale base note in
+    return a normalized tuple (root, mode) where the first element is the scale base note in
     upper case optionally with a sharp/flat alteration and the second element is
     the mode in lower case and with 3 characters.
 
     :param abc_key: key in ABC format, eg. 'C' or 'Gmaj' or 'Dminor' or 'Amixo' or 'Bb'
-    :return: a tuple (tonic, mode), eg ('C', 'maj') or
+    :return: a tuple (root, mode), eg ('C', 'maj') or
         ('G', 'maj') or ('D', 'min') or ('A', 'mix') or ('Bb', 'maj')
     """
 

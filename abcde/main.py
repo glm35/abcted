@@ -72,9 +72,9 @@ class EditZone(tkinter.Frame):
             self.alt = True
         elif not self.control and not self.alt and \
                         event.keysym.upper() in musictheory.c_major_scale:
-            note = self.get_note_to_play(event.keysym)
-            if note is not None:
-                self.snap.play_abc_note(event.keysym)
+            abc_note = self.get_note_to_play(event.keysym)
+            if abc_note is not None:
+                self.snap.play_midi_note(abc2midi.get_midi_note(abc_note))
 
         elif event.keysym in ['t']: # Test!
             self.get_cur_line_to_insert()
@@ -139,12 +139,16 @@ class EditZone(tkinter.Frame):
         """Given a keysym following a key press, check whether there is a
          note to play. If so, return the note.
 
-         :param keysym The key pressed
+         :param keysym The key pressed. It has to be a valid ABC note, ie its
+                       lower-case value must belong to musictheory.c_major_scale
 
          :return a String with the note to play in ABC-normalized format, or None
-         if there is no note to play. The note is absolute, ie not relative to
-         the tune scale.
+                 if there is no note to play. The note is absolute, ie not relative to
+                 the tune scale. Examples: 'c', "c'", 'C', 'C,,', '^C' (C sharp), '_c' (c flat)
          """
+
+        assert 'a' <= keysym <= 'g' or 'A' <= keysym <= 'G'
+        abc_note = keysym
 
         # Check whether we are in comment context
         cur_line_to_insert = self.get_cur_line_to_insert()
@@ -161,16 +165,16 @@ class EditZone(tkinter.Frame):
         # Find the tune key at the insertion point
         key = self.get_key_at_insert()
         print("Key at insert: " + key)
-        (root, mode) = abcparser.normalize_abc_key(key)
+        abc_key = abcparser.normalize_abc_key(key)
 
         # Find whether there is an accidental before the note
 
         # Get the note to play with all the useful attributes (accidentals,
         # octave changes, ...)
+        alteration = musictheory.get_note_alteration_in_key(abc_note, abc_key)
+        abc_note = alteration + abc_note
 
-        # Normalize the note
-
-        return keysym
+        return abc_note
 
 
 def main():

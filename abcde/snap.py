@@ -7,6 +7,7 @@ from getch import getch
 from threading import Timer, Lock
 
 import abc2midi
+import musictheory
 
 # midi utils
 
@@ -79,7 +80,7 @@ def demo_play_interactive(instrument ='Acoustic Grand Piano'):
     synth = SingleNoteAbcPlayer()
     synth.select_instrument(instrument)
     print('Press a key for an ABC note from C to b... (Ctrl+C or q or Q to finish)')
-    two_octaves_c_major_scale = abc2midi.c_major_scale + list(map(str.lower, abc2midi.c_major_scale))
+    two_octaves_c_major_scale = musictheory.c_major_scale + list(map(str.lower, musictheory.c_major_scale))
     while True:
         key = getch()
         if key in ['\x03', 'q', 'Q']: # '\x03' = Ctrl+C
