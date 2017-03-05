@@ -71,7 +71,7 @@ class EditZone(tkinter.Frame):
         elif event.keysym in ['Alt_L']:
             self.alt = True
         elif not self.control and not self.alt and \
-                        event.keysym.upper() in musictheory.c_major_scale:
+                        event.keysym.upper() in musictheory.C_MAJOR_SCALE:
             abc_note = self.get_note_to_play(event.keysym)
             if abc_note is not None:
                 self.snap.play_midi_note(abc2midi.get_midi_note(abc_note))
@@ -148,7 +148,7 @@ class EditZone(tkinter.Frame):
          """
 
         assert 'a' <= keysym <= 'g' or 'A' <= keysym <= 'G'
-        abc_note = keysym
+        simple_note = keysym
 
         # Check whether we are in comment context
         cur_line_to_insert = self.get_cur_line_to_insert()
@@ -163,16 +163,19 @@ class EditZone(tkinter.Frame):
                     return  None
 
         # Find the tune key at the insertion point
-        key = self.get_key_at_insert()
-        print("Key at insert: " + key)
-        abc_key = abcparser.normalize_abc_key(key)
+        raw_key = self.get_key_at_insert()
+        print("raw_key at insert: " + raw_key)  # TODO: log with trace level
+        try:
+            abc_key = abcparser.normalize_abc_key(raw_key)
+        except abcparser.AbcParserException:
+            return None  # Don't try to play anything if the key is invalid
 
         # Find whether there is an accidental before the note
 
         # Get the note to play with all the useful attributes (accidentals,
         # octave changes, ...)
-        alteration = musictheory.get_note_alteration_in_key(abc_note, abc_key)
-        abc_note = alteration + abc_note
+        alteration = musictheory.get_note_alteration_in_key(simple_note, abc_key)
+        abc_note = alteration + simple_note
 
         return abc_note
 

@@ -36,33 +36,52 @@ MODE_ALTERATIONS = {
 }
 
 
-c_major_scale = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
-major_scale_intervals = [0, 2, 4, 5, 7, 9, 11]
-c_major_scale_intervals = dict(zip(c_major_scale, major_scale_intervals))
+C_MAJOR_SCALE = MAJOR_SCALES['Cmaj']
+MAJOR_SCALE_INTERVALS = [0, 2, 4, 5, 7, 9, 11]
+C_MAJOR_SCALE_INTERVALS = dict(zip(C_MAJOR_SCALE, MAJOR_SCALE_INTERVALS))
 
 
-def get_note_alteration_in_key(abc_note, abc_key):
+def get_note_alteration_in_key(simple_note, abc_key):
     """Given a note without ABC alteration (no '_', '^' or '=') and a
     normalized key, tell whether the note is natural, sharp or flat in the key.
 
-    :param abc_note: A text string representing an ABC note eg 'b'
+    :param simple_note: A text string representing a note without alteration eg 'b'
     :param abc_key: A tuple representing a normalized ABC key, eg ('D', 'mix')
                     or ('Bb', 'min'). Defaults to ('C', 'maj').
 
-    :return: '' (natural), '_' (flat), '^' (sharp)
+    :return: '' (natural), '_' (flat), '__' (double flat), '^' (sharp), '^^' (double flat)
     """
 
     (root, mode) = abc_key
-    if mode != 'maj':
-        return ''
 
-    scale = MAJOR_SCALES[root + mode]
-    for note in scale:
-        if note[0].lower() == abc_note.lower():
+    # Find the alteration of the note in the major scale that has the same
+    # root as abc_key. Also find the place (index) of the note in the major
+    # scale, this will be useful for the next step
+
+    alteration = 0
+    scale = MAJOR_SCALES[root + 'maj']
+    for (index, note) in enumerate(scale):
+        if note[0].lower() == simple_note.lower():
             if len(note) == 1:
-                return ''
-            if note[1] == '#':
-                return '^'
+                alteration = 0
+            elif note[1] == '#':
+                alteration = 1
             elif note[1] == 'b':
-                return '_'
-    return ''
+                alteration = -1
+            break
+
+    # Add the alteration of the note in the mode of abc_key to the major scale
+    # alteration
+
+    alteration += MODE_ALTERATIONS[mode][index]
+
+    if alteration == 1:
+        return '^'
+    elif alteration == 2:
+        return '^^'
+    elif alteration == -1:
+        return '_'
+    elif alteration == -2:
+        return '__'
+    else:
+        return ''

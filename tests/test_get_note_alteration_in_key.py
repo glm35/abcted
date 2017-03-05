@@ -47,6 +47,26 @@ class TestGetNoteAlterationInKey(unittest.TestCase):
         alteration = get_note_alteration_in_key('F', ('D', 'mix'))
         self.assertEqual('^', alteration)
 
+    def test_e_in_cmin(self):
+        alteration = get_note_alteration_in_key('E', ('C', 'min'))
+        self.assertEqual('_', alteration)
+
+    def test_e_in_cdor(self):
+        alteration = get_note_alteration_in_key('E', ('C', 'dor'))
+        self.assertEqual('_', alteration)
+
+    def test_b_in_cdor(self):
+        alteration = get_note_alteration_in_key('B', ('C', 'dor'))
+        self.assertEqual('_', alteration)
+
+    def test_f_in_c_sharp_lyd(self):
+        alteration = get_note_alteration_in_key('F', ('C#', 'lyd'))
+        self.assertEqual('^^', alteration)
+
+    def test_e_in_d_flat_phr(self):
+        alteration = get_note_alteration_in_key('E', ('Db', 'phr'))
+        self.assertEqual('__', alteration)
+
 
 if __name__ == '__main__':
     unittest.main()

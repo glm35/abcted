@@ -1,7 +1,7 @@
 import unittest
 
 
-from abcde.abcparser import normalize_abc_key
+from abcde.abcparser import normalize_abc_key, AbcParserException
 
 
 class TestNormalizeAbcKey(unittest.TestCase):
@@ -34,6 +34,10 @@ class TestNormalizeAbcKey(unittest.TestCase):
         (base_note, mode) = normalize_abc_key('Bbmaj')
         self.assertEqual('Bb', base_note)
         self.assertEqual('maj', mode)
+
+    # Test exceptions
+    def test_invalid_key_a_sharp_maj(self):
+        self.assertRaises(AbcParserException, normalize_abc_key, 'A#')
 
 
 if __name__ == '__main__':
