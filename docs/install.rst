@@ -6,36 +6,48 @@ Install Python3
 
 To just run abcde:
 
-  $ sudo apt install python3 python3-venv python3-tk
+::
+
+   $ sudo apt install python3 python3-venv python3-tk
 
 Install FluidSynth and sound fonts
 ----------------------------------
 
-  $ sudo apt install fluidsynth fluid-soundfont-gm fluid-soundfont-gs
+::
+
+   $ sudo apt install fluidsynth fluid-soundfont-gm fluid-soundfont-gs
 
 Create a venv and install abcde pip dependencies
 ------------------------------------------------
 
-  $ python3 -m venv ~/.tmp/venv-devel-abcde/
-  $ source ~/.tmp/venv-devel-abcde/bin/activate
-  $ pip install py-getch
+::
+
+   $ python3 -m venv ~/.tmp/venv-devel-abcde/
+   $ source ~/.tmp/venv-devel-abcde/bin/activate
+   $ pip install py-getch sphinx
 
 Install pyfluidsynth3 (in the venv)
 -----------------------------------
 
-  $ cd ~/code
-  $ git clone https://github.com/glm35/pyfluidsynth3.git
-  $ cd ~/code/pyfluidsynth3
-  $ python setup.py install
+::
+
+   $ cd ~/code
+   $ git clone https://github.com/glm35/pyfluidsynth3.git
+   $ cd ~/code/pyfluidsynth3
+   $ python setup.py install
 
 Get abcde source code
 ---------------------
 
-  $ cd ~/code
-  $ git clone https://github.com/glm35/abcde.git
+::
+
+   $ cd ~/code
+   $ git clone https://github.com/glm35/abcde.git
 
 Start abcde
 -----------
 
-  $ cd ~/code/abcde
-  $ python abcde/main.py
+::
+
+   $ cd ~/code/abcde
+   $ python abcde/main.py

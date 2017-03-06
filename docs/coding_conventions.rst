@@ -10,8 +10,8 @@ et il prend une forme dite normalisée.
 
 Dans le code:
 
-* les données brutes sont préfixées par `raw_`. Par exemple: `raw_note`
-et `raw_key`.
+* les données brutes sont préfixées par ``raw_``. Par exemple: ``raw_note``
+  et ``raw_key``.
 
-* les données normalisées sont préfixées par `abc_`. Par exemple: `abc_note_`
-et `abc_key`.
+* les données normalisées sont préfixées par ``abc_``. Par exemple: ``abc_note_``
+  et ``abc_key``.
