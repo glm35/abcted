@@ -69,3 +69,34 @@ def normalize_abc_key(raw_key):
         mode = 'min'
 
     return root + alteration, mode
+
+
+def get_accidental(cur_line_to_insert):
+    """
+    Find whether there is an accidental at the end of the current line before
+    the insert point.
+
+    :param cur_line_to_insert: the current line of text from start to insert point
+
+    :return A string representing the accidental: '' (none), '=' (natural), '^' (sharp),
+        '^^' (double sharp), '_' (flat), '__' (double flat)
+    """
+
+    accidental = ''
+
+    try:
+        c = cur_line_to_insert[-1]
+        if c == '=':
+            accidental = c
+        elif c == '^' or c == '_':
+            accidental = c
+            try:
+                d = cur_line_to_insert[-2]
+                if d == c:
+                    accidental = d + accidental
+            except IndexError:
+                pass
+    except IndexError:
+        pass
+
+    return accidental

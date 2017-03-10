@@ -162,20 +162,26 @@ class EditZone(tkinter.Frame):
                 if 'A' <= cur_line_to_insert[0] <= 'Z':
                     return  None
 
-        # Find the tune key at the insertion point
-        raw_key = self.get_key_at_insert()
-        print("raw_key at insert: " + raw_key)  # TODO: log with trace level
-        try:
-            abc_key = abcparser.normalize_abc_key(raw_key)
-        except abcparser.AbcParserException:
-            return None  # Don't try to play anything if the key is invalid
-
         # Find whether there is an accidental before the note
+        accidental = abcparser.get_accidental(cur_line_to_insert)
+        if accidental != '':
+            if accidental == '=':  # natural
+                abc_note = simple_note
+            else:  # (double) sharp, (double) flat
+                abc_note = accidental + simple_note
+        else:
+            # Find the tune key at the insertion point
+            raw_key = self.get_key_at_insert()
+            print("raw_key at insert: " + raw_key)  # TODO: log with trace level
+            try:
+                abc_key = abcparser.normalize_abc_key(raw_key)
+            except abcparser.AbcParserException:
+                return None  # Don't try to play anything if the key is invalid
 
-        # Get the note to play with all the useful attributes (accidentals,
-        # octave changes, ...)
-        alteration = musictheory.get_note_alteration_in_key(simple_note, abc_key)
-        abc_note = alteration + simple_note
+            # Get the note to play with all the useful attributes (accidentals,
+            # octave changes, ...)
+            alteration = musictheory.get_note_alteration_in_key(simple_note, abc_key)
+            abc_note = alteration + simple_note
 
         return abc_note
 
