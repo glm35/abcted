@@ -14,6 +14,7 @@ ABCde: un éditeur de fichiers ABC
    tests
    coding_conventions
    design
+   about_abc
 
 Index et tables
 ===============
