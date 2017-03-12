@@ -11,8 +11,9 @@ ABCde: un éditeur de fichiers ABC
    :caption: Documentation pour les développeurs
 
    install
-   coding_conventions
    tests
+   coding_conventions
+   design
 
 Index et tables
 ===============
