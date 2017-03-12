@@ -12,6 +12,90 @@ class AbcParserException(Exception):
     pass
 
 
+def get_note_to_play(edit_buffer, keysym):
+    """Given a keysym following a key press, check whether there is a
+     note to play. If so, return the note.
+
+     :param edit_buffer: The buffer containing the text being edited
+
+     :param keysym The key pressed. It has to be a valid ABC note, ie its
+                   lower-case value must belong to musictheory.c_major_scale
+
+     :return a String with the note to play in ABC-normalized format, or None
+             if there is no note to play. The note is absolute, ie not relative to
+             the tune scale. Examples: 'c', "c'", 'C', 'C,,', '^C' (C sharp), '_c' (c flat)
+     """
+
+    if keysym.upper() not in musictheory.C_MAJOR_SCALE:
+        return None
+
+    simple_note = keysym
+
+    # Check whether we are in comment context
+    raw_abc_line = edit_buffer.get_current_line_to_cursor()
+    if raw_abc_line.find('%') != -1:
+        # There is a '%' before the text cursor => we are in comment context
+        return None
+
+    # Check whether we are in an information line
+    if len(raw_abc_line) >= 2:
+        if raw_abc_line[1] is ':':
+            if 'A' <= raw_abc_line[0] <= 'Z':
+                return None
+
+    # Find whether there is an accidental before the note
+    accidental = get_accidental(raw_abc_line)
+    if accidental != '':
+        if accidental == '=':  # natural
+            abc_note = simple_note
+        else:  # (double) sharp, (double) flat
+            abc_note = accidental + simple_note
+    else:
+        # Find the tune key at the insertion point
+        raw_key = get_current_raw_key(edit_buffer)
+        print("raw_key at insert: " + raw_key)  # TODO: log with trace level
+        try:
+            abc_key = normalize_abc_key(raw_key)
+        except AbcParserException:
+            return None  # Don't try to play anything if the key is invalid
+
+        # Get the note to play with all the useful attributes (accidentals,
+        # octave changes, ...)
+        alteration = musictheory.get_note_alteration_in_key(simple_note, abc_key)
+        abc_note = alteration + simple_note
+
+    return abc_note
+
+
+def get_current_raw_key(edit_buffer):
+    """Get the contents of the key info field for the current tune.
+
+    :return: a string with whatever can be found in the key info field. It
+             should be something like 'C' or 'Eb minor' or 'A mix', but it
+             is not controlled and not guaranteed to be valid here.
+    """
+
+    # Assume 'C major' if no key is specified
+    key = 'C'
+
+    # For each line going upward until until the line starts with 'X:'
+    # (beginning of the tune found) or until there are no more lines,
+    # look for the key:
+
+    line_no = edit_buffer.get_line_no_at_cursor()
+    while line_no > 0:
+        line = edit_buffer.get_line(line_no)
+        if line.startswith('K:'):
+            key = line[2:]
+            break
+        if line.startswith('X:'):
+            # We reached the beginning of the tune
+            break
+        line_no -= 1
+
+    return key
+
+
 def normalize_abc_key(raw_key):
     """
     Given a key in ABC format as found in the ABC input (eg. 'C' or 'Gmaj' or 'Dmajor' or 'Amixo' or 'F#m'),
@@ -71,12 +155,11 @@ def normalize_abc_key(raw_key):
     return root + alteration, mode
 
 
-def get_accidental(cur_line_to_insert):
+def get_accidental(raw_abc):
     """
-    Find whether there is an accidental at the end of the current line before
-    the insert point.
+    Find whether there is an accidental at the end of the given string
 
-    :param cur_line_to_insert: the current line of text from start to insert point
+    :param raw_abc: A piece of supposedly ABC text
 
     :return A string representing the accidental: '' (none), '=' (natural), '^' (sharp),
         '^^' (double sharp), '_' (flat), '__' (double flat)
@@ -85,13 +168,13 @@ def get_accidental(cur_line_to_insert):
     accidental = ''
 
     try:
-        c = cur_line_to_insert[-1]
+        c = raw_abc[-1]
         if c == '=':
             accidental = c
         elif c == '^' or c == '_':
             accidental = c
             try:
-                d = cur_line_to_insert[-2]
+                d = raw_abc[-2]
                 if d == c:
                     accidental = d + accidental
             except IndexError:

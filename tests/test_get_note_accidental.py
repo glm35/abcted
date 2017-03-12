@@ -9,37 +9,37 @@ class TestGetNoteAccidental(unittest.TestCase):
     # Nominal test cases
 
     def test_natural(self):
-        accidental = get_accidental(cur_line_to_insert='=')
+        accidental = get_accidental(raw_abc='=')
         self.assertEqual('=', accidental)
 
     def test_sharp(self):
-        accidental = get_accidental(cur_line_to_insert='^')
+        accidental = get_accidental(raw_abc='^')
         self.assertEqual('^', accidental)
 
     def test_double_sharp(self):
-        accidental = get_accidental(cur_line_to_insert='^^')
+        accidental = get_accidental(raw_abc='^^')
         self.assertEqual('^^', accidental)
 
     def test_flat(self):
-        accidental = get_accidental(cur_line_to_insert='_')
+        accidental = get_accidental(raw_abc='_')
         self.assertEqual('_', accidental)
 
     def test_double_flat(self):
-        accidental = get_accidental(cur_line_to_insert='__')
+        accidental = get_accidental(raw_abc='__')
         self.assertEqual('__', accidental)
 
     # Special test cases
 
     def test_empty_line(self):
-        accidental = get_accidental(cur_line_to_insert='')
+        accidental = get_accidental(raw_abc='')
         self.assertEqual('', accidental)
 
     def test_invalid_mixed_accidentals(self):
-        accidental = get_accidental(cur_line_to_insert='^_')
+        accidental = get_accidental(raw_abc='^_')
         self.assertEqual('_', accidental)
 
     def test_more_data_in_line(self):
-        accidental = get_accidental(cur_line_to_insert='CDEF GABc | CDEF GAB^')
+        accidental = get_accidental(raw_abc='CDEF GABc | CDEF GAB^')
         self.assertEqual('^', accidental)
 
 
