@@ -26,10 +26,7 @@ def get_note_to_play(edit_buffer, keysym):
              the tune scale. Examples: 'c', "c'", 'C', 'C,,', '^C' (C sharp), '_c' (c flat)
      """
 
-    if keysym.upper() not in musictheory.C_MAJOR_SCALE:
-        return None
-
-    simple_note = keysym
+    print('get_note_to_play(): keysym=' + keysym)  # TODO: log with trace level
 
     # Check whether we are in comment context
     raw_abc_line = edit_buffer.get_current_line_to_cursor()
@@ -43,6 +40,27 @@ def get_note_to_play(edit_buffer, keysym):
             if 'A' <= raw_abc_line[0] <= 'Z':
                 return None
 
+    # Handle octave markers
+    octave_marker = ''
+    if keysym == "'" or keysym == ',':
+        try:
+            tentative_note = raw_abc_line[-1]
+        except IndexError:
+            return None
+        if tentative_note.upper() in musictheory.C_MAJOR_SCALE:
+            raw_abc_line = raw_abc_line[:-1]
+            simple_note = tentative_note
+            octave_marker = keysym
+            if ((simple_note.islower() and octave_marker == ',')
+                or (simple_note.isupper() and octave_marker == "'")):
+                return None
+        else:
+            return None
+    elif keysym.upper() in musictheory.C_MAJOR_SCALE:
+        simple_note = keysym
+    else:
+        return None
+
     # Find whether there is an accidental before the note
     accidental = get_accidental(raw_abc_line)
     if accidental != '':
@@ -53,7 +71,7 @@ def get_note_to_play(edit_buffer, keysym):
     else:
         # Find the tune key at the insertion point
         raw_key = get_current_raw_key(edit_buffer)
-        print("raw_key at insert: " + raw_key)  # TODO: log with trace level
+        print("get_note_to_play(): raw_key at insert: " + raw_key)  # TODO: log with trace level
         try:
             abc_key = normalize_abc_key(raw_key)
         except AbcParserException:
@@ -64,6 +82,9 @@ def get_note_to_play(edit_buffer, keysym):
         alteration = musictheory.get_note_alteration_in_key(simple_note, abc_key)
         abc_note = alteration + simple_note
 
+    abc_note = abc_note + octave_marker
+
+    print('get_note_to_play(): abc_note=' + abc_note)  # TODO: log with trace level
     return abc_note
 
 

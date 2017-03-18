@@ -5,6 +5,10 @@ from abcde.abc2midi import get_midi_note
 
 
 class TestGetMidiNote(unittest.TestCase):
+    def test_c3(self):
+        midi_note = get_midi_note("C,")
+        self.assertEqual(48, midi_note)
+
     def test_c4(self):
         midi_note = get_midi_note('C')
         self.assertEqual(60, midi_note)
@@ -12,6 +16,10 @@ class TestGetMidiNote(unittest.TestCase):
     def test_c5(self):
         midi_note = get_midi_note('c')
         self.assertEqual(72, midi_note)
+
+    def test_c6(self):
+        midi_note = get_midi_note("c'")
+        self.assertEqual(84, midi_note)
 
     def test_c4_sharp(self):
         midi_note = get_midi_note('^C')

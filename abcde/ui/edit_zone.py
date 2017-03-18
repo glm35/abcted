@@ -51,7 +51,7 @@ class EditZone(tkinter.Frame):
         elif event.keysym in ['Alt_L']:
             self.alt = True
         elif not self.control and not self.alt:
-            abc_note = abcparser.get_note_to_play(self.edit_buffer, event.keysym)
+            abc_note = abcparser.get_note_to_play(self.edit_buffer, event.char)
             if abc_note is not None:
                 self.snap.play_midi_note(abc2midi.get_midi_note(abc_note))
 

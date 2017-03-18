@@ -43,6 +43,52 @@ class TestGetNoteToPlay(unittest.TestCase):
         note_to_play = get_note_to_play(mock_edit_zone, keysym='f')
         self.assertEqual('f', note_to_play)
 
+    # Test octave markers
+
+    def test_upper_c_in_c(self):
+        raw_abc = """K:C\nCDEF GABc"""
+        mock_edit_zone = MockEditZone(raw_abc)
+        note_to_play = get_note_to_play(mock_edit_zone, keysym="'")
+        self.assertEqual("c'", note_to_play)
+
+    def test_lower_c_in_c(self):
+        raw_abc = """K:C\nC"""
+        mock_edit_zone = MockEditZone(raw_abc)
+        note_to_play = get_note_to_play(mock_edit_zone, keysym=',')
+        self.assertEqual("C,", note_to_play)
+
+    def test_no_note_before_octave_marker(self):
+        raw_abc = """K:C\nCDEF GABc z"""
+        mock_edit_zone = MockEditZone(raw_abc)
+        note_to_play = get_note_to_play(mock_edit_zone, keysym="'")
+        self.assertEqual(None, note_to_play)
+
+    def test_nothing_before_octave_marker(self):
+        raw_abc = """K:C\n"""
+        mock_edit_zone = MockEditZone(raw_abc)
+        note_to_play = get_note_to_play(mock_edit_zone, keysym="'")
+        self.assertEqual(None, note_to_play)
+
+    def test_absolutely_nothing_before_octave_marker(self):
+        raw_abc = ''
+        mock_edit_zone = MockEditZone(raw_abc)
+        note_to_play = get_note_to_play(mock_edit_zone, keysym="'")
+        self.assertEqual(None, note_to_play)
+
+    def test_error_comma_after_upper_case_note(self):
+        raw_abc = """K:C\nCDEF GABc"""
+        mock_edit_zone = MockEditZone(raw_abc)
+        note_to_play = get_note_to_play(mock_edit_zone, keysym=',')
+        self.assertEqual(None, note_to_play)
+
+    def test_error_apostrophe_after_lower_case_note(self):
+        raw_abc = """K:C\nCDEF GABC"""
+        mock_edit_zone = MockEditZone(raw_abc)
+        note_to_play = get_note_to_play(mock_edit_zone, keysym="'")
+        self.assertEqual(None, note_to_play)
+
+    # Special cases
+
     def test_not_a_note(self):
         raw_abc = """K:G\nCDEF GAB"""
         mock_edit_zone = MockEditZone(raw_abc)
