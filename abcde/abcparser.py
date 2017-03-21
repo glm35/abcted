@@ -5,6 +5,7 @@
 Tools that parse the ABC input
 """
 
+import logging
 import musictheory
 
 
@@ -26,7 +27,7 @@ def get_note_to_play(edit_buffer, keysym):
              the tune scale. Examples: 'c', "c'", 'C', 'C,,', '^C' (C sharp), '_c' (c flat)
      """
 
-    print('get_note_to_play(): keysym=' + keysym)  # TODO: log with trace level
+    logging.debug('get_note_to_play(): keysym=' + keysym)
 
     # Check whether we are in comment context
     raw_abc_line = edit_buffer.get_current_line_to_cursor()
@@ -71,7 +72,7 @@ def get_note_to_play(edit_buffer, keysym):
     else:
         # Find the tune key at the insertion point
         raw_key = get_current_raw_key(edit_buffer)
-        print("get_note_to_play(): raw_key at insert: " + raw_key)  # TODO: log with trace level
+        logging.debug("get_note_to_play(): raw_key at insert: " + raw_key)
         try:
             abc_key = normalize_abc_key(raw_key)
         except AbcParserException:
@@ -84,7 +85,7 @@ def get_note_to_play(edit_buffer, keysym):
 
     abc_note = abc_note + octave_marker
 
-    print('get_note_to_play(): abc_note=' + abc_note)  # TODO: log with trace level
+    logging.debug('get_note_to_play(): abc_note=' + abc_note)
     return abc_note
 
 
@@ -147,7 +148,7 @@ def normalize_abc_key(raw_key):
 
     if root + alteration + "maj" not in musictheory.MAJOR_SCALES.keys():
         msg = root + alteration + " is not a valid key name"
-        print("warning: " + msg)  # TODO: use a logger
+        logging.warning(msg)
         raise AbcParserException(msg)
 
     # Parse the key mode
