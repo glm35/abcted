@@ -16,7 +16,7 @@ class EditBuffer:
     """
 
     def __init__(self, edit_zone):
-        self._edit_zone = edit_zone
+        self._edit_zone = edit_zone  # This is a tkinter.scrolledtext.ScrolledText
 
     def get_current_line_to_cursor(self):
         """Get the current line of text from the beginning of the line to the
@@ -35,10 +35,10 @@ class EditBuffer:
 
         :param: line_no: Number of the desired line, starting at 1.
 
-        :return: The line contents as a string.
+        :return: The line contents as a string. The empty string if line_no
+                 is out of range (before the first line or after the last
+                 line)
         """
-
-        # TODO: what if line_no is out of range?
 
         index_start = str(line_no) + ".0"
         index_end = str(line_no) + ".end"

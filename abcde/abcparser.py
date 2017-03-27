@@ -146,8 +146,8 @@ def normalize_abc_key(raw_key):
         alteration = raw_key[0]
         raw_key = raw_key[1:]
 
-    if root + alteration + "maj" not in musictheory.MAJOR_SCALES.keys():
-        msg = root + alteration + " is not a valid key name"
+    if root + alteration + 'maj' not in musictheory.MAJOR_SCALES.keys():
+        msg = root + alteration + raw_key + ' is not a valid key name'
         logging.warning(msg)
         raise AbcParserException(msg)
 
@@ -163,16 +163,16 @@ def normalize_abc_key(raw_key):
             if raw_key.startswith(prefix):
                 mode = prefix
                 break
-    # TODO: raise exception if the mode cannot be understood
+        if mode == 'ion':
+            mode = 'maj'
+        if mode == 'eol':
+            mode = 'min'
 
-    # Assume major if the key is improperly written
+    # Raise exception if the mode cannot be understood
     if mode is None:
-        mode = 'maj'
-
-    if mode == 'ion':
-        mode = 'maj'
-    if mode == 'eol':
-        mode = 'min'
+        msg = root + alteration + raw_key + ' is not a valid key name'
+        logging.warning(msg)
+        raise AbcParserException(msg)
 
     return root + alteration, mode
 

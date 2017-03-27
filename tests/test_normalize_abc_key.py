@@ -39,6 +39,8 @@ class TestNormalizeAbcKey(unittest.TestCase):
     def test_invalid_key_a_sharp_maj(self):
         self.assertRaises(AbcParserException, normalize_abc_key, 'A#')
 
+    def test_invalid_key_b_schtroumpf(self):
+        self.assertRaises(AbcParserException, normalize_abc_key, 'Bschtroumpf')
 
 if __name__ == '__main__':
     unittest.main()
