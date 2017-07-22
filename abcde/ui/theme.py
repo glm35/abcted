@@ -1,4 +1,4 @@
-import tkinter.font
+import tkinter.font as tk_font
 
 class Theme():
     def __init__(self, theme = 'TedPy'):
@@ -12,4 +12,4 @@ class Theme():
         self.font_size = 12
 
     def get_font(self):
-        return tkinter.font.Font(family=self.font_family, size=self.font_size)
+        return tk_font.Font(family=self.font_family, size=self.font_size)

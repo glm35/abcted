@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import tkinter
+import tkinter as tk
 
 
 class EditBuffer:
@@ -24,7 +24,7 @@ class EditBuffer:
 
         :return: a string
         """
-        insert_index = self._edit_zone.index(tkinter.INSERT)
+        insert_index = self._edit_zone.index(tk.INSERT)
         (cur_line, cur_col) = insert_index.split('.')
         line_start_index = '{}.{}'.format(cur_line, 0)
         return self._edit_zone.get(line_start_index, insert_index)
@@ -49,4 +49,4 @@ class EditBuffer:
 
         :return: The line number, starting at 1.
          """
-        return int(self._edit_zone.index(tkinter.INSERT).split('.')[0])
+        return int(self._edit_zone.index(tk.INSERT).split('.')[0])

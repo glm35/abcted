@@ -3,7 +3,7 @@
 
 import argparse
 import logging
-from ui.root_window import start_ui
+import ui.root_window
 
 
 def parse_args():
@@ -25,7 +25,8 @@ def setup_logging(enable_debug):
 def main():
     args = parse_args()
     setup_logging(enable_debug=args.debug)
-    start_ui()
+    root = ui.root_window.RootWindow()
+    root.mainloop()
 
 
 if __name__ == "__main__":

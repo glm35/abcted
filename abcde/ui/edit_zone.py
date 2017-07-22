@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import tkinter
-import tkinter.scrolledtext
+import tkinter as tk
+import tkinter.scrolledtext as tk_scrolledtext
 
 import abcparser
 import abc2midi
@@ -10,10 +10,10 @@ import snap
 import ui.edit_buffer
 
 
-class EditZone(tkinter.Frame):
+class EditZone(tk.Frame):
     def __init__(self, frame, theme):
         self.theme = theme
-        self._edit_zone = tkinter.scrolledtext.ScrolledText(
+        self._edit_zone = tk_scrolledtext.ScrolledText(
             frame, font=theme.get_font(),
             background=theme.bg, foreground=theme.fg,
 
@@ -34,7 +34,7 @@ class EditZone(tkinter.Frame):
         self._edit_zone.bind('<Key>', self.on_key_press)
         self._edit_zone.bind('<KeyRelease>', self.on_key_release)
 
-        self._edit_zone.pack(expand=tkinter.YES, fill=tkinter.BOTH)
+        self._edit_zone.pack(expand=tk.YES, fill=tk.BOTH)
 
         self.edit_buffer = ui.edit_buffer.EditBuffer(self._edit_zone)
 

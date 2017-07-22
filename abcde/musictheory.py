@@ -49,7 +49,7 @@ def get_note_alteration_in_key(simple_note, abc_key):
     :param abc_key: A tuple representing a normalized ABC key, eg ('D', 'mix')
                     or ('Bb', 'min'). Defaults to ('C', 'maj').
 
-    :return: '' (natural), '_' (flat), '__' (double flat), '^' (sharp), '^^' (double flat)
+    :return: '' (natural), '_' (flat), '__' (double flat), '^' (sharp), '^^' (double sharp)
     """
 
     (root, mode) = abc_key
