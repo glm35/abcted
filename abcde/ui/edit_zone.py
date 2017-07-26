@@ -10,9 +10,11 @@ import snap
 import ui.edit_buffer
 
 
-class EditZone(tk.Frame):
+class EditZone(tk.Frame):  # TODO: pourquoi a-t-on besoin d'une Frame?
+                           #  Pour une future barre de défilement horizontale?
     def __init__(self, frame, theme):
         self.theme = theme
+        # TODO: Renommer _edit_zone: ambigu car même nom que la classe qui l'héberge
         self._edit_zone = tk_scrolledtext.ScrolledText(
             frame, font=theme.get_font(),
             background=theme.bg, foreground=theme.fg,
@@ -37,10 +39,14 @@ class EditZone(tk.Frame):
         self._edit_zone.pack(expand=tk.YES, fill=tk.BOTH)
 
         self.edit_buffer = ui.edit_buffer.EditBuffer(self._edit_zone)
+        self.check_text_change_since_last_save_cb = None
 
         self.snap = snap.SingleNoteAbcPlayer()
         self.snap.midi_channel = 1
         self.snap.select_instrument('Acoustic Grand Piano')
+
+    def set_check_text_change_since_last_save_cb(self, callback):
+        self.check_text_change_since_last_save_cb = callback
 
     def on_key_press(self, event):
         #print("key pressed: " + event.keysym)
@@ -62,3 +68,6 @@ class EditZone(tk.Frame):
             self.control = False
         elif event.keysym in ['Alt_L']:
             self.alt = False
+
+        if self.check_text_change_since_last_save_cb:
+            self.check_text_change_since_last_save_cb()
