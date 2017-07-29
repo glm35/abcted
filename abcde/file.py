@@ -24,15 +24,18 @@ class File():
         self._last_saved_text = text
         self._modified_flag = False
 
+    def _dump_edit_buffer(self, text=None, tag='text'):
+        """Debug tool to print a text buffer and watch the ending line"""
+        if text is None:
+            text = self.buffer.get(1.0, tk.END)
+        print('<{0}>{1}</{0}>'.format(tag, text))
+
     def check_text_change_since_last_save(self, update_ui=True):
         """Check whether the text in the edit zone has changed since the last time
            the buffer was saved. If so, update the ui.
         """
         old_modified_flag = self._modified_flag
         text = self.buffer.get(1.0, tk.END)
-
-        print('<text>' + text + '</text>')
-        print('<last-saved-text>' + self._last_saved_text + '</last-saved-text>')
 
         if text != self._last_saved_text:
             self._modified_flag = True
@@ -71,14 +74,25 @@ class File():
             # TODO: si le fichier courant est modifié: proposer de le sauver
             log.debug('Opening: ' + filename)
             with open(filename, 'r') as file:
+                text = file.read()
                 self.filename = filename
                 self.set_root_title()
+
+                # Replace the contents of the edit zone
+                # with the contents of the file
                 self.buffer.delete(1.0, tk.END)
-                text = file.read()
                 self.buffer.insert(1.0, text)
-                # TODO: comprendre pourquoi insert() ajoute une ligne vide
-                #       qui vient mettre le bazar dans la détection des modifications
                 self._update_last_saved_text(text)
+
+                # For some reason, tkinter adds a new empty line to the
+                # edit zone. Carefully remove that spurious line, else the
+                # 'text changed' flag computation will bug.
+                (line, col) = tuple(map(int, self.buffer.index(tk.END).split('.')))
+                if col == 0 and line > 2:
+                    last_line = self.buffer.get('{0}.{1}'.format(line-1, 0), '{0}.{1}'.format(line-1, 'end'))
+                    if last_line == '':
+                        self.buffer.delete('{0}.{1}'.format(int(line)-2, 'end'))
+
             # TODO: handle IO errors
         return 'break'
 
