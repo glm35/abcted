@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
+import tkinter.messagebox as tk_messagebox
 import tkinter.scrolledtext as tk_scrolledtext
 
 import abcparser
@@ -42,8 +43,11 @@ class EditZone(tk.Frame):  # TODO: pourquoi a-t-on besoin d'une Frame?
         self.check_text_change_since_last_save_cb = None
 
         self.snap = snap.SingleNoteAbcPlayer()
-        self.snap.midi_channel = 1
-        self.snap.select_instrument('Acoustic Grand Piano')
+        try:
+            self.snap.setup_synth()
+            self.snap.select_instrument('Acoustic Grand Piano')
+        except snap.SingleNoteAbcPlayerException as e:
+            tk_messagebox.showwarning(title='Failed to setup synth', message=e)
 
     def set_check_text_change_since_last_save_cb(self, callback):
         self.check_text_change_since_last_save_cb = callback
