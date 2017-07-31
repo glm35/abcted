@@ -6,9 +6,13 @@ Install Python3
 
 To just run abcde:
 
-::
+Under Linux Mint::
 
    $ sudo apt install python3 python3-venv python3-tk
+
+Under Fedora (26)::
+
+   $ sudo dnf install python3 python3-tkinter
 
 Install FluidSynth and sound fonts
 ----------------------------------
@@ -16,6 +20,11 @@ Install FluidSynth and sound fonts
 ::
 
    $ sudo apt install fluidsynth fluid-soundfont-gm fluid-soundfont-gs
+
+Under Fedora::
+
+   $ sudo dnf install fluidsynth fluid-soundfont-gm fluid-soundfont-gs
+
 
 Create a venv and install abcde pip dependencies
 ------------------------------------------------
@@ -34,6 +43,7 @@ Install pyfluidsynth3 (in the venv)
    $ cd ~/code
    $ git clone https://github.com/glm35/pyfluidsynth3.git
    $ cd ~/code/pyfluidsynth3
+   $ git checkout --track origin/gl-devel
    $ python setup.py install
 
 Get abcde source code
