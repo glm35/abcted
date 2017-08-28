@@ -8,6 +8,7 @@ Manage ABC files: open, save, detect on-disk change, ...
 import logging as log
 import tkinter as tk
 import tkinter.filedialog as tk_filedialog
+import tkinter.messagebox as tk_messagebox
 import os
 
 
@@ -47,6 +48,7 @@ class File():
 
     def new(self, event=None):
         log.debug('File(): new()')
+        # TODO
         return 'break'
 
     def set_root_title(self):
@@ -66,34 +68,48 @@ class File():
         self._root.title(title)
 
     def open(self, event=None):
-        log.debug('File(): open()')
+        log.debug('File.open(): entering')
         filename = tk_filedialog.askopenfilename(
             defaultextension='.abc',
             filetypes = [('ABC Files', '*.abc'), ('All Files', '*.*')])
-        if filename:
-            # TODO: si le fichier courant est modifié: proposer de le sauver
-            log.debug('Opening: ' + filename)
-            with open(filename, 'r') as file:
+        if not filename:
+            log.debug('File.open(): no file selected, leaving')
+            return 'break'
+
+        # TODO: si le fichier courant est modifié: proposer de le sauver
+        log.debug('File.open(): opening: ' + filename)
+        with open(filename, 'r') as file:
+            try:
                 text = file.read()
-                self.filename = filename
-                self.set_root_title()
-
-                # Replace the contents of the edit zone
-                # with the contents of the file
-                self.buffer.delete(1.0, tk.END)
-                self.buffer.insert(1.0, text)
-                self._update_last_saved_text(text)
-
-                # For some reason, tkinter adds a new empty line to the
-                # edit zone. Carefully remove that spurious line, else the
-                # 'text changed' flag computation will bug.
-                (line, col) = tuple(map(int, self.buffer.index(tk.END).split('.')))
-                if col == 0 and line > 2:
-                    last_line = self.buffer.get('{0}.{1}'.format(line-1, 0), '{0}.{1}'.format(line-1, 'end'))
-                    if last_line == '':
-                        self.buffer.delete('{0}.{1}'.format(int(line)-2, 'end'))
-
+            except UnicodeDecodeError as e:
+                log.debug('File.open(): caught exception UnicodeDecodeError: ' + str(e))
+                text = None
+                tk_messagebox.showerror('Open failed', 'Could not open ' + filename
+                                        + ': it is not encoded in UTF-8.'
+                                        + ' Please fix the encoding and retry.')
             # TODO: handle IO errors
+        if text is None:
+            log.debug('File.open(): read failed, leaving')
+            return 'break'
+
+        self.filename = filename
+        self.set_root_title()
+
+        # Replace the contents of the edit zone
+        # with the contents of the file
+        self.buffer.delete(1.0, tk.END)
+        self.buffer.insert(1.0, text)
+        self._update_last_saved_text(text)
+
+        # For some reason, tkinter adds a new empty line to the
+        # edit zone. Carefully remove that spurious line, else the
+        # 'text changed' flag computation will bug.
+        (line, col) = tuple(map(int, self.buffer.index(tk.END).split('.')))
+        if col == 0 and line > 2:
+            last_line = self.buffer.get('{0}.{1}'.format(line-1, 0), '{0}.{1}'.format(line-1, 'end'))
+            if last_line == '':
+                self.buffer.delete('{0}.{1}'.format(int(line)-2, 'end'))
+
         return 'break'
 
     def _write_to_file(self, filename=None):

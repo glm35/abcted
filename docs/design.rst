@@ -103,3 +103,28 @@ complémentaire.
 
 .. _Note names, MIDI numbers and frequencies: http://newt.phys.unsw.edu.au/jw/notes.html
 
+
+Encodage des fichiers ABC
+-------------------------
+
+abcde travaille avec le format UTF-8:
+
+* abcde enregistre toujours les fichiers avec l'encodage UTF-8
+
+* abde ne peut ouvrir que des fichiers encodés en UTF-8. Si ce n'est pas le cas, il faut les convertir
+  en UTF-8 avant de les ouvrir avec abcde.
+
+.. note::
+
+   Sous Linux,  le programme ``file`` implémente des heuristiques pour essayer de découvrir l'encodage
+   d'un fichier texte et le programme ``iconv`` permet de transcoder les caractères d'un fichier.
+
+   Exemple pour réaliser une conversion ISO-8859-1 vers UTF-8::
+
+     $ file gwen_random_tunes.abc
+     gwen_random_tunes.abc: ISO-8859 text
+
+     $ iconv -f ISO-8859-1 -t UTF-8 gwen_random_tunes.abc > gwen_random_tunes.abc.utf8
+
+     $ file gwen_random_tunes.abc.utf8
+     gwen_random_tunes.abc.utf8: UTF-8 Unicode text
