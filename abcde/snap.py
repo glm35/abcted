@@ -4,16 +4,14 @@
 # PSL imports
 import logging as log
 from threading import Timer, Lock
-import time
+import traceback
 
 # Third-party imports
-from getch import getch
 from pyfluidsynth3 import fluidaudiodriver, fluidhandle, fluidsettings, fluidsynth
 from pyfluidsynth3.fluiderror import FluidError
 
 # abcde imports
 import abc2midi
-import musictheory
 
 
 # midi utils
@@ -56,18 +54,36 @@ class SingleNoteAbcPlayer:
         self._no_sound = True
 
     def setup_synth(self):
-        """Setup the player so that it can produce sound."""
-        self._handle = fluidhandle.FluidHandle()
-        self._settings = fluidsettings.FluidSettings(self._handle)
-        self._settings['synth.gain'] = 0.2
-        self._synth = fluidsynth.FluidSynth(self._handle, self._settings)
-        self._load_soundfont()
-        self._settings['audio.driver'] = 'alsa'
-        self._driver = fluidaudiodriver.FluidAudioDriver(self._handle, self._synth, self._settings)
+        """Setup the player so that it can produce sound.
+
+           Raises:
+               SingleNoteAbcPlayerException: an error occured during the synth setup.
+                   Most common errors: fluidsynth library not found, soundfont not found.
+        """
+        try:
+            self._handle = fluidhandle.FluidHandle()
+            self._settings = fluidsettings.FluidSettings(self._handle)
+            self._settings['synth.gain'] = 0.2
+            self._synth = fluidsynth.FluidSynth(self._handle, self._settings)
+            self._load_soundfont()
+            self._settings['audio.driver'] = 'alsa'
+            self._driver = fluidaudiodriver.FluidAudioDriver(self._handle, self._synth, self._settings)
+        except FluidError as e:
+            log.warning('Failed to setup fluidsynth: ' + str(e))
+            log.debug(traceback.format_exc())
+            raise SingleNoteAbcPlayerException(str(e))
+
+        # TODO: warn here rather than in _load_soundfont that audio output will be disabled
+
         self._no_sound = False  # If we can reach that point without exception, we should have sound
         self.select_instrument(self._instrument)
 
     def _load_soundfont(self):
+        """Look for a soundfont and load it into fluidsynth.
+
+           Raises:
+               SingleNoteAbcPlayerException: could not find a soundfont
+        """
         soundfont_found = False
         for soundfont in soundfonts:
             try:
@@ -124,41 +140,3 @@ class SingleNoteAbcPlayer:
             self._midi_note = None
         finally:
             self._lock.release()
-
-
-def demo_play_interactive(instrument ='Acoustic Grand Piano'):
-    snap = SingleNoteAbcPlayer()
-    snap.setup_synth()
-    snap.select_instrument(instrument)
-    print('Press a key for an ABC note from C to b... (Ctrl+C or q or Q to finish)')
-    two_octaves_c_major_scale = musictheory.C_MAJOR_SCALE + list(map(str.lower, musictheory.C_MAJOR_SCALE))
-    while True:
-        key = getch()
-        if key in ['\x03', 'q', 'Q']: # '\x03' = Ctrl+C
-            break
-        if key in two_octaves_c_major_scale:
-            snap.play_abc_note(key)
-
-
-def demo_play_tick():
-    # !!! use 9 for channel 10 (perc)
-    # Valeurs de 'note' qui pourraient le faire pour un tick métronome:
-    # 37: stick
-    # 42: Closed Hi-hat
-    # 56: Cowbell
-    # ~ 60-62
-    # ~ 75-77
-    snap = SingleNoteAbcPlayer()
-    snap.setup_synth()
-    snap.select_midi_channel(9)
-    for note in range(35, 82):
-        print("playing note {} on channel 10 (perc)".format(note))
-        snap.play_midi_note(note)
-        time.sleep(0.5)
-
-if __name__ == "__main__":
-    # Choose your demo:
-
-    demo_play_interactive()
-    #demo_play_interactive('Accordion')
-    #demo_play_tick()
