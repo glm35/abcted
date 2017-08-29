@@ -26,7 +26,7 @@ class File():
         self._modified_flag = False
 
     def _dump_edit_buffer(self, text=None, tag='text'):
-        """Debug tool to print a text buffer and watch the ending line"""
+        """Debug tool to print a text buffer and watch the ending line."""
         if text is None:
             text = self.buffer.get(1.0, tk.END)
         print('<{0}>{1}</{0}>'.format(tag, text))
@@ -46,13 +46,15 @@ class File():
             self.set_root_title()
         return self._modified_flag
 
-    def new(self, event=None):
-        log.debug('File(): new()')
+    def on_file_new(self, event=None):
+        """'File => New' menu callback"""
+        log.debug('File.on_file_new()')
         # TODO
+        # TODO: si le fichier courant est modifié: proposer de le sauver
         return 'break'
 
     def set_root_title(self):
-        """Set the title of the root window from the filename"""
+        """Set the title of the root window from the filename."""
         title = ''
         if self._modified_flag:
             title += '* '
@@ -67,8 +69,50 @@ class File():
             title += '{} ({})'.format(os.path.basename(self.filename), dirname)
         self._root.title(title)
 
-    def open(self, event=None):
+    def ask_save_changes(self):
+        """Propose to save the current text if it has changed.
+
+        If the current text has changed and has never been saved, or if
+        it has changed since last save, propose the user to save the text.
+
+        If the user chooses to save the text, ask for a filename if there
+        is no filename yet, then save the text.
+
+        Returns:
+            str: 'ok' or 'cancel'
+
+            Returns 'ok' if the user choosed to save the file or to discard
+            the changes
+
+            Returns 'cancel' if the user choosed to cancel the
+            current operation (open, new, ...)
+        """
+        if not self._modified_flag:
+            return 'ok'
+
+        ret = tk_messagebox.askyesnocancel(
+            title='Unsaved changes',
+            message='The ABC text has been modified and the changes have not been saved.'
+                    ' Would you like to save the text?')
+        if ret is None:  # cancel
+            return 'cancel'
+        elif ret == False:  # no
+            return 'ok'
+        else:  # yes (ret == True)
+            if self._save() == True:
+                return 'ok'
+            else:  # Save failed or was cancelled by user
+                return 'cancel'
+
+    def on_file_open(self, event=None):
+        """'File => Open...' menu callback"""
+        # TODO: allow open from the CLI with a specified file
         log.debug('File.open(): entering')
+
+        if self.ask_save_changes() == 'cancel':
+            log.debug('File.open(): ask save changes cancelled/failed, leaving')
+            return 'break'
+
         filename = tk_filedialog.askopenfilename(
             defaultextension='.abc',
             filetypes = [('ABC Files', '*.abc'), ('All Files', '*.*')])
@@ -76,7 +120,6 @@ class File():
             log.debug('File.open(): no file selected, leaving')
             return 'break'
 
-        # TODO: si le fichier courant est modifié: proposer de le sauver
         log.debug('File.open(): opening: ' + filename)
         with open(filename, 'r') as file:
             try:
@@ -91,15 +134,15 @@ class File():
         if text is None:
             log.debug('File.open(): read failed, leaving')
             return 'break'
-
         self.filename = filename
-        self.set_root_title()
 
         # Replace the contents of the edit zone
         # with the contents of the file
         self.buffer.delete(1.0, tk.END)
         self.buffer.insert(1.0, text)
         self._update_last_saved_text(text)
+
+        self.set_root_title()  # Must be done here after the reset of self._modified_flag
 
         # For some reason, tkinter adds a new empty line to the
         # edit zone. Carefully remove that spurious line, else the
@@ -127,18 +170,36 @@ class File():
             return_status = False
         return return_status
 
-    def save(self, event=None):
-        log.debug("File(): save()")
+    def _save(self):
+        """Save text to file.
+
+        If no filename has been chosen yet, ask the user for one.
+
+        Returns:
+            bool: True if the text was saved, False if it was not whatever the reason
+                (error, no filename specified, ...)
+        """
         if self.filename is None:
-            self.save_as()
+            return self._save_as()
         else:
-            self._write_to_file()
-            self.set_root_title()
+            if self._write_to_file() == True:
+                self.set_root_title()
+                return True
+            else:
+                return False
+
+    def on_file_save(self, event=None):
+        """'File => Save' menu callback"""
+        self._save()
         return 'break'
 
-    def save_as(self, event=None):
-        log.debug("File(): save_as()")
-        # TODO: si le fichier courant est modifié: proposer de le sauver
+    def _save_as(self):
+        """Select filename then save text.
+
+        Returns:
+            bool: True if the text was saved, False if the user did not
+                select any filename or if there was an error during the saving.
+        """
         filename = tk_filedialog.asksaveasfilename(
             defaultextension='.abc',
             filetypes=[('ABC Files', '*.abc'), ('All Files', '*.*')])
@@ -148,4 +209,10 @@ class File():
             if ret == True:
                 self.filename = filename
                 self.set_root_title()
+                return True
+        return False
+
+    def on_file_save_as(self, event=None):
+        """'File => Save As...' menu callback"""
+        self._save_as()
         return 'break'

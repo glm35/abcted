@@ -128,3 +128,10 @@ abcde travaille avec le format UTF-8:
 
      $ file gwen_random_tunes.abc.utf8
      gwen_random_tunes.abc.utf8: UTF-8 Unicode text
+
+
+Style de codage
+---------------
+
+* la documentation Python (dosctrings) est écrite dans le style Google. Exemple ici:
+  http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html

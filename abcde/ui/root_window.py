@@ -23,22 +23,22 @@ class RootWindow(tk.Tk):
         menu_bar = tk.Menu(self)
 
         file_menu = tk.Menu(menu_bar, tearoff=0)
-        file_menu.add_command(label='New', underline=0, accelerator='Ctrl + N', command=self._file.new)
-        file_menu.add_command(label='Open...', underline=0, accelerator='Ctrl + O', command=self._file.open)
-        file_menu.add_command(label='Save', underline=0, accelerator='Ctrl + S', command=self._file.save)
-        file_menu.add_command(label='Save as...', underline=3, command=self._file.save_as)
+        file_menu.add_command(label='New', underline=0, accelerator='Ctrl + N', command=self._file.on_file_new)
+        file_menu.add_command(label='Open...', underline=0, accelerator='Ctrl + O', command=self._file.on_file_open)
+        file_menu.add_command(label='Save', underline=0, accelerator='Ctrl + S', command=self._file.on_file_save)
+        file_menu.add_command(label='Save as...', underline=3, command=self._file.on_file_save_as)
         file_menu.add_separator()
         file_menu.add_command(label='Exit', underline=0, accelerator='Alt + F4', command=self.exit)
         menu_bar.add_cascade(label='File', underline=0, menu=file_menu)
 
         self.config(menu=menu_bar)
 
-        self.bind('<Control-N>', self._file.new)
-        self.bind('<Control-n>', self._file.new)
-        self.bind('<Control-O>', self._file.open)
-        self.bind('<Control-o>', self._file.open)
-        self.bind('<Control-S>', self._file.save)
-        self.bind('<Control-s>', self._file.save)
+        self.bind('<Control-N>', self._file.on_file_new)
+        self.bind('<Control-n>', self._file.on_file_new)
+        self.bind('<Control-O>', self._file.on_file_open)
+        self.bind('<Control-o>', self._file.on_file_open)
+        self.bind('<Control-S>', self._file.on_file_save)
+        self.bind('<Control-s>', self._file.on_file_save)
         self.bind('Alt-Keypress-F4', self.exit)
 
         self.protocol('WM_DELETE_WINDOW', self.exit)
@@ -50,6 +50,9 @@ class RootWindow(tk.Tk):
 
     def exit(self, event=None):
         log.debug('RootWindow.exit()')
-        # TODO: proposer d'enregistrer le fichier si modifié
-        if tk_messagebox.askokcancel('Quit?', 'Really quit?'):
+
+        if self._file.ask_save_changes() == 'cancel':
+            log.debug('RootWindow.exit(): ask save changes cancelled/failed, aborting')
+            return 'break'
+        elif tk_messagebox.askokcancel('Quit?', 'Really quit?'):
             self.destroy()
