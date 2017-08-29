@@ -46,11 +46,34 @@ class File():
             self.set_root_title()
         return self._modified_flag
 
+    def _reset_with_new_text(self, text, filename=None):
+        """Setup the text buffer with new text data and a new filename."""
+        self.filename = filename
+
+        # Replace the contents of the edit zone
+        # with the contents of the file
+        self.buffer.delete(1.0, tk.END)
+        self.buffer.insert(1.0, text)
+        self._update_last_saved_text(text)
+
+        self.set_root_title()  # Must be done here after the reset of self._modified_flag
+
+        # For some reason, tkinter adds a new empty line to the
+        # edit zone. Carefully remove that spurious line, else the
+        # 'text changed' flag computation will bug.
+        (line, col) = tuple(map(int, self.buffer.index(tk.END).split('.')))
+        if col == 0 and line > 2:
+            last_line = self.buffer.get('{0}.{1}'.format(line - 1, 0), '{0}.{1}'.format(line - 1, 'end'))
+            if last_line == '':
+                self.buffer.delete('{0}.{1}'.format(int(line) - 2, 'end'))
+
     def on_file_new(self, event=None):
         """'File => New' menu callback"""
         log.debug('File.on_file_new()')
-        # TODO
-        # TODO: si le fichier courant est modifié: proposer de le sauver
+        if self.ask_save_changes() == 'cancel':
+            log.debug('File.on_file_new(): ask save changes cancelled/failed, leaving')
+        else:
+            self._reset_with_new_text(text='', filename=None)
         return 'break'
 
     def set_root_title(self):
@@ -134,25 +157,8 @@ class File():
         if text is None:
             log.debug('File.open(): read failed, leaving')
             return 'break'
-        self.filename = filename
 
-        # Replace the contents of the edit zone
-        # with the contents of the file
-        self.buffer.delete(1.0, tk.END)
-        self.buffer.insert(1.0, text)
-        self._update_last_saved_text(text)
-
-        self.set_root_title()  # Must be done here after the reset of self._modified_flag
-
-        # For some reason, tkinter adds a new empty line to the
-        # edit zone. Carefully remove that spurious line, else the
-        # 'text changed' flag computation will bug.
-        (line, col) = tuple(map(int, self.buffer.index(tk.END).split('.')))
-        if col == 0 and line > 2:
-            last_line = self.buffer.get('{0}.{1}'.format(line-1, 0), '{0}.{1}'.format(line-1, 'end'))
-            if last_line == '':
-                self.buffer.delete('{0}.{1}'.format(int(line)-2, 'end'))
-
+        self._reset_with_new_text(text=text, filename=filename)
         return 'break'
 
     def _write_to_file(self, filename=None):
