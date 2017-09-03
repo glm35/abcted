@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging as log
+import pathlib
 import tkinter as tk
 import tkinter.messagebox as tk_messagebox
 
@@ -11,7 +12,7 @@ import ui.theme
 
 
 class RootWindow(tk.Tk):
-    def __init__(self):
+    def __init__(self, filename=None):
         super().__init__()
 
         self._theme = ui.theme.Theme()
@@ -19,6 +20,15 @@ class RootWindow(tk.Tk):
         self._file = file.File(self, self._edit_zone._edit_zone)  # TODO: revoir les accesseurs
         self._file.set_root_title()
         self._edit_zone.set_check_text_change_since_last_save_cb(self._file.check_text_change_since_last_save)
+        if filename:
+            self._file.open(str(pathlib.Path(filename).absolute()))  # Make sure filename is absolute
+            # TODO: use pathlib.Path.resolve() to remove possible '..'
+            # This will check that the path exists, so 'FileNotFound' errors will have to be handled here...
+            # unless we move this to _file.open()
+
+            # TODO: si le fichier n'existe pas, créer un nouveau fichier avec ce nom
+            #       plutôt que générer une erreur. C'est le comportement par défaut
+            #       des éditeurs de texte (vim, xed)
 
         menu_bar = tk.Menu(self)
 

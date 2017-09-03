@@ -16,7 +16,7 @@ class File():
     def __init__(self, root, edit_zone):
         self._root = root
         self.buffer = edit_zone  # Text buffer to be saved in file (TODO encapsulate)
-        self.filename = None
+        self.filename = None  # Absolute file name (absolute path + file name)
 
         self._last_saved_text = '\n'  # That's the contents of the empty edit zone
         self._modified_flag = False  # Whether buffer has been modified since last save
@@ -73,7 +73,7 @@ class File():
         if self.ask_save_changes() == 'cancel':
             log.debug('File.on_file_new(): ask save changes cancelled/failed, leaving')
         else:
-            self._reset_with_new_text(text='', filename=None)
+            self._reset_with_new_text(text='\n', filename=None)  # '\n' will be removed by _reset_with_new_text()
         return 'break'
 
     def set_root_title(self):
@@ -127,38 +127,57 @@ class File():
             else:  # Save failed or was cancelled by user
                 return 'cancel'
 
+    def open(self, filename):
+        """Open a file given its filename.
+
+        In case the file cannot be opened, an error message box is displayed and that's it.
+
+        Params:
+            filename(str): absolute path + filename
+        """
+        log.debug('File.open(): opening: ' + filename)
+        text = None
+        try:
+            with open(filename, 'r') as file:
+                try:
+                    text = file.read()
+                except UnicodeDecodeError as e:
+                    log.debug('File.open(): caught exception UnicodeDecodeError: ' + str(e))
+                    tk_messagebox.showerror('Open failed', 'Could not open ' + filename
+                                            + ': it is not encoded in UTF-8.'
+                                            + ' Please fix the encoding and retry.')
+        except FileNotFoundError as e:
+            log.debug('File.open(): caught exception ' + type(e).__name__ + ' : '+ str(e))
+            tk_messagebox.showerror('Open failed', 'Could not open ' + filename + ': '
+                                    + str(e))
+        except Exception as e:  # Catch-all handler for other file exceptions
+            # TODO: better error messages for some exceptions: PermissionError
+            log.debug('File.open(): caught exception ' + type(e).__name__ + ' : '+ str(e))
+            tk_messagebox.showerror('Open failed', 'Could not open ' + filename + ': '
+                                    + str(e))
+
+        if text is None:
+            log.debug('File.open(): read failed, leaving')
+        else:
+            self._reset_with_new_text(text=text, filename=filename)
+
     def on_file_open(self, event=None):
         """'File => Open...' menu callback"""
-        # TODO: allow open from the CLI with a specified file
-        log.debug('File.open(): entering')
+        log.debug('File.on_file_open(): entering')
 
         if self.ask_save_changes() == 'cancel':
-            log.debug('File.open(): ask save changes cancelled/failed, leaving')
+            log.debug('File.on_file_open(): ask save changes cancelled/failed, leaving')
             return 'break'
 
         filename = tk_filedialog.askopenfilename(
             defaultextension='.abc',
             filetypes = [('ABC Files', '*.abc'), ('All Files', '*.*')])
         if not filename:
-            log.debug('File.open(): no file selected, leaving')
+            log.debug('File.on_file_open(): no file selected, leaving')
             return 'break'
 
-        log.debug('File.open(): opening: ' + filename)
-        with open(filename, 'r') as file:
-            try:
-                text = file.read()
-            except UnicodeDecodeError as e:
-                log.debug('File.open(): caught exception UnicodeDecodeError: ' + str(e))
-                text = None
-                tk_messagebox.showerror('Open failed', 'Could not open ' + filename
-                                        + ': it is not encoded in UTF-8.'
-                                        + ' Please fix the encoding and retry.')
-            # TODO: handle IO errors
-        if text is None:
-            log.debug('File.open(): read failed, leaving')
-            return 'break'
-
-        self._reset_with_new_text(text=text, filename=filename)
+        print(type(filename))
+        self.open(filename)
         return 'break'
 
     def _write_to_file(self, filename=None):

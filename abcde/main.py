@@ -11,6 +11,7 @@ def parse_args():
     parser.add_argument('-d', '--debug',
                         help='Enable debug messages',
                         action='store_true')
+    parser.add_argument('filename', help='ABC file to open at startup (optional)', type=str, nargs='?')
     args = parser.parse_args()
     return args
 
@@ -25,7 +26,7 @@ def setup_logging(enable_debug):
 def main():
     args = parse_args()
     setup_logging(enable_debug=args.debug)
-    root = ui.root_window.RootWindow()
+    root = ui.root_window.RootWindow(filename=args.filename)
     root.mainloop()
 
 
