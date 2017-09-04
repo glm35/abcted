@@ -13,11 +13,11 @@ import ui.edit_buffer
 
 class EditZone(tk.Frame):  # TODO: pourquoi a-t-on besoin d'une Frame?
                            #  Pour une future barre de défilement horizontale?
-    def __init__(self, frame, theme):
+    def __init__(self, root_window, theme):
         self.theme = theme
         # TODO: Renommer _edit_zone: ambigu car même nom que la classe qui l'héberge
         self._edit_zone = tk_scrolledtext.ScrolledText(
-            frame, font=theme.get_font(),
+            root_window, font=theme.get_font(),
             background=theme.bg, foreground=theme.fg,
 
             # Cursor configuration:
@@ -47,7 +47,14 @@ class EditZone(tk.Frame):  # TODO: pourquoi a-t-on besoin d'une Frame?
             self.snap.setup_synth()
             self.snap.select_instrument('Acoustic Grand Piano')
         except snap.SingleNoteAbcPlayerException as e:
+            # Under Windows, after we display a messagebox before the mainloop():
+            # 1. the edit zone looses its focus (and it is difficult to get it back).
+            # 2. the global keybindings do not work.
+            #
+            # Workaround : hide the root window before showing the messagebox
+            root_window.withdraw()
             tk_messagebox.showwarning(title='Failed to setup synth', message=e)
+            root_window.deiconify()
 
     def set_check_text_change_since_last_save_cb(self, callback):
         self.check_text_change_since_last_save_cb = callback

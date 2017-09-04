@@ -69,11 +69,10 @@ class SingleNoteAbcPlayer:
             self._settings['audio.driver'] = 'alsa'
             self._driver = fluidaudiodriver.FluidAudioDriver(self._handle, self._synth, self._settings)
         except FluidError as e:
-            log.warning('Failed to setup fluidsynth: ' + str(e))
+            message = 'Failed to setup fluidsynth: ' + str(e) + '. Audio output will be disabled.'
+            log.warning(message)
             log.debug(traceback.format_exc())
-            raise SingleNoteAbcPlayerException(str(e))
-
-        # TODO: warn here rather than in _load_soundfont that audio output will be disabled
+            raise SingleNoteAbcPlayerException(message)
 
         self._no_sound = False  # If we can reach that point without exception, we should have sound
         self.select_instrument(self._instrument)
