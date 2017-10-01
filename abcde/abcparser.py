@@ -136,6 +136,8 @@ def normalize_abc_key(raw_key):
     :exception AbcParserException: the format of raw_text is invalid and cannot be parsed
     """
 
+    raw_key = raw_key.strip()  # Remove leading and trailing spaces
+
     # Parse the key root
 
     root = raw_key[0].upper()

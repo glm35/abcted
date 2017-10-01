@@ -35,6 +35,12 @@ class TestNormalizeAbcKey(unittest.TestCase):
         self.assertEqual('Bb', base_note)
         self.assertEqual('maj', mode)
 
+    # Test input sanitization
+    def test_g_with_leading_and_trailing_spaces(self):
+        (base_note, mode) = normalize_abc_key(' G  ')
+        self.assertEqual('G', base_note)
+        self.assertEqual('maj', mode)
+
     # Test exceptions
     def test_invalid_key_a_sharp_maj(self):
         self.assertRaises(AbcParserException, normalize_abc_key, 'A#')
