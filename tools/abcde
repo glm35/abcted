@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source ~/.tmp/venv-devel-abcde/bin/activate
+python3 ~/code/abcde/abcde/main.py $*
+
