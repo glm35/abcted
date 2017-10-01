@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import logging
 import tkinter as tk
 import tkinter.messagebox as tk_messagebox
 import tkinter.scrolledtext as tk_scrolledtext
@@ -60,19 +61,24 @@ class EditZone(tk.Frame):  # TODO: pourquoi a-t-on besoin d'une Frame?
         self.check_text_change_since_last_save_cb = callback
 
     def on_key_press(self, event):
-        #print("key pressed: " + event.keysym)
+        logging.debug("key pressed: " + event.keysym)
         if event.keysym in ['Shift_R','Shift_L']:
             self.shift = True
         elif event.keysym in ['Control_L','Control_R']:
             self.control = True
         elif event.keysym in ['Alt_L']:
             self.alt = True
+            # TODO: need bugfix: when alt is pressed in this app and released in another app
+            # (eg when switching app with alt-tab), we do not get the release event
+            # and play_midi_note() is never called.
+            # Workaround: press then release Alt_L
         elif not self.control and not self.alt:
             abc_note = abcparser.get_note_to_play(self.edit_buffer, event.char)
             if abc_note is not None:
                 self.snap.play_midi_note(abc2midi.get_midi_note(abc_note))
 
     def on_key_release(self, event):
+        logging.debug("key released: " + event.keysym)
         if event.keysym in ['Shift_R','Shift_L']:
             self.shift = False
         elif event.keysym in ['Control_L','Control_R']:
