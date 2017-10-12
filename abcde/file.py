@@ -11,12 +11,13 @@ import tkinter.filedialog as tk_filedialog
 import tkinter.messagebox as tk_messagebox
 import os
 
+from ui.edit_zone_buffer import EditZoneBuffer
 
 class File():
-    def __init__(self, root, edit_zone):
+    def __init__(self, root: tk.Tk, buffer: EditZoneBuffer):
         self._root = root
-        self.buffer = edit_zone  # Text buffer to be saved in file (TODO encapsulate)
-        self.filename = None  # Absolute file name (absolute path + file name)
+        self._buffer = buffer  # Text buffer to be saved in file (this is a EditZoneBuffer object)
+        self._filename = None  # Absolute file name (absolute path + file name)
 
         self._last_saved_text = '\n'  # That's the contents of the empty edit zone
         self._modified_flag = False  # Whether buffer has been modified since last save
@@ -25,18 +26,12 @@ class File():
         self._last_saved_text = text
         self._modified_flag = False
 
-    def _dump_edit_buffer(self, text=None, tag='text'):
-        """Debug tool to print a text buffer and watch the ending line."""
-        if text is None:
-            text = self.buffer.get(1.0, tk.END)
-        print('<{0}>{1}</{0}>'.format(tag, text))
-
     def check_text_change_since_last_save(self, update_ui=True):
         """Check whether the text in the edit zone has changed since the last time
            the buffer was saved. If so, update the ui.
         """
         old_modified_flag = self._modified_flag
-        text = self.buffer.get(1.0, tk.END)
+        text = self._buffer.get()
 
         if text != self._last_saved_text:
             self._modified_flag = True
@@ -48,24 +43,13 @@ class File():
 
     def _reset_with_new_text(self, text, filename=None):
         """Setup the text buffer with new text data and a new filename."""
-        self.filename = filename
+        self._filename = filename
 
-        # Replace the contents of the edit zone
-        # with the contents of the file
-        self.buffer.delete(1.0, tk.END)
-        self.buffer.insert(1.0, text)
+        # Replace the contents of the edit zone with the contents of the file
+        self._buffer.replace(text)
         self._update_last_saved_text(text)
 
         self.set_root_title()  # Must be done here after the reset of self._modified_flag
-
-        # For some reason, tkinter adds a new empty line to the
-        # edit zone. Carefully remove that spurious line, else the
-        # 'text changed' flag computation will bug.
-        (line, col) = tuple(map(int, self.buffer.index(tk.END).split('.')))
-        if col == 0 and line > 2:
-            last_line = self.buffer.get('{0}.{1}'.format(line - 1, 0), '{0}.{1}'.format(line - 1, 'end'))
-            if last_line == '':
-                self.buffer.delete('{0}.{1}'.format(int(line) - 2, 'end'))
 
     def on_file_new(self, event=None):
         """'File => New' menu callback"""
@@ -81,15 +65,15 @@ class File():
         title = ''
         if self._modified_flag:
             title += '* '
-        if self.filename is None:
+        if self._filename is None:
             title += 'New ABC File.abc'
         else:
             # If possible, build a dir name relative to the user's home directory
-            dirname = os.path.dirname(self.filename)
+            dirname = os.path.dirname(self._filename)
             home = os.path.expanduser('~')
             if dirname.startswith(home):
                 dirname = '~' + dirname[len(home):]
-            title += '{} ({})'.format(os.path.basename(self.filename), dirname)
+            title += '{} ({})'.format(os.path.basename(self._filename), dirname)
         self._root.title(title)
 
     def ask_save_changes(self):
@@ -183,10 +167,10 @@ class File():
     def _write_to_file(self, filename=None):
         """Return True in case of success else False"""
         if filename is None:
-            filename = self.filename
+            filename = self._filename
         return_status = True
         try:
-            text = self.buffer.get(1.0, tk.END)
+            text = self._buffer.get()
             with open(filename, 'w') as file:
                 file.write(text)
                 self._update_last_saved_text(text)
@@ -204,7 +188,7 @@ class File():
             bool: True if the text was saved, False if it was not whatever the reason
                 (error, no filename specified, ...)
         """
-        if self.filename is None:
+        if self._filename is None:
             return self._save_as()
         else:
             if self._write_to_file() == True:
@@ -232,7 +216,7 @@ class File():
             log.debug('Saving as: ' + filename)
             ret = self._write_to_file(filename)
             if ret == True:
-                self.filename = filename
+                self._filename = filename
                 self.set_root_title()
                 return True
         return False

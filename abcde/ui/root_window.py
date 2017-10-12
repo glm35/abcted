@@ -17,7 +17,7 @@ class RootWindow(tk.Tk):
 
         self._theme = ui.theme.Theme()
         self._edit_zone = ui.edit_zone.EditZone(self, self._theme)
-        self._file = file.File(self, self._edit_zone._edit_zone)  # TODO: revoir les accesseurs
+        self._file = file.File(self, self._edit_zone.get_buffer())
         self._file.set_root_title()
         self._edit_zone.set_check_text_change_since_last_save_cb(self._file.check_text_change_since_last_save)
         if filename:

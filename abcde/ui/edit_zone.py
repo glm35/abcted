@@ -9,15 +9,13 @@ import tkinter.scrolledtext as tk_scrolledtext
 import abcparser
 import abc2midi
 import snap
-import ui.edit_buffer
+import ui.edit_zone_buffer
 
 
-class EditZone(tk.Frame):  # TODO: pourquoi a-t-on besoin d'une Frame?
-                           #  Pour une future barre de défilement horizontale?
+class EditZone():
     def __init__(self, root_window, theme):
-        self.theme = theme
-        # TODO: Renommer _edit_zone: ambigu car même nom que la classe qui l'héberge
-        self._edit_zone = tk_scrolledtext.ScrolledText(
+        self._theme = theme
+        self._scrolled_text = tk_scrolledtext.ScrolledText(
             root_window, font=theme.get_font(),
             background=theme.bg, foreground=theme.fg,
 
@@ -29,24 +27,25 @@ class EditZone(tk.Frame):  # TODO: pourquoi a-t-on besoin d'une Frame?
             # Selection configuration:
             selectbackground=theme.selectbg)
 
-        self.shift = False
-        self.control = False
-        self.alt = False
+        self._shift = False
+        self._control = False
+        self._alt = False
 
-        self._edit_zone.focus() # Set the focus on the edit zone
+        self._scrolled_text.focus() # Set the focus on the edit zone
 
-        self._edit_zone.bind('<Key>', self.on_key_press)
-        self._edit_zone.bind('<KeyRelease>', self.on_key_release)
+        self._scrolled_text.bind('<Key>', self._on_key_press)
+        self._scrolled_text.bind('<KeyRelease>', self._on_key_release)
 
-        self._edit_zone.pack(expand=tk.YES, fill=tk.BOTH)
+        self._scrolled_text.pack(expand=tk.YES, fill=tk.BOTH)
 
-        self.edit_buffer = ui.edit_buffer.EditBuffer(self._edit_zone)
-        self.check_text_change_since_last_save_cb = None
+        self._buffer = ui.edit_zone_buffer.EditZoneBuffer(self._scrolled_text)
 
-        self.snap = snap.SingleNoteAbcPlayer()
+        self._check_text_change_since_last_save_cb = None
+
+        self._snap = snap.SingleNoteAbcPlayer()
         try:
-            self.snap.setup_synth()
-            self.snap.select_instrument('Acoustic Grand Piano')
+            self._snap.setup_synth()
+            self._snap.select_instrument('Acoustic Grand Piano')
         except snap.SingleNoteAbcPlayerException as e:
             # Under Windows, after we display a messagebox before the mainloop():
             # 1. the edit zone looses its focus (and it is difficult to get it back).
@@ -57,34 +56,41 @@ class EditZone(tk.Frame):  # TODO: pourquoi a-t-on besoin d'une Frame?
             tk_messagebox.showwarning(title='Failed to setup synth', message=e)
             root_window.deiconify()
 
-    def set_check_text_change_since_last_save_cb(self, callback):
-        self.check_text_change_since_last_save_cb = callback
+    def get_buffer(self):
+        return self._buffer
 
-    def on_key_press(self, event):
+    def set_check_text_change_since_last_save_cb(self, callback):
+        """Set the function that will be called whenever we decide
+           it is time to check whether the edit zone text has changed since
+           last save.
+        """
+        self._check_text_change_since_last_save_cb = callback
+
+    def _on_key_press(self, event):
         logging.debug("key pressed: " + event.keysym)
         if event.keysym in ['Shift_R','Shift_L']:
-            self.shift = True
+            self._shift = True
         elif event.keysym in ['Control_L','Control_R']:
-            self.control = True
+            self._control = True
         elif event.keysym in ['Alt_L']:
-            self.alt = True
+            self._alt = True
             # TODO: need bugfix: when alt is pressed in this app and released in another app
             # (eg when switching app with alt-tab), we do not get the release event
             # and play_midi_note() is never called.
             # Workaround: press then release Alt_L
-        elif not self.control and not self.alt:
-            abc_note = abcparser.get_note_to_play(self.edit_buffer, event.char)
+        elif not self._control and not self._alt:
+            abc_note = abcparser.get_note_to_play(self._buffer, event.char)
             if abc_note is not None:
-                self.snap.play_midi_note(abc2midi.get_midi_note(abc_note))
+                self._snap.play_midi_note(abc2midi.get_midi_note(abc_note))
 
-    def on_key_release(self, event):
+    def _on_key_release(self, event):
         logging.debug("key released: " + event.keysym)
         if event.keysym in ['Shift_R','Shift_L']:
-            self.shift = False
+            self._shift = False
         elif event.keysym in ['Control_L','Control_R']:
-            self.control = False
+            self._control = False
         elif event.keysym in ['Alt_L']:
-            self.alt = False
+            self._alt = False
 
-        if self.check_text_change_since_last_save_cb:
-            self.check_text_change_since_last_save_cb()
+        if self._check_text_change_since_last_save_cb:
+            self._check_text_change_since_last_save_cb()
