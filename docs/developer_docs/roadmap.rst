@@ -11,6 +11,11 @@ Main features
 * "Print" tune to external PDF viewer
 
 
+File Management features
+------------------------
+
+* Recent files
+
 
 Random desired features for abcde
 ---------------------------------

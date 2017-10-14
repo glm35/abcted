@@ -8,13 +8,21 @@ ABCde: un éditeur de fichiers ABC
 
 .. toctree::
    :maxdepth: 2
+   :caption: Documentation pour les utilisateurs
+
+   user_guide/about_abc
+
+.. toctree::
+   :maxdepth: 2
    :caption: Documentation pour les développeurs
 
-   install
-   tests
-   coding_conventions
-   design
-   about_abc
+   developer_docs/install
+   developer_docs/tests
+   developer_docs/coding_conventions
+   developer_docs/design
+   developer_docs/roadmap.rst
+   developer_docs/known_issues.rst
+
 
 Index et tables
 ===============
