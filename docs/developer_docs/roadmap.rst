@@ -26,3 +26,5 @@ Random desired features for abcde
 * A command to format/wrap multi-line history header fields (H:)
 
 * Syntax highlighting
+
+* Internationalization & english translation

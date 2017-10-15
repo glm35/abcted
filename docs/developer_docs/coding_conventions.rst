@@ -1,8 +1,21 @@
+Style et conventions de codage
+==============================
+
+Style de codage
+---------------
+
+docstrings
+~~~~~~~~~~
+
+* la documentation Python (dosctrings) est écrite dans le style Google. Exemple ici:
+  http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+
+
 Conventions de codage
-=====================
+---------------------
 
 Données brutes et données normalisées
--------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Le texte supposé au format ABC récupéré dans la zone d'édition est considéré
 comme du texte brut. Après analyse par le parser ABC, sa syntaxe est validée

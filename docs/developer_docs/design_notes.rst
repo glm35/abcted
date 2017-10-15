@@ -130,8 +130,9 @@ abcde travaille avec le format UTF-8:
      gwen_random_tunes.abc.utf8: UTF-8 Unicode text
 
 
-Style de codage
----------------
+Composition des objets tkinter
+------------------------------
 
-* la documentation Python (dosctrings) est écrite dans le style Google. Exemple ici:
-  http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+Les objets d'IHM d'abcde ne sont pas hérités de tkinter: on va plutôt les inclure dans nos classes
+(composition plutôt que héritage). La raison est d'éviter une surcharge accidentelle (shadowing?)
+des attributs et méthodes des objets tkinter.

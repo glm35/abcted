@@ -132,7 +132,6 @@ class File():
             tk_messagebox.showerror('Open failed', 'Could not open ' + filename + ': '
                                     + str(e))
         except Exception as e:  # Catch-all handler for other file exceptions
-            # TODO: better error messages for some exceptions: PermissionError
             log.debug('File.open(): caught exception ' + type(e).__name__ + ' : '+ str(e))
             tk_messagebox.showerror('Open failed', 'Could not open ' + filename + ': '
                                     + str(e))

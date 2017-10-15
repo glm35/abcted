@@ -24,13 +24,6 @@ class RootWindow():
         self._edit_zone.set_check_text_change_since_last_save_cb(self._file.check_text_change_since_last_save)
         if filename:
             self._file.open(str(pathlib.Path(filename).absolute()))  # Make sure filename is absolute
-            # TODO: use pathlib.Path.resolve() to remove possible '..'
-            # This will check that the path exists, so 'FileNotFound' errors will have to be handled here...
-            # unless we move this to _file.open()
-
-            # TODO: si le fichier n'existe pas, créer un nouveau fichier avec ce nom
-            #       plutôt que générer une erreur. C'est le comportement par défaut
-            #       des éditeurs de texte (vim, xed)
 
         menu_bar = tk.Menu(self.tk_root)
 

@@ -7,21 +7,26 @@ ABCde: un éditeur de fichiers ABC
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Documentation pour les utilisateurs
 
    user_guide/about_abc
+.. TODO kesako
+.. TODO fonctionnalités supportées
+.. TODO raccourcis clavier
+
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Documentation pour les développeurs
 
    developer_docs/install
-   developer_docs/tests
-   developer_docs/coding_conventions
-   developer_docs/design
-   developer_docs/roadmap.rst
    developer_docs/known_issues.rst
+   developer_docs/roadmap.rst
+   developer_docs/tests
+   developer_docs/design_principles
+   developer_docs/design_notes
+   developer_docs/coding_conventions
 
 
 Index et tables

@@ -75,10 +75,6 @@ class EditZone():
             self._control = True
         elif event.keysym in ['Alt_L']:
             self._alt = True
-            # TODO: need bugfix: when alt is pressed in this app and released in another app
-            # (eg when switching app with alt-tab), we do not get the release event
-            # and play_midi_note() is never called.
-            # Workaround: press then release Alt_L
         elif not self._control and not self._alt:
             abc_note = abcparser.get_note_to_play(self._buffer, event.char)
             if abc_note is not None:
