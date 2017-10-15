@@ -10,13 +10,14 @@ import abcparser
 import abc2midi
 import snap
 import ui.edit_zone_buffer
+import ui.theme
 
 
 class EditZone():
-    def __init__(self, root_window, theme):
+    def __init__(self, tk_root: tk.Tk, theme: ui.theme.Theme):
         self._theme = theme
         self._scrolled_text = tk_scrolledtext.ScrolledText(
-            root_window, font=theme.get_font(),
+            tk_root, font=theme.get_font(),
             background=theme.bg, foreground=theme.fg,
 
             # Cursor configuration:
@@ -52,9 +53,9 @@ class EditZone():
             # 2. the global keybindings do not work.
             #
             # Workaround : hide the root window before showing the messagebox
-            root_window.withdraw()
+            tk_root.withdraw()
             tk_messagebox.showwarning(title='Failed to setup synth', message=e)
-            root_window.deiconify()
+            tk_root.deiconify()
 
     def get_buffer(self):
         return self._buffer

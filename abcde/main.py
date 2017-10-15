@@ -3,6 +3,8 @@
 
 import argparse
 import logging
+
+import file
 import ui.root_window
 
 
@@ -26,8 +28,8 @@ def setup_logging(enable_debug):
 def main():
     args = parse_args()
     setup_logging(enable_debug=args.debug)
-    root = ui.root_window.RootWindow(filename=args.filename)
-    root.mainloop()
+    root_window = ui.root_window.RootWindow(filename=args.filename)
+    root_window.tk_root.mainloop()
 
 
 if __name__ == "__main__":

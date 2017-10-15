@@ -6,16 +6,16 @@ Manage ABC files: open, save, detect on-disk change, ...
 """
 
 import logging as log
-import tkinter as tk
 import tkinter.filedialog as tk_filedialog
 import tkinter.messagebox as tk_messagebox
 import os
 
 from ui.edit_zone_buffer import EditZoneBuffer
 
+
 class File():
-    def __init__(self, root: tk.Tk, buffer: EditZoneBuffer):
-        self._root = root
+    def __init__(self, root_window, buffer: EditZoneBuffer):
+        self._root_window = root_window
         self._buffer = buffer  # Text buffer to be saved in file (this is a EditZoneBuffer object)
         self._filename = None  # Absolute file name (absolute path + file name)
 
@@ -38,7 +38,7 @@ class File():
         else:
             self._modified_flag = False
         if update_ui and old_modified_flag != self._modified_flag:
-            self.set_root_title()
+            self.set_root_window_title()
         return self._modified_flag
 
     def _reset_with_new_text(self, text, filename=None):
@@ -49,7 +49,7 @@ class File():
         self._buffer.replace(text)
         self._update_last_saved_text(text)
 
-        self.set_root_title()  # Must be done here after the reset of self._modified_flag
+        self.set_root_window_title()  # Must be done here after the reset of self._modified_flag
 
     def on_file_new(self, event=None):
         """'File => New' menu callback"""
@@ -60,21 +60,18 @@ class File():
             self._reset_with_new_text(text='\n', filename=None)  # '\n' will be removed by _reset_with_new_text()
         return 'break'
 
-    def set_root_title(self):
+    def set_root_window_title(self):
         """Set the title of the root window from the filename."""
-        title = ''
-        if self._modified_flag:
-            title += '* '
         if self._filename is None:
-            title += 'New ABC File.abc'
+            filename = 'New ABC File.abc'
         else:
             # If possible, build a dir name relative to the user's home directory
             dirname = os.path.dirname(self._filename)
             home = os.path.expanduser('~')
             if dirname.startswith(home):
                 dirname = '~' + dirname[len(home):]
-            title += '{} ({})'.format(os.path.basename(self._filename), dirname)
-        self._root.title(title)
+            filename = '{} ({})'.format(os.path.basename(self._filename), dirname)
+        self._root_window.set_title(filename, self._modified_flag)
 
     def ask_save_changes(self):
         """Propose to save the current text if it has changed.
@@ -153,14 +150,13 @@ class File():
             log.debug('File.on_file_open(): ask save changes cancelled/failed, leaving')
             return 'break'
 
-        filename = tk_filedialog.askopenfilename(
+        filename = tk_filedialog.askopenfilename(  # filename is a 'str' object
             defaultextension='.abc',
             filetypes = [('ABC Files', '*.abc'), ('All Files', '*.*')])
         if not filename:
             log.debug('File.on_file_open(): no file selected, leaving')
             return 'break'
 
-        print(type(filename))
         self.open(filename)
         return 'break'
 
@@ -192,7 +188,7 @@ class File():
             return self._save_as()
         else:
             if self._write_to_file() == True:
-                self.set_root_title()
+                self.set_root_window_title()
                 return True
             else:
                 return False
@@ -217,7 +213,7 @@ class File():
             ret = self._write_to_file(filename)
             if ret == True:
                 self._filename = filename
-                self.set_root_title()
+                self.set_root_window_title()
                 return True
         return False
 

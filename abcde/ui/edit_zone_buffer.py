@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
+import tkinter.scrolledtext as tk_scrolledtext
 
 
 class EditZoneBuffer:
@@ -15,8 +16,8 @@ class EditZoneBuffer:
        providing the whole buffer and cursor position to the parser.
     """
 
-    def __init__(self, scrolled_text):
-        self._scrolled_text = scrolled_text  # This is a tkinter.scrolledtext.ScrolledText
+    def __init__(self, scrolled_text: tk_scrolledtext.ScrolledText):
+        self._scrolled_text = scrolled_text
 
     def get(self):
         """Get the whole buffer contents
@@ -36,7 +37,7 @@ class EditZoneBuffer:
         line_start_index = '{}.{}'.format(cur_line, 0)
         return self._scrolled_text.get(line_start_index, insert_index)
 
-    def get_line(self, line_no):
+    def get_line(self, line_no: int):
         """
         Get a string with the contents of a given line.
 
