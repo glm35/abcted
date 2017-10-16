@@ -169,8 +169,10 @@ class File():
             with open(filename, 'w') as file:
                 file.write(text)
                 self._update_last_saved_text(text)
-        except IOError:
-            # TODO: handle IO errors
+        except IOError as e:
+            log.debug('File._write_to_file(): caught exception ' + type(e).__name__ + ' : '+ str(e))
+            tk_messagebox.showerror('Write failed', 'Could not write to ' + filename + ': '
+                                    + str(e))
             return_status = False
         return return_status
 
@@ -199,6 +201,9 @@ class File():
 
     def _save_as(self):
         """Select filename then save text.
+
+        Note: the tkinter.filedialog.asksaveasfilename dialog warns the user
+            if he attempts to overwrite an already existing file.
 
         Returns:
             bool: True if the text was saved, False if the user did not
