@@ -151,7 +151,8 @@ class File():
 
         filename = tk_filedialog.askopenfilename(  # filename is a 'str' object
             defaultextension='.abc',
-            filetypes = [('ABC Files', '*.abc'), ('All Files', '*.*')])
+            filetypes = [('ABC Files', '*.abc'), ('All Files', '*.*')],
+            initialdir='.')  # Under Windows, the current dir is not the initial dir
         if not filename:
             log.debug('File.on_file_open(): no file selected, leaving')
             return 'break'
@@ -211,7 +212,8 @@ class File():
         """
         filename = tk_filedialog.asksaveasfilename(
             defaultextension='.abc',
-            filetypes=[('ABC Files', '*.abc'), ('All Files', '*.*')])
+            filetypes=[('ABC Files', '*.abc'), ('All Files', '*.*')],
+            initialdir='.')  # Under Windows, the current dir is not the initial dir
         if filename:
             log.debug('Saving as: ' + filename)
             ret = self._write_to_file(filename)
