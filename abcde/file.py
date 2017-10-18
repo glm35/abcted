@@ -10,7 +10,7 @@ import tkinter.filedialog as tk_filedialog
 import tkinter.messagebox as tk_messagebox
 import os
 
-from ui.edit_zone_buffer import EditZoneBuffer
+from edit_zone_buffer import EditZoneBuffer
 
 
 class File():

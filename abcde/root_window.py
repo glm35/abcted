@@ -6,18 +6,18 @@ import pathlib
 import tkinter as tk
 import tkinter.messagebox as tk_messagebox
 
+import edit_zone
 import file
-import ui.edit_zone
-import ui.theme
+import theme
 
 
 class RootWindow():
     def __init__(self, filename=None):
         self.tk_root = tk.Tk()
 
-        self._theme = ui.theme.Theme()
+        self._theme = theme.Theme()
 
-        self._edit_zone = ui.edit_zone.EditZone(self.tk_root, self._theme)
+        self._edit_zone = edit_zone.EditZone(self.tk_root, self._theme)
 
         self._file = file.File(self, self._edit_zone.get_buffer())
         self._file.set_root_window_title()

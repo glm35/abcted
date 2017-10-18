@@ -6,15 +6,15 @@ import tkinter as tk
 import tkinter.messagebox as tk_messagebox
 import tkinter.scrolledtext as tk_scrolledtext
 
-import abcparser
 import abc2midi
+import abcparser
+import edit_zone_buffer
 import snap
-import ui.edit_zone_buffer
-import ui.theme
+import theme
 
 
 class EditZone():
-    def __init__(self, tk_root: tk.Tk, theme: ui.theme.Theme):
+    def __init__(self, tk_root: tk.Tk, theme: theme.Theme):
         self._theme = theme
         self._scrolled_text = tk_scrolledtext.ScrolledText(
             tk_root, font=theme.get_font(),
@@ -39,7 +39,7 @@ class EditZone():
 
         self._scrolled_text.pack(expand=tk.YES, fill=tk.BOTH)
 
-        self._buffer = ui.edit_zone_buffer.EditZoneBuffer(self._scrolled_text)
+        self._buffer = edit_zone_buffer.EditZoneBuffer(self._scrolled_text)
 
         self._check_text_change_since_last_save_cb = None
 
