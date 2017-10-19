@@ -13,7 +13,7 @@ La langue maternelle d'abcde est le français:
 
 * la documentation pour les utilisateurs et les développeurs est en français.
 
-Le code et les commentaires dans le code sont écrits en anglais.
+Le code, les commentaires dans le code et les messages de log sont écrits en anglais.
 
 A terme, si le logiciel a atteint un niveau de maturité suffisamment
 important pour envisger une publication/diffusion internationale, il

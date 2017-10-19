@@ -54,7 +54,7 @@ class EditZone():
             #
             # Workaround : hide the root window before showing the messagebox
             tk_root.withdraw()
-            tk_messagebox.showwarning(title='Failed to setup synth', message=e)
+            tk_messagebox.showwarning(title='Erreur lors de l\'initialisation du synthétiseur', message=e)
             tk_root.deiconify()
 
     def get_buffer(self):

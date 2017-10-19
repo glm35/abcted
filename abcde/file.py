@@ -63,7 +63,7 @@ class File():
     def set_root_window_title(self):
         """Set the title of the root window from the filename."""
         if self._filename is None:
-            filename = 'New ABC File.abc'
+            filename = 'Nouveau fichier.abc'
         else:
             # If possible, build a dir name relative to the user's home directory
             dirname = os.path.dirname(self._filename)
@@ -94,10 +94,9 @@ class File():
         if not self._modified_flag:
             return 'ok'
 
-        ret = tk_messagebox.askyesnocancel(
-            title='Unsaved changes',
-            message='The ABC text has been modified and the changes have not been saved.'
-                    ' Would you like to save the text?')
+        ret = tk_messagebox.askyesnocancel(title='Modifications non enregistrées',
+            message='Le texte ABC a été modifié et les changement n\'ont pas été enregistrés.'
+                    ' Voulez-vous enregistrer les modifications?')
         if ret is None:  # cancel
             return 'cancel'
         elif ret == False:  # no
@@ -124,17 +123,19 @@ class File():
                     text = file.read()
                 except UnicodeDecodeError as e:
                     log.debug('File.open(): caught exception UnicodeDecodeError: ' + str(e))
-                    tk_messagebox.showerror('Open failed', 'Could not open ' + filename
-                                            + ': it is not encoded in UTF-8.'
-                                            + ' Please fix the encoding and retry.')
+                    tk_messagebox.showerror('Erreur lors de l\'ouverture du fichier',
+                                            'Impossible d\'ouvrir ' + filename
+                                            + ': il n\'est pas encodé en UTF-8.'
+                                            + ' Veuillez corriger l\'encodage et réessayer.')
         except FileNotFoundError as e:
             log.debug('File.open(): caught exception ' + type(e).__name__ + ' : '+ str(e))
-            tk_messagebox.showerror('Open failed', 'Could not open ' + filename + ': '
+            tk_messagebox.showerror('Erreur lors de l\'ouverture du fichier',
+                                    'Impossible d\'ouvrir ' + filename + ': '
                                     + str(e))
         except Exception as e:  # Catch-all handler for other file exceptions
             log.debug('File.open(): caught exception ' + type(e).__name__ + ' : '+ str(e))
-            tk_messagebox.showerror('Open failed', 'Could not open ' + filename + ': '
-                                    + str(e))
+            tk_messagebox.showerror('Erreur lors de l\'ouverture du fichier',
+                                    'Impossible d\'ouvrir ' + filename + ': ' + str(e))
 
         if text is None:
             log.debug('File.open(): read failed, leaving')
@@ -151,7 +152,7 @@ class File():
 
         filename = tk_filedialog.askopenfilename(  # filename is a 'str' object
             defaultextension='.abc',
-            filetypes = [('ABC Files', '*.abc'), ('All Files', '*.*')],
+            filetypes = [('Fichiers ABC', '*.abc'), ('Tous les fichiers', '*.*')],
             initialdir='.')  # Under Windows, the current dir is not the initial dir
         if not filename:
             log.debug('File.on_file_open(): no file selected, leaving')
@@ -172,7 +173,8 @@ class File():
                 self._update_last_saved_text(text)
         except IOError as e:
             log.debug('File._write_to_file(): caught exception ' + type(e).__name__ + ' : '+ str(e))
-            tk_messagebox.showerror('Write failed', 'Could not write to ' + filename + ': '
+            tk_messagebox.showerror('Erreur lors de l\'enregistrement du fichier',
+                                    'Impossible d\'enregistrer ' + filename + ': '
                                     + str(e))
             return_status = False
         return return_status
@@ -212,7 +214,7 @@ class File():
         """
         filename = tk_filedialog.asksaveasfilename(
             defaultextension='.abc',
-            filetypes=[('ABC Files', '*.abc'), ('All Files', '*.*')],
+            filetypes=[('Fichiers ABC', '*.abc'), ('Tous les fichiers', '*.*')],
             initialdir='.')  # Under Windows, the current dir is not the initial dir
         if filename:
             log.debug('Saving as: ' + filename)

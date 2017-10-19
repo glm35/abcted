@@ -10,9 +10,9 @@ import root_window
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug',
-                        help='Enable debug messages',
+                        help='Affiche les messges de log (en anglais)',
                         action='store_true')
-    parser.add_argument('filename', help='ABC file to open at startup (optional)', type=str, nargs='?')
+    parser.add_argument('filename', help='Fichier ABC à ouvrir au démarrage (optionnel)', type=str, nargs='?')
     args = parser.parse_args()
     return args
 

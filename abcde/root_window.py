@@ -28,13 +28,13 @@ class RootWindow():
         menu_bar = tk.Menu(self.tk_root)
 
         file_menu = tk.Menu(menu_bar, tearoff=0)
-        file_menu.add_command(label='New', underline=0, accelerator='Ctrl + N', command=self._file.on_file_new)
-        file_menu.add_command(label='Open...', underline=0, accelerator='Ctrl + O', command=self._file.on_file_open)
-        file_menu.add_command(label='Save', underline=0, accelerator='Ctrl + S', command=self._file.on_file_save)
-        file_menu.add_command(label='Save as...', underline=3, command=self._file.on_file_save_as)
+        file_menu.add_command(label='Nouveau', underline=0, accelerator='Ctrl + N', command=self._file.on_file_new)
+        file_menu.add_command(label='Ouvrir...', underline=0, accelerator='Ctrl + O', command=self._file.on_file_open)
+        file_menu.add_command(label='Enregistrer', underline=0, accelerator='Ctrl + S', command=self._file.on_file_save)
+        file_menu.add_command(label='Enregistrer sous...', underline=3, command=self._file.on_file_save_as)
         file_menu.add_separator()
-        file_menu.add_command(label='Exit', underline=0, accelerator='Alt + F4', command=self.exit)
-        menu_bar.add_cascade(label='File', underline=0, menu=file_menu)
+        file_menu.add_command(label='Quitter', underline=0, accelerator='Alt + F4', command=self.exit)
+        menu_bar.add_cascade(label='Fichier', underline=0, menu=file_menu)
 
         self.tk_root.config(menu=menu_bar)
 
@@ -59,7 +59,7 @@ class RootWindow():
         if self._file.ask_save_changes() == 'cancel':
             log.debug('RootWindow.exit(): ask save changes cancelled/failed, aborting')
             return 'break'
-        elif tk_messagebox.askokcancel('Quit?', 'Really quit?'):
+        elif tk_messagebox.askokcancel('Confirmer la sortie', 'Voulez-vous vraiment quitter abcde?'):
             self.tk_root.destroy()
 
     def set_title(self, filename, modified_flag):
