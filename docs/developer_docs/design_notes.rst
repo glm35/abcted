@@ -136,3 +136,73 @@ Composition des objets tkinter
 Les objets d'IHM d'abcde ne sont pas hérités de tkinter: on va plutôt les inclure dans nos classes
 (composition plutôt que héritage). La raison est d'éviter une surcharge accidentelle (shadowing?)
 des attributs et méthodes des objets tkinter.
+
+.. _Fichiers récents et favoris:
+
+Fichiers favoris et fichiers récemment édités
+---------------------------------------------
+
+Fichiers récents et favoris v1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Dans cette première version, on traite uniquement le cas des fichiers favoris:
+
+  * les fichiers favoris sont stockés dans ~/.config/abcde/favorite_files.txt
+
+    * favorite_files.txt est encodé en UTF-8. Si ce n'est pas le cas, un warning est affiché
+      dans les logs et le fichier n'est pas traité
+
+    * on peut définir autant de fichiers favoris qu'on le souhaite
+
+    * les chemins sont absolus ou relatifs; un chemin relatif sera par rapport au répertoire de
+      démarrage d'abcde; un chemin relatif sera présenté comme un chemin absolu dans le menu
+
+    * un chemin peut commencer par ~/: il est alors relatif à la racine du répertoire personnel
+      de l'utilisateur courant.
+
+    * une ligne commençant par # est considérée comme un commentaire et non traitée
+
+    * une ligne vide est non traitée
+
+    * on valide le format de chaque ligne: vérification syntaxique que c'est bien un chemin,
+      avec une approche multiplateforme. Si ce n'est pas le cas, un warning est affiché
+      dans les logs et le fichier n'est pas affiché dans les menus
+
+  * on édite la liste manuellement en dehors d'abcde
+
+  * la liste est lue uniquement au démarrage d'abcde, et les fichiers favoris apparaissent dans le
+    menu fichier.
+
+Fichiers récents et favoris v2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * conserver les 6 fichiers les plus récemment ouverts dans ~/.config/abcde/recent_files.txt
+
+    * on ajoute un fichier récent dans la liste dès qu'on ouvre un fichier ou qu'on enregistre
+      un fichier sous un nouveau nom; on enregistre recent_files.txt immédiatement.
+
+  * essayer de se conformer au standard "XDG Base Directory Specification"
+    https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+    pour l'emplacement des fichiers
+
+  * afficher dans une même liste dans le menu fichier les fichiers favoris et les fichiers récents
+
+    * les fichiers favoris sont identifiés par une icone "étoile"
+
+    * on affiche d'abord les fichiers récents puis les fichiers favoris
+
+    * un fichier à la fois récent et favori est affiché dans la première partie de la liste (fichiers récents)
+      avec son icone de fichier favori
+
+Fichiers récents et favoris v3
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * pouvoir ajouter/retirer des fichiers favoris depuis l'application
+
+  * approches possibles:
+
+    * approche 1: une icone étoile pleine ou vide devant chaque fichier favori ou récent du menu; en cliquant sur
+      l'icone, on change l'état du fichier: favori ou non
+
+    * approche 2: une commande menu pour "Ajouter le fichier courant aux favoris" ou "Retirer le fichier courant
+      des favoris", selon que le fichier courant est déjà favori ou pas.

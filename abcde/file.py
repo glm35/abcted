@@ -13,6 +13,56 @@ import os
 from edit_zone_buffer import EditZoneBuffer
 
 
+FAVORITE_FILES = '~/.config/abcde/favorite_files.txt'
+
+
+def read_favorite_files():
+    """Read the "favorite files" file
+
+    Read the "favorite files" file, skip empty lines, skip comment lines,
+    expand ~, check the file format and return the list of favorite files.
+
+    Returns: a list of favorite file strings
+    """
+
+    favorite_files = []
+
+    with open(os.path.expanduser(FAVORITE_FILES), 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line == '':
+                continue
+            if line.startswith('#'):
+                continue
+            if line.startswith('~'):
+                line = os.path.expanduser(line)
+            # TODO: check that 'line' is a syntactically correct path (using pathlib)
+            # TODO: + issue warning log message
+            # TODO: transform relative paths into absolute paths
+            # TODO: test not UTF-8 encoded file + issue warning log message
+            favorite_files.append(line)
+
+    return favorite_files
+
+
+def prettify_filename(filename):
+    """
+    Given an absolute filename with its path (eg '/home/gwen/Musique/gwen_tunes.abc'),
+    return the filename followed between parenthesis by the directory.  If possible,
+    the directory is relative to the home directory.
+
+    Example: 'gwen_tunes.abc (~/Musique)'
+
+    Returns: a string with the prettified filename
+    """
+    dirname = os.path.dirname(filename)
+    home = os.path.expanduser('~')
+    if dirname.startswith(home):
+        dirname = '~' + dirname[len(home):]
+    pretty = '{} ({})'.format(os.path.basename(filename), dirname)
+    return pretty
+
+
 class File():
     def __init__(self, root_window, buffer: EditZoneBuffer):
         self._root_window = root_window
@@ -65,12 +115,7 @@ class File():
         if self._filename is None:
             filename = 'Nouveau fichier.abc'
         else:
-            # If possible, build a dir name relative to the user's home directory
-            dirname = os.path.dirname(self._filename)
-            home = os.path.expanduser('~')
-            if dirname.startswith(home):
-                dirname = '~' + dirname[len(home):]
-            filename = '{} ({})'.format(os.path.basename(self._filename), dirname)
+            filename = prettify_filename(self._filename)
         self._root_window.set_title(filename, self._modified_flag)
 
     def ask_save_changes(self):

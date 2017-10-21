@@ -29,7 +29,16 @@ class RootWindow():
 
         file_menu = tk.Menu(menu_bar, tearoff=0)
         file_menu.add_command(label='Nouveau', underline=0, accelerator='Ctrl + N', command=self._file.on_file_new)
+        file_menu.add_separator()
         file_menu.add_command(label='Ouvrir...', underline=0, accelerator='Ctrl + O', command=self._file.on_file_open)
+
+        favorite_files = file.read_favorite_files()
+        for fav in favorite_files:
+            file_menu.add_command(label=file.prettify_filename(fav),
+                                  command=lambda local_fav=fav: self._file.open(local_fav))
+            # https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result
+
+        file_menu.add_separator()
         file_menu.add_command(label='Enregistrer', underline=0, accelerator='Ctrl + S', command=self._file.on_file_save)
         file_menu.add_command(label='Enregistrer sous...', underline=3, command=self._file.on_file_save_as)
         file_menu.add_separator()
