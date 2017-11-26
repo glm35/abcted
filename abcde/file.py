@@ -26,21 +26,39 @@ def read_favorite_files():
     """
 
     favorite_files = []
+    abs_favorite_files = os.path.expanduser(FAVORITE_FILES)
 
-    with open(os.path.expanduser(FAVORITE_FILES), 'r') as f:
-        for line in f:
-            line = line.strip()
-            if line == '':
-                continue
-            if line.startswith('#'):
-                continue
-            if line.startswith('~'):
-                line = os.path.expanduser(line)
-            # TODO: check that 'line' is a syntactically correct path (using pathlib)
-            # TODO: + issue warning log message
-            # TODO: transform relative paths into absolute paths
-            # TODO: test not UTF-8 encoded file + issue warning log message
-            favorite_files.append(line)
+    try:
+        with open(abs_favorite_files, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line == '':
+                    continue
+                if line.startswith('#'):
+                    continue
+                favorite_file = line
+
+                if favorite_file.startswith('~'):
+                    favorite_file = os.path.expanduser(line)
+
+                # Transform relative paths into absolute paths:
+                if not os.path.isabs(favorite_file):
+                    favorite_file = os.path.abspath(favorite_file)
+
+                # Normalize path, eg to get a consistent path separator:
+                favorite_file = os.path.normpath(favorite_file)
+
+                # Note: we do not check that the file exists, is a file or
+                # is readable.  A favorite file may not always be readable,
+                # eg if it is on a removable device or a network drive.
+
+                favorite_files.append(favorite_file)
+    except FileNotFoundError:
+        log.debug('Favorite files config file not found: '
+                  + abs_favorite_files)
+    # TODO: test not UTF-8 encoded favorite_files.Txt + issue warning log message
+    # rem: on Windows 7, no prb to read a ISO-8859-1 encoded file
+    # => test this on Linux
 
     return favorite_files
 
