@@ -4,14 +4,15 @@ Roadmap
 Prochains développements
 ------------------------
 
+* Playback d'un tune ou d'une partie d'un tune
+
+** faire tourner sequencer.py de pyfluidsynth3
+
 * Fichiers récents et favoris v1 (cf. :ref:`Fichiers récents et favoris`)
 
 * Le nom abcde est déjà pris (paquet abcde "A Better CD Encoder" sous debian/ubuntu/mint):
   trouver un autre nom. "abcted" (ou "abcTed", ou "ABCtED" ou "ABCted") semble un bon candidat pas encore pris
   (cf. http://abcnotation.com/software
-
-* Playback d'un tune ou d'une partie d'un tune
-
 
 Main features
 -------------

@@ -1,6 +1,12 @@
 Problèmes connus
 ================
 
+Flag "changed" non testé lors de l'ouverture d'un fichier récent
+----------------------------------------------------------------
+
+Si le fichier courant est modifié et qu'on ouvre un fichier récent, abcde ne
+demande pas si on souhaite enregistrer les modifications.
+
 Retour musical non souhaité dans les champs informatifs
 -------------------------------------------------------
 

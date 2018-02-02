@@ -17,9 +17,9 @@ Passer les tests en CLI
 -----------------------
 
 Pour pouvoir dérouler les tests en CLI, il faut ajouter la racine des sources
-à la variable d'environnement ``PYTHONPATH``::
+à la variable d'environnement ``PYTHONPATH``. Par exemple::
 
-  $ export PYTHONPATH=$PYTHONPATH:/path/to/abcde/abcde
+  export PYTHONPATH=$PYTHONPATH:~/code/abcde:~/code/abcde/abcde
 
 Pour automatiser la configuration du ``PYTHONPATH`` lors de l'appel à  ``make test``
 je ne vois pas d'autre moyen que de passer par un script intermédiaire: je ne
