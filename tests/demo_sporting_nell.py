@@ -54,20 +54,48 @@ def demo_play_sporting_nell(bpm=90, instrument='Acoustic Grand Piano'):
     bar1 = 'ADED A2dc'
     bar2 = 'ABAG EFG2'
 
-    for simple_note in half_bar1:
-        norm_key = abcparser.normalize_abc_key(abc_key)
-        alteration = musictheory.get_note_alteration_in_key(simple_note, norm_key)
-        abc_note = alteration + simple_note
-        midi_note = abc2midi.get_midi_note(abc_note)
+    midi_note = None
+    for i in range(0, 3):
+        for simple_note in half_bar1:
+            norm_key = abcparser.normalize_abc_key(abc_key)
+            alteration = musictheory.get_note_alteration_in_key(simple_note, norm_key)
+            abc_note = alteration + simple_note
+            midi_note = abc2midi.get_midi_note(abc_note)
 
-        event = fluidevent.FluidEvent(player._handle)
-        event.dest = dest[0]
-        event.note(0, midi_note, 127, int(beat_length * 0.25))
+            event = fluidevent.FluidEvent(player._handle)
+            event.dest = dest[0]
+            event.note(0, midi_note, 127, int(beat_length * 0.25))
 
-        sequencer.send(event, ticks)
-        ticks += int(beat_length / 4)
+            sequencer.send(event, ticks)
+            ticks += int(beat_length / 4)
 
-    time.sleep(4)
+    print('Waiting 4 beats...')
+    time.sleep(60 / bpm * 4)
+
+    print('Sending event in the past')
+    event = fluidevent.FluidEvent(player._handle)
+    event.dest = dest[0]
+    event.note(0, midi_note, 127, int(beat_length * 0.25))
+    #sequencer.send(event, ticks)
+    sequencer.send(event, 10)
+
+    #    time.sleep(60 / 90 * 2)
+#
+#    try:
+#        player._lock.acquire()
+#        player._synth.noteoff(player._midi_channel, midi_note)
+#    finally:
+#        player._lock.release()
+#
+#    del sequencer
+#    print('Deleted sequencer')
+
+    print('Waiting 2s...')
+    time.sleep(2)
+
+    del sequencer
+    del player._driver
+    del player._synth
 
 
 if __name__ == "__main__":
