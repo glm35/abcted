@@ -24,6 +24,9 @@ from pyfluidsynth3 import fluidaudiodriver, fluidevent, fluidhandle, \
     fluidsequencer, fluidsettings, fluidsynth, utility
 from pyfluidsynth3.fluiderror import FluidError
 
+from ctypes import CFUNCTYPE, c_uint, c_void_p
+FLUID_EVENT_CALLBACK = CFUNCTYPE(None, c_uint, c_void_p, c_void_p, c_void_p)
+# https://docs.python.org/3/library/ctypes.html#callback-functions
 
 ###fluid_synth_t* synth;
 ###fluid_audio_driver_t* adriver;
@@ -72,6 +75,7 @@ def create_synth():
     global seq_duration
 
     handle = fluidhandle.FluidHandle()
+
     settings = fluidsettings.FluidSettings(handle)
     settings['synth.gain'] = 0.2
     settings['synth.reverb.active'] = 'yes'
@@ -88,8 +92,8 @@ def create_synth():
     (synth_seq_id, name) = sequencer.add_synth(synth)
 
     # register myself as second destination
-    #my_seq_id = handle.fluid_sequencer_register_client(
-    #    sequencer.seq, utility.fluidstring('me'), seq_callback, None)
+    my_seq_id = handle.fluid_sequencer_register_client(
+        sequencer.seq, utility.fluidstring('me'), seq_callback, None)
 
     # the sequence duration, in ms
     seq_duration = 1000
@@ -211,9 +215,15 @@ def schedule_next_sequence():
 ###    schedule_next_sequence();
 ###}
 
-def seq_callback(time, event, seq, data):
+def py_seq_callback(time, event, seq, data):
     schedule_next_sequence()
 
+seq_callback = FLUID_EVENT_CALLBACK(py_seq_callback)
+
+
+# fluid_event_callback_t = CFUNCTYPE(None, c_uint, c_void_p, c_void_p, c_void_p)
+# 1st arg = return type
+# other args: params
 
 ###int main(void) {
 ###    createsynth();
