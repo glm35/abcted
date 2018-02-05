@@ -7,6 +7,7 @@ fluidsynth documentation:
 http://fluidsynth.sourceforge.net/api/index.html#Sequencer
 """
 
+# TODO: revoir le départ de la séquence: départ immédiat
 # TODO: revoir le nombre de ticks par secondes et le timing de la séquence.
 # TODO: faire fonctionner fluid_sequencer_register_client().  C'est le callback
 #    qui n'est pas bon.
@@ -96,7 +97,8 @@ def create_synth():
         sequencer.seq, utility.fluidstring('me'), seq_callback, None)
 
     # the sequence duration, in ms
-    seq_duration = 1000
+    # original: seq_duration = 1000
+    seq_duration = 2000
 
 
 ###void deletesynth()
@@ -197,14 +199,29 @@ def schedule_next_sequence():
 
     # the sequence to play
 
-    # the beat : 2 beats per sequence
-    send_noteon(0, 60, now + seq_duration / 2)
-    send_noteon(0, 60, now + seq_duration)
+    # The strange sequence from the fluidsynth demo:
+    #
+    ## the beat : 2 beats per sequence
+    #send_noteon(0, 60, now + seq_duration / 2)
+    #send_noteon(0, 60, now + seq_duration)
+    #
+    ## melody
+    #send_noteon(1, 45, now + seq_duration/10)
+    #send_noteon(1, 50, now + 4*seq_duration/10)
+    #send_noteon(1, 55, now + 8*seq_duration/10)
 
-    # melody
-    send_noteon(1, 45, now + seq_duration/10)
-    send_noteon(1, 50, now + 4*seq_duration/10)
-    send_noteon(1, 55, now + 8*seq_duration/10)
+    # something basic but more recognizable musically
+
+    # the bass line (in ABC format: |: C2 G,2 :|)
+    send_noteon(0, 60, now)
+    send_noteon(0, 55, now + seq_duration / 2)
+
+    # the melody (in ABC format: |: c e g e :|)
+    send_noteon(1, 72, now)
+    send_noteon(1, 76, now + seq_duration / 4)
+    send_noteon(1, 79, now + seq_duration / 2)
+    send_noteon(1, 76, now + 3 * seq_duration / 4)
+
 
     # so that we are called back early enough to schedule the next sequence
     schedule_next_callback()
@@ -245,6 +262,7 @@ def main():
 
     # initialize our absolute date
     now = sequencer.ticks
+    print('Current tick:', now)
     schedule_next_sequence()
 
     time.sleep(100)
