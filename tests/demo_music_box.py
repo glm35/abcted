@@ -7,15 +7,7 @@ fluidsynth documentation:
 http://fluidsynth.sourceforge.net/api/index.html#Sequencer
 """
 
-# TODO: revoir le départ de la séquence: départ immédiat
-# TODO: revoir le nombre de ticks par secondes et le timing de la séquence.
-# TODO: faire fonctionner fluid_sequencer_register_client().  C'est le callback
-#    qui n'est pas bon.
-#    Piste au hasard:
-#    - https://docs.python.org/3/library/ctypes.html
-#    - https://stackoverflow.com/questions/33484591/callbacks-with-ctypes-how-to-call-a-python-function-from-c
-#    - https://stackoverflow.com/questions/17980167/writing-python-ctypes-for-function-pointer-callback-function-in-c
-
+# TODO: changement de tempo statique (conf initiale) et dynamique (en cours de jeu)
 
 # PSL imports
 import time
@@ -42,8 +34,8 @@ adriver = None
 sequencer = None
 synth_seq_id = None
 my_seq_id = 0
-now = None
-seq_duration = None
+seq_start = 0
+seq_duration = 2000
 
 
 ###void createsynth()
@@ -96,10 +88,6 @@ def create_synth():
     my_seq_id = handle.fluid_sequencer_register_client(
         sequencer.seq, utility.fluidstring('me'), seq_callback, None)
 
-    # the sequence duration, in ms
-    # original: seq_duration = 1000
-    seq_duration = 2000
-
 
 ###void deletesynth()
 ###{
@@ -111,6 +99,9 @@ def create_synth():
 def delete_synth():
     global sequencer, adriver, synth
 
+    handle.fluid_sequencer_unregister_client(sequencer.seq, my_seq_id)
+        # Needed at least to avoid that seq_callback() gets called after the
+        # sequencer is deleted.
     del sequencer
     del adriver
     del synth
@@ -162,7 +153,7 @@ def send_noteon(channel, key, date):
 
 def schedule_next_callback():
     # I want to be called back before the end of the next sequence
-    callback_date = int(now + seq_duration / 2)
+    callback_date = int(seq_start + seq_duration / 2)
     event = fluidevent.FluidEvent(handle)
     event.source = -1
     event.dest = my_seq_id
@@ -191,15 +182,14 @@ def schedule_next_callback():
 ###}
 
 def schedule_next_sequence():
-    global now
+    global seq_start
 
     # Called more or less before each sequence start
-    # the next sequence start date
-    now = now + seq_duration
 
     # the sequence to play
 
     # The strange sequence from the fluidsynth demo:
+    # (rem: seq_duration = 1000)
     #
     ## the beat : 2 beats per sequence
     #send_noteon(0, 60, now + seq_duration / 2)
@@ -213,18 +203,20 @@ def schedule_next_sequence():
     # something basic but more recognizable musically
 
     # the bass line (in ABC format: |: C2 G,2 :|)
-    send_noteon(0, 60, now)
-    send_noteon(0, 55, now + seq_duration / 2)
+    send_noteon(0, 60, seq_start)
+    send_noteon(0, 55, seq_start + seq_duration / 2)
 
     # the melody (in ABC format: |: c e g e :|)
-    send_noteon(1, 72, now)
-    send_noteon(1, 76, now + seq_duration / 4)
-    send_noteon(1, 79, now + seq_duration / 2)
-    send_noteon(1, 76, now + 3 * seq_duration / 4)
-
+    send_noteon(1, 72, seq_start)
+    send_noteon(1, 76, seq_start + seq_duration / 4)
+    send_noteon(1, 79, seq_start + seq_duration / 2)
+    send_noteon(1, 76, seq_start + 3 * seq_duration / 4)
 
     # so that we are called back early enough to schedule the next sequence
     schedule_next_callback()
+
+    # the next sequence start date
+    seq_start = seq_start + seq_duration
 
 
 ###/* sequencer callback */
@@ -255,7 +247,7 @@ seq_callback = FLUID_EVENT_CALLBACK(py_seq_callback)
 ###    return 0;
 
 def main():
-    global now
+    global seq_start
 
     create_synth()
     load_soundfont()
@@ -263,10 +255,15 @@ def main():
     # initialize our absolute date
     now = sequencer.ticks
     print('Current tick:', now)
+    seq_start = now + 10  # keep a small margin before the first note
     schedule_next_sequence()
 
-    time.sleep(100)
-    delete_synth()
+    print('Playing...  Hit Ctrl+C to stop')
+    try:
+        time.sleep(100)
+    except KeyboardInterrupt:
+        pass
+    delete_synth()  # seems needed to avoid segfault at the end
 
 
 if __name__ == "__main__":
