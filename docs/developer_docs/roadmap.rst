@@ -25,12 +25,14 @@ Prochains développements
   (cf. http://abcnotation.com/software
 
 
-pyfluidsynth3 features
-----------------------
+pyfluidsynth3 features & fixes
+------------------------------
 
 * make it possible to register a Python callback (example in
   tests/demo_music_box.py with direct calls to the low-level fluidsynth API
 
+* fluidsequencer.py: with BPM_DEFAULT=120 and the default value of
+  ticks_per_second in fluidsynth which is 1000, TPB_DEFAULT should be 500
 
 Main features
 -------------

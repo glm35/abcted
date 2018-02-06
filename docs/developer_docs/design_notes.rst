@@ -206,3 +206,44 @@ Fichiers récents et favoris v3
 
     * approche 2: une commande menu pour "Ajouter le fichier courant aux favoris" ou "Retirer le fichier courant
       des favoris", selon que le fichier courant est déjà favori ou pas.
+
+
+Réglage tps, tpb et bpm pour fluidsynth
+---------------------------------------
+
+Avec fluidsynth, l'unité de date des évènements midi est le tick.  Cette unité
+est utilisée pour la programmation du séquenceur.
+
+Pour faciliter les modifications de tempo lors du playback, on définit une
+convention pour le "ticks per beat"::
+
+  TPB = cte = 240
+
+Il suffit de programmer cette valeur avec FluidSequencer.ticks_per_beat = 240.
+Ensuite, on définit le tempo en bpm avec FluidSequencer.beats_per_minute = la
+valeur désirée (ex bpm=120), et FluidSequencer met à jour le tps qui est
+l'échelle de temps de fluidsynth (ex tps=480).
+
+Lors de la programmation d'une séquence, on gérera les durées en ticks, et
+on fera varier le beats_per_minute comme désiré.  Comme la config du tps
+est immédiate, elle s'appliquera même aux évènements programmés dans le futur.
+
+L'idée de TPB=240 est d'avoir des comptes ronds pour les triolets (multiple de
+3), les triples croches (multiple de 8) et même les "quintolets" (multiple de
+5).  Un métronome classique permet de faire varier le tempo de 30 à 240.  Avec
+TPB=240, on a tps=960 proche de la valeur par défaut de 1000::
+
+  >>> bpms = [30, 60, 90, 100, 110, 120, 150, 180, 200, 240]
+  >>> TPB=240
+  >>> for bpm in bpms:
+    2     print('bpm={} -> tps={}'.format(bpm, TPB * bpm / 60))
+  bpm=30 -> tps=120.0
+  bpm=60 -> tps=240.0
+  bpm=90 -> tps=360.0
+  bpm=100 -> tps=400.0
+  bpm=110 -> tps=440.0
+  bpm=120 -> tps=480.0
+  bpm=150 -> tps=600.0
+  bpm=180 -> tps=720.0
+  bpm=200 -> tps=800.0
+  bpm=240 -> tps=960.0
