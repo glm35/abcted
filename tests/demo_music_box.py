@@ -8,8 +8,10 @@ http://fluidsynth.sourceforge.net/api/index.html#Sequencer
 """
 
 # TODO: changement de tempo statique (conf initiale) et dynamique (en cours de jeu)
+# TODO: code cleaning
 
 # PSL imports
+import argparse
 import time
 
 # Third-party imports
@@ -20,6 +22,8 @@ from pyfluidsynth3.fluiderror import FluidError
 from ctypes import CFUNCTYPE, c_uint, c_void_p
 FLUID_EVENT_CALLBACK = CFUNCTYPE(None, c_uint, c_void_p, c_void_p, c_void_p)
 # https://docs.python.org/3/library/ctypes.html#callback-functions
+
+ARG = None  # program arguments
 
 TPB = 240  # tick per beats = constant by convention in demo_music_box.py
 DEFAULT_BPM = 120
@@ -257,15 +261,20 @@ def main():
     create_synth()
     load_soundfont()
 
-    sequencer.beats_per_minute = 90
+    if ARGS.bpm is not None:
+        sequencer.beats_per_minute = ARGS.bpm
+    else:
+        sequencer.beats_per_minute = 90
 
     print("BPM: {0}".format(sequencer.beats_per_minute))
-    print("TPB: {0}".format(sequencer.ticks_per_beat))
-    print("TPS: {0}".format(sequencer.ticks_per_second))
+    if ARGS.debug:
+        print("TPB: {0}".format(sequencer.ticks_per_beat))
+        print("TPS: {0}".format(sequencer.ticks_per_second))
 
     # initialize our absolute date
     now = sequencer.ticks
-    print('Current tick:', now)
+    if ARGS.debug:
+        print('<debug> Current tick:', now)
     seq_start = now + 10  # keep a small margin before the first note
     schedule_next_sequence()
 
@@ -277,5 +286,16 @@ def main():
     delete_synth()  # seems needed to avoid segfault at the end
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug',
+                        help='display debug messages',
+                        action='store_true')
+    parser.add_argument('-b', '--bpm', help='set beats per minute', type=int)
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == "__main__":
+    ARGS = parse_args()
     main()
