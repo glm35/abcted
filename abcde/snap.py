@@ -68,7 +68,9 @@ class SingleNoteAbcPlayer:
             self._load_soundfont()
             self._settings['audio.driver'] = 'alsa'
             self._driver = fluidaudiodriver.FluidAudioDriver(self._handle, self._synth, self._settings)
-        except FluidError as e:
+        except (AttributeError, FluidError) as e:
+            # rem: under Linux, AttributeError is raised when pyfluidsynth3 is
+            # available but libfluidsynth1 is not.
             message = 'Failed to setup fluidsynth: ' + str(e) + '. Audio output will be disabled.'
             log.warning(message)
             log.debug(traceback.format_exc())
