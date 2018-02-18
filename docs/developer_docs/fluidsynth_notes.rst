@@ -28,8 +28,11 @@ Qu'est-ce qui se passe quand on envoie un évènement dans le passé?
 L'évènement s'applique immédiatement.
 
 
+Contrôler le tempo
+==================
+
 time, timestamps, date et ticks
-===============================
+-------------------------------
 
 time, timestamps, date et ticks: c'est kiff-kiff.
 
@@ -43,7 +46,7 @@ l'exemple donné dans http://fluidsynth.sourceforge.net/api/index.html#Sequencer
 
 
 Relation entre ticks et tempo
-=============================
+-----------------------------
 
 Par défaut, l'échelle de temps des ticks est la suivante: 1000 ticks/s, soit
 durée(tick) = 1ms.  C'est le paramètre "ticks per second", ou tps.
@@ -70,6 +73,32 @@ soit::
 Exemple: pour un tempo de 120 battements par minute (120 bpm) et l'échelle
 de temps par défaut (tps = 1000 ticks par seconde), un battement dure
 500 ticks.
+
+Modification dynamique du tempo
+-------------------------------
+
+Piste 1: changer l'échelle de temps
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Testé dans prototypes/music_box.py: ne fonctionne pas:
+
+* quand on diminue le tempo, il y a un blanc non désiré puis ça repart;
+
+* quand on augmente le tempo, on n'entend plus rien.
+
+Le bug https://github.com/FluidSynth/fluidsynth/issues/195 de fluidsynth
+aurait pu être la cause du problème. Linux Mint 18.3 (Ubuntu 16.04) vient
+avec libfluidsynth1 1.1.6, et le bug est corrigé dans la version 1.1.7
+(https://github.com/FluidSynth/fluidsynth/releases/tag/v1.1.7). Mais
+l'installation manuelle de la dernière version stable 1.1.9 ne résoud pas
+le problème
+
+Par ailleurs, si on essaie de modifier l'échelle de temps dans un callback
+appelé par libfluidsynth, on obtient un crash avec l'erreur suivante:
+
+(process:8152): GLib-ERROR **: file /build/glib2.0-prJhLS/glib2.0-2.48.2/./glib/gthread-posix.c: line 1211 (g_system_thread_wait): error 'Resource deadlock avoided' during 'pthread_join (pt->system_thread, NULL)'
+
+Conclusion: j'abandonne cette piste.
 
 
 Interaction bas-niveau avec fluidsynth
