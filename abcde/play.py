@@ -7,8 +7,11 @@ Play an ABC tune or a tune selection
 
 import logging as log
 
+import abcparser
 from edit_zone_buffer import EditZoneBuffer
 
 
 def play(buffer: EditZoneBuffer):
-    log.debug('Line at cursor: ' + str(buffer.get_line_no_at_cursor()))
+    raw_tune = abcparser.get_current_raw_tune(buffer)
+    # TODO: handle AbcParserException
+    log.debug('raw_tune: ' + str(raw_tune))

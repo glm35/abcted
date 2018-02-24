@@ -5,7 +5,7 @@
 Tools that parse the ABC input
 """
 
-import logging
+import logging as log
 
 from edit_zone_buffer import EditZoneBuffer
 import musictheory
@@ -29,7 +29,7 @@ def get_note_to_play(edit_buffer: EditZoneBuffer, keysym):
              the tune scale. Examples: 'c', "c'", 'C', 'C,,', '^C' (C sharp), '_c' (c flat)
      """
 
-    logging.debug('get_note_to_play(): keysym=' + keysym)
+    log.debug('get_note_to_play(): keysym=' + keysym)
 
     # Check whether we are in comment context
     raw_abc_line = edit_buffer.get_current_line_to_cursor()
@@ -74,7 +74,7 @@ def get_note_to_play(edit_buffer: EditZoneBuffer, keysym):
     else:
         # Find the tune key at the insertion point
         raw_key = get_current_raw_key(edit_buffer)
-        logging.debug("get_note_to_play(): raw_key at insert: " + raw_key)
+        log.debug("get_note_to_play(): raw_key at insert: " + raw_key)
         try:
             abc_key = normalize_abc_key(raw_key)
         except AbcParserException:
@@ -87,7 +87,7 @@ def get_note_to_play(edit_buffer: EditZoneBuffer, keysym):
 
     abc_note = abc_note + octave_marker
 
-    logging.debug('get_note_to_play(): abc_note=' + abc_note)
+    log.debug('get_note_to_play(): abc_note=' + abc_note)
     return abc_note
 
 
@@ -152,7 +152,7 @@ def normalize_abc_key(raw_key: str):
 
     if root + alteration + 'maj' not in musictheory.MAJOR_SCALES.keys():
         msg = root + alteration + raw_key + ' is not a valid key name'
-        logging.warning(msg)
+        log.warning(msg)
         raise AbcParserException(msg)
 
     # Parse the key mode
@@ -175,7 +175,7 @@ def normalize_abc_key(raw_key: str):
     # Raise exception if the mode cannot be understood
     if mode is None:
         msg = root + alteration + raw_key + ' is not a valid key name'
-        logging.warning(msg)
+        log.warning(msg)
         raise AbcParserException(msg)
 
     return root + alteration, mode
@@ -228,13 +228,35 @@ def get_current_raw_tune(buffer: EditZoneBuffer):
     """
     raw_tune = []
 
-    # Read and add the current line
-
-    # If the current line is not a reference number, read lines above the
-    # current line until the reference number.  If no
+    # Read lines including and above the current line until
+    # the ABC reference number is found.  If no
     # reference number can be found, raise an exception.
 
+    line_no = cur_line_no = buffer.get_line_no_at_cursor()
+    while True:
+        line = buffer.get_line(line_no)
+        raw_tune.insert(0, line)
+        if line.strip().startswith('X:'):
+            break
+        else:
+            line_no -= 1
+            if line_no == 0:  # line numbers start at 1
+                msg = 'Reference number (X: header) missing in current tune'
+                log.error(msg)
+                raise AbcParserException(msg)
+
+
     # Read lines below the current line until the next reference number or
-    # the end of the buffer.
+    # the end of the buffer (empty line).
+    # TODO: change get_line() to have an exception when we pass the end of
+    # the buffer.  So that we accept empty lines inside a tune.
+
+    line_no = cur_line_no + 1
+    while True:
+        line = buffer.get_line(line_no)
+        if line.strip().startswith('X:') or line.strip() == '':
+            break
+        raw_tune.append(line)
+        line_no += 1
 
     return raw_tune
