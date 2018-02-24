@@ -6,6 +6,8 @@ Tools that parse the ABC input
 """
 
 import logging
+
+from edit_zone_buffer import EditZoneBuffer
 import musictheory
 
 
@@ -13,7 +15,7 @@ class AbcParserException(Exception):
     pass
 
 
-def get_note_to_play(edit_buffer, keysym):
+def get_note_to_play(edit_buffer: EditZoneBuffer, keysym):
     """Given a keysym following a key press, check whether there is a
      note to play. If so, return the note.
 
@@ -89,7 +91,7 @@ def get_note_to_play(edit_buffer, keysym):
     return abc_note
 
 
-def get_current_raw_key(edit_buffer):
+def get_current_raw_key(edit_buffer: EditZoneBuffer):
     """Get the contents of the key info field for the current tune.
 
     :return: a string with whatever can be found in the key info field. It
@@ -118,7 +120,7 @@ def get_current_raw_key(edit_buffer):
     return key
 
 
-def normalize_abc_key(raw_key):
+def normalize_abc_key(raw_key: str):
     """
     Given a key in ABC format as found in the ABC input (eg. 'C' or 'Gmaj' or 'Dmajor' or 'Amixo' or 'F#m'),
     return a normalized tuple (root, mode) where the first element is the scale base note in
@@ -179,7 +181,7 @@ def normalize_abc_key(raw_key):
     return root + alteration, mode
 
 
-def get_accidental(raw_abc):
+def get_accidental(raw_abc: str):
     """
     Find whether there is an accidental at the end of the given string
 
@@ -207,3 +209,32 @@ def get_accidental(raw_abc):
         pass
 
     return accidental
+
+
+def get_current_raw_tune(buffer: EditZoneBuffer):
+    """
+    Return the current tune around the cursor.
+
+    Args:
+        buffer: the EditZoneBuffer to look for the tune
+
+    Returns:
+        An array of strings, one per line, starting at the ABC reference
+        number (X: header).
+
+    Raises:
+        AbcParserException: if the tune cannot be extracted
+
+    """
+    raw_tune = []
+
+    # Read and add the current line
+
+    # If the current line is not a reference number, read lines above the
+    # current line until the reference number.  If no
+    # reference number can be found, raise an exception.
+
+    # Read lines below the current line until the next reference number or
+    # the end of the buffer.
+
+    return raw_tune

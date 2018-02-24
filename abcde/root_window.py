@@ -8,6 +8,7 @@ import os
 import edit_zone
 import file
 import file_utils
+import play
 import recent_files
 import search_bar
 import theme
@@ -39,11 +40,18 @@ class RootWindow():
 
         self._file = file.File(self, self._edit_zone.get_buffer())
         self._file.set_root_window_title()
-        self._edit_zone.set_check_text_change_since_last_save_cb(self._file.check_text_change_since_last_save)
+        self._edit_zone.set_check_text_change_since_last_save_cb(
+            self._file.check_text_change_since_last_save)
         if raw_path:
             self._file.open(raw_path)
 
+        # ---------------------------------------------------------------------
+        #     Menu bar
+        # ---------------------------------------------------------------------
+
         menu_bar = tk.Menu(self.tk_root)
+
+        # ---- File menu
 
         self._file_menu = tk.Menu(menu_bar, tearoff=0)
         self._file_menu.add_command(label='Nouveau', underline=0,
@@ -68,6 +76,8 @@ class RootWindow():
         self._file_menu.add_command(label='Quitter', underline=0,
                                     accelerator='Alt+F4', command=self.exit)
         menu_bar.add_cascade(label='Fichier', underline=0, menu=self._file_menu)
+
+        # ---- Edit menu
 
         self._edit_menu = tk.Menu(menu_bar, tearoff=0)
         self._edit_menu.add_command(label='Annuler', underline=4,
@@ -95,7 +105,18 @@ class RootWindow():
                                     command=self._search_bar.on_edit_search)
         menu_bar.add_cascade(label='Edition', underline=1, menu=self._edit_menu)
 
+        # ---- Play menu
+
+        play_menu = tk.Menu(menu_bar, tearoff=0)
+        play_menu.add_command(label='Jouer', underline=0, accelerator='Ctrl+J',
+                              command=self._on_play)
+        menu_bar.add_cascade(label='Jouer', underline=0, menu=play_menu)
+
         self.tk_root.config(menu=menu_bar)
+
+        # ---------------------------------------------------------------------
+        #     Global shortcuts
+        # ---------------------------------------------------------------------
 
         self.tk_root.bind('<Control-N>', self._file.on_file_new)
         self.tk_root.bind('<Control-n>', self._file.on_file_new)
@@ -103,6 +124,7 @@ class RootWindow():
         self.tk_root.bind('<Control-o>', self._file.on_file_open)
         self.tk_root.bind('<Control-S>', self._file.on_file_save)
         self.tk_root.bind('<Control-s>', self._file.on_file_save)
+        self.tk_root.bind('<Control-j>', self._on_play)
         self.tk_root.bind('Alt-Keypress-F4', self.exit)
 
         self._edit_zone._scrolled_text.bind('<Control-Y>',
@@ -169,7 +191,8 @@ class RootWindow():
 
     def maximize(self):
         """Maximize the root window"""
-        root_w, root_h = self.tk_root.winfo_screenwidth(), self.tk_root.winfo_screenheight()
+        root_w, root_h = self.tk_root.winfo_screenwidth(),\
+                         self.tk_root.winfo_screenheight()
         self.tk_root.geometry("%dx%d+0+0" % (root_w, root_h))
 
     def exit(self, event=None):
@@ -197,3 +220,9 @@ class RootWindow():
 
         modified_flag_str = '* ' if modified_flag else ''
         self.tk_root.title(modified_flag_str + pretty_path)
+
+    def _on_play(self, event=None):
+        """'Play => Play...' menu callback"""
+        log.debug('RootWindow._on_play(): entering')
+        play.play(self._edit_zone.get_buffer())
+        log.debug('RootWindow._on_play(): leaving')
