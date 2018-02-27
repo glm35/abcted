@@ -6,6 +6,7 @@ Tools that parse the ABC input
 """
 
 import logging as log
+from typing import List
 
 from edit_zone_buffer import EditZoneBuffer
 import musictheory
@@ -211,7 +212,7 @@ def get_accidental(raw_abc: str):
     return accidental
 
 
-def get_current_raw_tune(buffer: EditZoneBuffer):
+def get_current_raw_tune(buffer: EditZoneBuffer) -> List[str]:
     """
     Return the current tune around the cursor.
 
@@ -236,7 +237,7 @@ def get_current_raw_tune(buffer: EditZoneBuffer):
     while True:
         line = buffer.get_line(line_no)
         raw_tune.insert(0, line)
-        if line.strip().startswith('X:'):
+        if is_reference_number(line):
             break
         else:
             line_no -= 1
@@ -254,9 +255,37 @@ def get_current_raw_tune(buffer: EditZoneBuffer):
     line_no = cur_line_no + 1
     while True:
         line = buffer.get_line(line_no)
-        if line.strip().startswith('X:') or line.strip() == '':
+        if is_reference_number(line) or line.strip() == '':
             break
         raw_tune.append(line)
         line_no += 1
 
     return raw_tune
+
+
+def is_reference_number(line: str) -> bool:
+    """
+    Given a line of ABC text, tell whether it is a reference number
+    (X: header) or not.
+
+    Args:
+        line: the line of text to process
+
+    Returns:
+        True if the line is a X: header else False
+    """
+    return line.strip().startswith('X:')
+
+
+def is_comment(line: str) -> bool:
+    """
+    Given a line of ABC text, tell whether it is a comment (starts with %)
+    or not.
+
+    Args:
+        line: line of text to check
+
+    Returns:
+        True (line is comment) or False (line is not comment)
+    """
+    return line.strip().startswith('%')
