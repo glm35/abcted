@@ -289,3 +289,114 @@ def is_comment(line: str) -> bool:
         True (line is comment) or False (line is not comment)
     """
     return line.strip().startswith('%')
+
+
+def is_header(line: str) -> bool:
+    """
+    Given a line of ABC text, tell whether it looks like an ABC header or not.
+
+    Args:
+        line: line of text to check
+
+    Returns:
+        True (line is header) or False (line is not header)
+
+    """
+    abc_headers = ['A:', 'B:', 'C:', 'D:', 'E:', 'F:', 'G:', 'H:', 'I:',
+                   'K:', 'L:', 'M:', 'N:', 'O:', 'P:', 'Q:', 'R:', 'S:',
+                   'T:', 'W:', 'X:', 'Z:']
+    for header in abc_headers:
+        if line.startswith(header):
+            return True
+    return False
+
+
+def parse_default_note_length(line: str):
+    """
+    Given a line containing a raw default note length, eg '1/8', return
+    a tuple eg (1, 8)
+
+    Args:
+        line: raw default not length following the
+            default note length header 'L:'
+
+    Returns:
+        a tuple representing a fraction (numerator, denominator)
+
+    Raises:
+        AbcParserException
+    """
+    try:
+        f = [int(s) for s in line.split('/')]
+        if len(f) == 2 and f[0] == 1 and f[1] in [4, 8, 16, 32]:
+            return tuple(f)
+    except ValueError:
+        pass
+    raise AbcParserException('Invalid default note length: \'' + line + '\'')
+
+
+def parse_meter(line: str):
+    """
+    Given a line containing a raw meter, eg '6/8', return
+    a tuple eg (6, 8)
+
+    Args:
+        line: raw meter following the meter header 'M:'
+
+    Returns:
+        a tuple representing a fraction (numerator, denominator)
+
+    Raises:
+        AbcParserException
+    """
+    line = line.strip()
+    if line == 'C':
+        return 4, 4
+    elif line == 'C|':
+        return 2, 2
+    try:
+        f = [int(s) for s in line.split('/')]
+        if len(f) == 2:
+            return tuple(f)
+    except ValueError:
+        pass
+    raise AbcParserException('Invalid meter: \'' + line + '\'')
+
+
+def parse_tempo(line: str):
+    """
+    Given a line containing a raw tempo, eg '120' or '1/8=120', return a tuple
+    where the first element is an optional note length tuple and the second
+    element is the number of beats per minute for a beat of the note length.
+    If a note length is not given, the default note length will be used.
+
+    Args:
+        line: raw tempo following the tempo header 'Q:'
+
+    Returns:
+        a tuple (note length, bpm)
+
+    Raises:
+        AbcParserException
+
+    Notes:
+        The forms such as 'C=120' and 'C3=120' found in the ABC 1.6 standard
+        are not supported.
+    """
+
+    # Form 1: ex 'Q:120'
+    try:
+        bpm = int(line)
+        return None, bpm
+    except ValueError:
+        pass
+
+    # Form 2: ex 'Q:1/2=80'
+    f = line.split('=')
+    if len(f) == 2:
+        try:
+            f2 = [int(s) for s in f[0].split('/')]
+            return tuple(f2), f[1]
+        except ValueError:
+            pass
+    raise AbcParserException('Invalid or unsupported tempo: \'' + line + '\'')

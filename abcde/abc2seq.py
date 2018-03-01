@@ -43,6 +43,13 @@ class AbcParserStateMachine:
 
         self._state = self.S_BEGIN
 
+        # ABC tune info
+        self.key = None  # eg ('C', 'maj')
+        self.default_note_length = None  # eg (1, 8)
+        self.meter = None  # eg (6, 8)
+        self.tempo = None  # eg (None, 120) or ((1, 8), 120)
+
+
     def run(self, line: str):
         line = line.strip()  # Strip leading and trailing spaces
 
@@ -63,9 +70,26 @@ class AbcParserStateMachine:
             # rem: all these "useful" headers can re-appear and change in the tune
 
             if line.startswith('K:'):
+                self.key = abcparser.normalize_abc_key(line[2:])
+                log.debug('ABC parser: key = ' + str(self.key))
+
+            elif line.startswith('L:'):
+                self.default_note_length = \
+                    abcparser.parse_default_note_length(line[2:])
+                log.debug('ABC parser: default note length = '
+                          + str(self.default_note_length))
+
+            elif line.startswith('M:'):
+                self.meter = abcparser.parse_meter(line[2:])
+                log.debug('Abc parser: meter = ' + str(self.meter))
+
+            elif line.startswith('Q:'):
+                self.tempo = abcparser.parse_tempo(line[2:])
+                log.debug('Abc parser: tempo = ' + str(self.tempo))
+
+            elif abcparser.is_header(line):
                 pass
-            #elif abcparser.is_header(line):
-            #    pass
+
             else:
                 log.warning('ABC parser: unexpected line: \'' + line + '\'')
         else:
