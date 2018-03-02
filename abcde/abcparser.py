@@ -365,7 +365,7 @@ def parse_meter(line: str):
 
 def parse_tempo(line: str):
     """
-    Given a line containing a raw tempo, eg '120' or '1/8=120', return a tuple
+    Given a line containing a raw tempo, eg '120' or '3/8=120', return a tuple
     where the first element is an optional note length tuple and the second
     element is the number of beats per minute for a beat of the note length.
     If a note length is not given, the default note length will be used.
@@ -374,7 +374,8 @@ def parse_tempo(line: str):
         line: raw tempo following the tempo header 'Q:'
 
     Returns:
-        a tuple (note length, bpm)
+        a tuple (note length, bpm) eg (None, 120) for 'Q:120'
+            or ((3, 8), 120) for 'Q:3/8=120'
 
     Raises:
         AbcParserException
@@ -391,12 +392,12 @@ def parse_tempo(line: str):
     except ValueError:
         pass
 
-    # Form 2: ex 'Q:1/2=80'
+    # Form 2: ex 'Q:3/8=120'
     f = line.split('=')
     if len(f) == 2:
         try:
             f2 = [int(s) for s in f[0].split('/')]
-            return tuple(f2), f[1]
+            return tuple(f2), int(f[1])
         except ValueError:
             pass
     raise AbcParserException('Invalid or unsupported tempo: \'' + line + '\'')

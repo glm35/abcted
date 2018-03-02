@@ -26,7 +26,50 @@ class Sequence:
         self.flat_tune = None  # the actual sequence
         self.tpb = TPB
         self.bpm = DEFAULT_BPM
+        self.npm = 0  # notes per minute
         self.tpn = 0  # ticks per note
+
+
+class AbcSequencerException(Exception):
+    pass
+
+
+def compute_notes_per_minute(default_note_length, meter, tempo) -> int:
+    """
+    Compute the number of notes per minutes.  This will be used to configure
+    the tempo of the sequencer.
+
+    Args:
+        default_note_length: tuple of int, eg (1, 8) for 'L:1/8'.  This
+            parameter is optional and can be None
+        meter: tuple of int, eg (6, 8) for 'M:6/8'
+        tempo: tuple (absolute note length, tempo), eg (None, 120) for 'Q:120'
+            or ((3, 8), 120) for 'Q:3/8=120'
+
+    Returns:
+        The number of notes per minutes (int)
+
+    Raises:
+        AbcSequencerException if meter or tempo is not set
+    """
+    if meter is None or tempo is None:
+        raise AbcSequencerException('Cannot compute notes per minutes: '
+                                    'missing meter or tempo')
+
+    # If the default note length is not set, deduce it from the meter:
+    if default_note_length is None:
+        default_note_length = (1, meter[1])
+
+    # If the tempo note length is not explicitly set, use default note length
+    if tempo[0] is None:
+        tempo = (default_note_length, tempo[1])
+
+    npm = tempo[1] * tempo[0][0] * default_note_length[1] / tempo[0][1]
+    return int(npm)
+
+
+def compute_ticks_per_note(notes_per_minute):
+    return 0
 
 
 class AbcParserStateMachine:
@@ -49,6 +92,13 @@ class AbcParserStateMachine:
         self.meter = None  # eg (6, 8)
         self.tempo = None  # eg (None, 120) or ((1, 8), 120)
 
+        #
+        self.seq = Sequence()
+
+    def _update_notes_per_minute(self):
+        self.seq.npm = compute_notes_per_minute(
+            self.default_note_length, self.meter, self.tempo)
+        log.debug('ABC parser: notes_per_minute = ' + str(self.seq.npm))
 
     def run(self, line: str):
         line = line.strip()  # Strip leading and trailing spaces
@@ -72,6 +122,8 @@ class AbcParserStateMachine:
             if line.startswith('K:'):
                 self.key = abcparser.normalize_abc_key(line[2:])
                 log.debug('ABC parser: key = ' + str(self.key))
+                self._state = self.S_TUNE
+                self._update_notes_per_minute()
 
             elif line.startswith('L:'):
                 self.default_note_length = \
@@ -92,7 +144,8 @@ class AbcParserStateMachine:
 
             else:
                 log.warning('ABC parser: unexpected line: \'' + line + '\'')
-        else:
+
+        elif self._state == self.S_TUNE:
             log.warning('ABC parser: unexpected line: \'' + line + '\'')
 
 
