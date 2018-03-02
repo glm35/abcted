@@ -2,11 +2,11 @@ import unittest
 
 
 from abcde.abcparser import get_note_to_play
-import ui.edit_zone
+from abcde.edit_zone_buffer import EditZoneBuffer
 
 
-class MockEditZone(ui.edit_zone.EditZone):
-    """Behave like an EditZone object, operating on a simple array of lines,
+class MockEditZone(EditZoneBuffer):
+    """Behave like an EditZoneBuffer object, operating on a simple array of lines,
     where the cursor is at the end of the last line
     """
 
