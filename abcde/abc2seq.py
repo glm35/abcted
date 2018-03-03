@@ -68,8 +68,25 @@ def compute_notes_per_minute(default_note_length, meter, tempo) -> int:
     return int(npm)
 
 
-def compute_ticks_per_note(notes_per_minute):
-    return 0
+def compute_ticks_per_note(notes_per_minute: int) -> int:
+    """
+    Compute the number of ticks per default length note at the current
+    tempo.  We try to maximise the resolution, but we have to stay below
+    the max ticks per second that fluidsynth supports.
+
+    Args:
+        notes_per_minute: number of notes of the default length per minute
+
+    Returns:
+        number of ticks per default length note
+
+    """
+    max_ticks_per_second = 1000
+    tpn_candidates = [60, 120, 240, 480]
+    for tpn in reversed(tpn_candidates):
+        if tpn * notes_per_minute / 60 <= max_ticks_per_second:
+            return tpn
+    return tpn_candidates[0]
 
 
 class AbcParserStateMachine:
@@ -98,7 +115,9 @@ class AbcParserStateMachine:
     def _update_notes_per_minute(self):
         self.seq.npm = compute_notes_per_minute(
             self.default_note_length, self.meter, self.tempo)
+        self.seq.tpn = compute_ticks_per_note(self.seq.npm)
         log.debug('ABC parser: notes_per_minute = ' + str(self.seq.npm))
+        log.debug('ABC parser: ticks_per_note = ' + str(self.seq.tpn))
 
     def run(self, line: str):
         line = line.strip()  # Strip leading and trailing spaces
