@@ -8,6 +8,7 @@ import tkinter.messagebox as tk_messagebox
 
 import edit_zone
 import file
+import recent_files
 import theme
 
 
@@ -27,23 +28,20 @@ class RootWindow():
 
         menu_bar = tk.Menu(self.tk_root)
 
-        file_menu = tk.Menu(menu_bar, tearoff=0)
-        file_menu.add_command(label='Nouveau', underline=0, accelerator='Ctrl + N', command=self._file.on_file_new)
-        file_menu.add_separator()
-        file_menu.add_command(label='Ouvrir...', underline=0, accelerator='Ctrl + O', command=self._file.on_file_open)
-
-        favorite_files = file.read_favorite_files()
-        for fav in favorite_files:
-            file_menu.add_command(label=file.prettify_filename(fav),
-                                  command=lambda local_fav=fav: self._file.open(local_fav))
-            # https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result
-
-        file_menu.add_separator()
-        file_menu.add_command(label='Enregistrer', underline=0, accelerator='Ctrl + S', command=self._file.on_file_save)
-        file_menu.add_command(label='Enregistrer sous...', underline=3, command=self._file.on_file_save_as)
-        file_menu.add_separator()
-        file_menu.add_command(label='Quitter', underline=0, accelerator='Alt + F4', command=self.exit)
-        menu_bar.add_cascade(label='Fichier', underline=0, menu=file_menu)
+        self._file_menu = tk.Menu(menu_bar, tearoff=0)
+        self._file_menu.add_command(label='Nouveau', underline=0, accelerator='Ctrl + N', command=self._file.on_file_new)
+        self._file_menu.add_command(label='Ouvrir...', underline=0, accelerator='Ctrl + O', command=self._file.on_file_open)
+        self._file_menu.add_separator()
+        self._favrecent_index_first = 3  # The first favorite file is at index 3
+        self._favrecent_nb = 0
+        self._build_fav_recent_menu_entries()
+        recent_files.register_update_recent_files_cb(self._update_fav_recent_menu_entries)
+        self._file_menu.add_separator()
+        self._file_menu.add_command(label='Enregistrer', underline=0, accelerator='Ctrl + S', command=self._file.on_file_save)
+        self._file_menu.add_command(label='Enregistrer sous...', underline=3, command=self._file.on_file_save_as)
+        self._file_menu.add_separator()
+        self._file_menu.add_command(label='Quitter', underline=0, accelerator='Alt + F4', command=self.exit)
+        menu_bar.add_cascade(label='Fichier', underline=0, menu=self._file_menu)
 
         self.tk_root.config(menu=menu_bar)
 
@@ -56,6 +54,32 @@ class RootWindow():
         self.tk_root.bind('Alt-Keypress-F4', self.exit)
 
         self.tk_root.protocol('WM_DELETE_WINDOW', self.exit)
+
+    def _build_fav_recent_menu_entries(self):
+        for fav in recent_files.read_favorite_files():
+            self._file_menu.insert_command(
+                index=self._favrecent_index_first + self._favrecent_nb,
+                label=file.prettify_filename(fav),
+                command=lambda local_fav=fav: self._file.open(local_fav))
+            self._favrecent_nb += 1
+            # https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result
+        self._file_menu.insert_separator(
+            index=self._favrecent_index_first + self._favrecent_nb)
+        self._favrecent_nb += 1
+        for recent in recent_files.read_recent_files():
+            self._file_menu.insert_command(
+                index=self._favrecent_index_first + self._favrecent_nb,
+                label=file.prettify_filename(recent),
+                command=lambda local_recent=recent: self._file.open(local_recent))
+            self._favrecent_nb += 1
+
+    def _update_fav_recent_menu_entries(self):
+        # Remove the favorite and recent menu entries
+        while self._favrecent_nb > 0:
+            self._file_menu.delete(self._favrecent_index_first)
+            self._favrecent_nb -= 1
+        # Re-create them
+        self._build_fav_recent_menu_entries()
 
     def maximize(self):
         """Maximize the root window"""

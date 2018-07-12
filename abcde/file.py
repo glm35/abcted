@@ -11,56 +11,7 @@ import tkinter.messagebox as tk_messagebox
 import os
 
 from edit_zone_buffer import EditZoneBuffer
-
-
-FAVORITE_FILES = '~/.config/abcde/favorite_files.txt'
-
-
-def read_favorite_files():
-    """Read the "favorite files" file
-
-    Read the "favorite files" file, skip empty lines, skip comment lines,
-    expand ~, check the file format and return the list of favorite files.
-
-    Returns: a list of favorite file strings
-    """
-
-    favorite_files = []
-    abs_favorite_files = os.path.expanduser(FAVORITE_FILES)
-
-    try:
-        with open(abs_favorite_files, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line == '':
-                    continue
-                if line.startswith('#'):
-                    continue
-                favorite_file = line
-
-                if favorite_file.startswith('~'):
-                    favorite_file = os.path.expanduser(line)
-
-                # Transform relative paths into absolute paths:
-                if not os.path.isabs(favorite_file):
-                    favorite_file = os.path.abspath(favorite_file)
-
-                # Normalize path, eg to get a consistent path separator:
-                favorite_file = os.path.normpath(favorite_file)
-
-                # Note: we do not check that the file exists, is a file or
-                # is readable.  A favorite file may not always be readable,
-                # eg if it is on a removable device or a network drive.
-
-                favorite_files.append(favorite_file)
-    except FileNotFoundError:
-        log.debug('Favorite files config file not found: '
-                  + abs_favorite_files)
-    # TODO: test not UTF-8 encoded favorite_files.Txt + issue warning log message
-    # rem: on Windows 7, no prb to read a ISO-8859-1 encoded file
-    # => test this on Linux
-
-    return favorite_files
+import recent_files
 
 
 def prettify_filename(filename):
@@ -204,6 +155,7 @@ class File():
             log.debug('File.open(): read failed, leaving')
         else:
             self._reset_with_new_text(text=text, filename=filename)
+            recent_files.update_recent_files(filename)
 
     def on_file_open(self, event=None):
         """'File => Open...' menu callback"""
@@ -234,6 +186,7 @@ class File():
             with open(filename, 'w') as file:
                 file.write(text)
                 self._update_last_saved_text(text)
+            recent_files.update_recent_files(filename)
         except IOError as e:
             log.debug('File._write_to_file(): caught exception ' + type(e).__name__ + ' : '+ str(e))
             tk_messagebox.showerror('Erreur lors de l\'enregistrement du fichier',
