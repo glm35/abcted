@@ -92,7 +92,7 @@ class RootWindow():
         if self._file.ask_save_changes() == 'cancel':
             log.debug('RootWindow.exit(): ask save changes cancelled/failed, aborting')
             return 'break'
-        elif tk_messagebox.askokcancel('Confirmer la sortie', 'Voulez-vous vraiment quitter abcde?'):
+        else:
             self.tk_root.destroy()
 
     def set_title(self, filename, modified_flag):
