@@ -27,7 +27,7 @@ def setup_logging(enable_debug):
 def main():
     args = parse_args()
     setup_logging(enable_debug=args.debug)
-    root_win = root_window.RootWindow(filename=args.filename)
+    root_win = root_window.RootWindow(raw_path=args.filename)
     root_win.tk_root.mainloop()
 
 

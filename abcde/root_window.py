@@ -2,18 +2,27 @@
 # -*- coding: utf-8 -*-
 
 import logging as log
-import pathlib
 import tkinter as tk
-import tkinter.messagebox as tk_messagebox
 
 import edit_zone
 import file
+import os
+
+import file_utils
 import recent_files
 import theme
 
 
+def get_star_image():
+    starpath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                            'icons', 'star.png')
+    # https://stackoverflow.com/questions/50499/how-do-i-get-the-path-and-name-of-the-file-that-is-currently-executing
+    star = tk.PhotoImage(file=starpath)
+    return star
+
+
 class RootWindow():
-    def __init__(self, filename=None):
+    def __init__(self, raw_path=None):
         self.tk_root = tk.Tk()
 
         self._theme = theme.Theme()
@@ -23,8 +32,8 @@ class RootWindow():
         self._file = file.File(self, self._edit_zone.get_buffer())
         self._file.set_root_window_title()
         self._edit_zone.set_check_text_change_since_last_save_cb(self._file.check_text_change_since_last_save)
-        if filename:
-            self._file.open(str(pathlib.Path(filename).absolute()))  # Make sure filename is absolute
+        if raw_path:
+            self._file.open(raw_path)
 
         menu_bar = tk.Menu(self.tk_root)
 
@@ -34,6 +43,7 @@ class RootWindow():
         self._file_menu.add_separator()
         self._favrecent_index_first = 3  # The first favorite file is at index 3
         self._favrecent_nb = 0
+        self._icon_star = get_star_image()
         self._build_fav_recent_menu_entries()
         recent_files.register_update_recent_files_cb(self._update_fav_recent_menu_entries)
         self._file_menu.add_separator()
@@ -56,22 +66,43 @@ class RootWindow():
         self.tk_root.protocol('WM_DELETE_WINDOW', self.exit)
 
     def _build_fav_recent_menu_entries(self):
-        for fav in recent_files.read_favorite_files():
+        recents = recent_files.get_recent_files()
+        for path in recents.keys():
+            if recents[path] is True:  # favorite file
+                icon = self._icon_star
+            else:  # recent file
+                icon = None
             self._file_menu.insert_command(
                 index=self._favrecent_index_first + self._favrecent_nb,
-                label=file.prettify_filename(fav),
-                command=lambda local_fav=fav: self._file.open(local_fav))
+                label=file_utils.prettify_path(path),
+                compound='left',
+                image=icon,
+                command=lambda local_fav=path: self._file.on_file_open(local_fav))
             self._favrecent_nb += 1
             # https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result
+
         self._file_menu.insert_separator(
             index=self._favrecent_index_first + self._favrecent_nb)
         self._favrecent_nb += 1
-        for recent in recent_files.read_recent_files():
-            self._file_menu.insert_command(
-                index=self._favrecent_index_first + self._favrecent_nb,
-                label=file.prettify_filename(recent),
-                command=lambda local_recent=recent: self._file.open(local_recent))
-            self._favrecent_nb += 1
+
+        # Menu entry enabled if:
+        # (1) there is an opened file with a name
+        # and (2) it is not already listed in the favorites
+        self._file_menu.insert_command(
+            index=self._favrecent_index_first + self._favrecent_nb,
+            label='Ajouter aux favoris',
+            underline=0,
+            state=self._file.get_menu_state('add_to_favorites'),
+            command=self._file.on_file_add_to_favorites)
+        self._favrecent_nb += 1
+
+        self._file_menu.insert_command(
+            index=self._favrecent_index_first + self._favrecent_nb,
+            label='Retirer des favoris',
+            underline=0,
+            state=self._file.get_menu_state('remove_from_favorites'),
+            command=self._file.on_file_remove_from_favorites)
+        self._favrecent_nb += 1
 
     def _update_fav_recent_menu_entries(self):
         # Remove the favorite and recent menu entries
@@ -95,14 +126,14 @@ class RootWindow():
         else:
             self.tk_root.destroy()
 
-    def set_title(self, filename, modified_flag):
+    def set_title(self, pretty_path, modified_flag):
         """Set the title of the root window
 
         The title shows the name of the file being edited, and a star '*'
         if the file has been modified in the editor since its last save on disk.
 
         Args:
-            filename (str): string representation of the filename
+            pretty_path (str): string representation of the file path
             modified_flag (bool): whether the file has been modified
 
         Returns:
@@ -110,4 +141,4 @@ class RootWindow():
         """
 
         modified_flag_str = '* ' if modified_flag else ''
-        self.tk_root.title(modified_flag_str + filename)
+        self.tk_root.title(modified_flag_str + pretty_path)

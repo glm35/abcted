@@ -11,6 +11,8 @@ ABCde: un éditeur de fichiers ABC
    :caption: Documentation pour les utilisateurs
 
    user_guide/about_abc
+   user_guide/file
+   user_guide/play
 .. TODO kesako
 .. TODO fonctionnalités supportées
 .. TODO raccourcis clavier
@@ -26,6 +28,7 @@ ABCde: un éditeur de fichiers ABC
    developer_docs/tests
    developer_docs/design_principles
    developer_docs/design_notes
+   developer_docs/fluidsynth_notes
    developer_docs/coding_conventions
 
 

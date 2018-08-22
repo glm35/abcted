@@ -94,9 +94,9 @@ l'installation manuelle de la dernière version stable 1.1.9 ne résoud pas
 le problème
 
 Par ailleurs, si on essaie de modifier l'échelle de temps dans un callback
-appelé par libfluidsynth, on obtient un crash avec l'erreur suivante:
+appelé par libfluidsynth, on obtient un crash avec l'erreur suivante::
 
-(process:8152): GLib-ERROR **: file /build/glib2.0-prJhLS/glib2.0-2.48.2/./glib/gthread-posix.c: line 1211 (g_system_thread_wait): error 'Resource deadlock avoided' during 'pthread_join (pt->system_thread, NULL)'
+  (process:8152): GLib-ERROR **: file /build/glib2.0-prJhLS/glib2.0-2.48.2/./glib/gthread-posix.c: line 1211 (g_system_thread_wait): error 'Resource deadlock avoided' during 'pthread_join (pt->system_thread, NULL)'
 
 Conclusion: j'abandonne cette piste.
 

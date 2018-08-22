@@ -142,10 +142,8 @@ des attributs et méthodes des objets tkinter.
 Fichiers favoris et fichiers récemment édités
 ---------------------------------------------
 
-Fichiers récents et favoris v1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Dans cette première version, on traite uniquement le cas des fichiers favoris:
+Fichiers favoris
+~~~~~~~~~~~~~~~~
 
   * les fichiers favoris sont stockés dans ~/.config/abcde/favorite_files.txt
 
@@ -168,15 +166,12 @@ Dans cette première version, on traite uniquement le cas des fichiers favoris:
       avec une approche multiplateforme. Si ce n'est pas le cas, un warning est affiché
       dans les logs et le fichier n'est pas affiché dans les menus
 
-  * on édite la liste manuellement en dehors d'abcde
+  * les fichiers favoris apparaissent dans le menu fichier.
 
-  * la liste est lue uniquement au démarrage d'abcde, et les fichiers favoris apparaissent dans le
-    menu fichier.
+Fichiers récents
+~~~~~~~~~~~~~~~~
 
-Fichiers récents et favoris v2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  * conserver les 6 fichiers les plus récemment ouverts dans ~/.config/abcde/recent_files.txt
+  * conserver les 10 fichiers les plus récemment ouverts dans ~/.config/abcde/recent_files.txt
 
     * on ajoute un fichier récent dans la liste dès qu'on ouvre un fichier ou qu'on enregistre
       un fichier sous un nouveau nom; on enregistre recent_files.txt immédiatement.
@@ -194,18 +189,8 @@ Fichiers récents et favoris v2
     * un fichier à la fois récent et favori est affiché dans la première partie de la liste (fichiers récents)
       avec son icone de fichier favori
 
-Fichiers récents et favoris v3
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  * pouvoir ajouter/retirer des fichiers favoris depuis l'application
-
-  * approches possibles:
-
-    * approche 1: une icone étoile pleine ou vide devant chaque fichier favori ou récent du menu; en cliquant sur
-      l'icone, on change l'état du fichier: favori ou non
-
-    * approche 2: une commande menu pour "Ajouter le fichier courant aux favoris" ou "Retirer le fichier courant
-      des favoris", selon que le fichier courant est déjà favori ou pas.
+  * on peut ajouter/retirer des fichiers favoris depuis l'application à l'aide
+    du menu Fichier
 
 
 Réglage tps, tpb et bpm pour fluidsynth
