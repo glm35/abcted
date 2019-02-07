@@ -138,10 +138,12 @@ class File():
             self.set_root_window_title()
             recent_files.promote_recent_file(path)
 
-    def on_file_open(self, path=None):
+    def on_file_open(self, event=None, path=None):
         """'File => Open...' menu callback
 
         Args:
+            event: event that caused the callback
+
             path: normalized path of the path of the file to open.  This is
               optional: if no path is provided, a box to select the file
               is presented to the user.

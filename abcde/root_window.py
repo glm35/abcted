@@ -38,8 +38,12 @@ class RootWindow():
         menu_bar = tk.Menu(self.tk_root)
 
         self._file_menu = tk.Menu(menu_bar, tearoff=0)
-        self._file_menu.add_command(label='Nouveau', underline=0, accelerator='Ctrl + N', command=self._file.on_file_new)
-        self._file_menu.add_command(label='Ouvrir...', underline=0, accelerator='Ctrl + O', command=self._file.on_file_open)
+        self._file_menu.add_command(label='Nouveau', underline=0,
+                                    accelerator='Ctrl + N',
+                                    command=self._file.on_file_new)
+        self._file_menu.add_command(label='Ouvrir...', underline=0,
+                                    accelerator='Ctrl + O',
+                                    command=self._file.on_file_open)
         self._file_menu.add_separator()
         self._favrecent_index_first = 3  # The first favorite file is at index 3
         self._favrecent_nb = 0
@@ -77,7 +81,7 @@ class RootWindow():
                 label=file_utils.prettify_path(path),
                 compound='left',
                 image=icon,
-                command=lambda local_fav=path: self._file.on_file_open(local_fav))
+                command=lambda local_fav=path: self._file.on_file_open(path=local_fav))
             self._favrecent_nb += 1
             # https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result
 
