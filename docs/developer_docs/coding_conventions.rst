@@ -45,3 +45,19 @@ https://stackoverflow.com/questions/2235173/file-name-path-name-base-name-naming
 Dans le code abcde, tous les noms de fichiers sont absolus et normalisés.
 Les noms de variables stockant des chemins venant de l'extérieur du programme
 avant normalisation sont préfixés par ``raw_``.
+
+Variables globales et constantes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Les constantes sont en majuscules: eg CONFIG_FILE_NAME.
+
+* Les variables globales non constantes sont en minuscules: eg args
+
+Nom de fichier vs chemin vers un fichier
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Les noms de fichiers ou répertoires sous forme de chaîne de caractères
+  terminent par name: eg config_file_name, config_dir_name.
+
+* Les chemins de fichiers ou répertoires (pathlib.Path) terminent par path,
+  eg: config_file_path, config_dir_path.
