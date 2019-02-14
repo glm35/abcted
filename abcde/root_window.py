@@ -3,11 +3,11 @@
 
 import logging as log
 import tkinter as tk
-
-import edit_zone
-import file
 import os
 
+import edit_zone
+import find
+import file
 import file_utils
 import recent_files
 import theme
@@ -39,10 +39,10 @@ class RootWindow():
 
         self._file_menu = tk.Menu(menu_bar, tearoff=0)
         self._file_menu.add_command(label='Nouveau', underline=0,
-                                    accelerator='Ctrl + N',
+                                    accelerator='Ctrl+N',
                                     command=self._file.on_file_new)
         self._file_menu.add_command(label='Ouvrir...', underline=0,
-                                    accelerator='Ctrl + O',
+                                    accelerator='Ctrl+O',
                                     command=self._file.on_file_open)
         self._file_menu.add_separator()
         self._favrecent_index_first = 3  # The first favorite file is at index 3
@@ -51,11 +51,41 @@ class RootWindow():
         self._build_fav_recent_menu_entries()
         recent_files.register_update_recent_files_cb(self._update_fav_recent_menu_entries)
         self._file_menu.add_separator()
-        self._file_menu.add_command(label='Enregistrer', underline=0, accelerator='Ctrl + S', command=self._file.on_file_save)
-        self._file_menu.add_command(label='Enregistrer sous...', underline=3, command=self._file.on_file_save_as)
+        self._file_menu.add_command(label='Enregistrer', underline=0,
+                                    accelerator='Ctrl+S',
+                                    command=self._file.on_file_save)
+        self._file_menu.add_command(label='Enregistrer sous...', underline=3,
+                                    command=self._file.on_file_save_as)
         self._file_menu.add_separator()
-        self._file_menu.add_command(label='Quitter', underline=0, accelerator='Alt + F4', command=self.exit)
+        self._file_menu.add_command(label='Quitter', underline=0,
+                                    accelerator='Alt+F4', command=self.exit)
         menu_bar.add_cascade(label='Fichier', underline=0, menu=self._file_menu)
+
+        self._edit_menu = tk.Menu(menu_bar, tearoff=0)
+        self._edit_menu.add_command(label='Annuler', underline=4,
+                                    accelerator='Ctrl+Z',
+                                    command=self._edit_zone.on_edit_undo)
+        self._edit_menu.add_command(label='Rétablir', underline=0,
+                                    accelerator='Ctrl+Y',
+                                    command=self._edit_zone.on_edit_redo)
+        self._edit_menu.add_separator()
+        self._edit_menu.add_command(label='Couper', underline=0,
+                                    accelerator='Ctrl+X',
+                                    command=self._edit_zone.on_edit_cut)
+        self._edit_menu.add_command(label='Copier', underline=1,
+                                    accelerator='Ctrl+C',
+                                    command=self._edit_zone.on_edit_copy)
+        self._edit_menu.add_command(label='Coller', underline=0,
+                                    accelerator='Ctrl+V',
+                                    command=self._edit_zone.on_edit_paste)
+        self._edit_menu.add_command(label='Tout sélectionner', underline=0,
+                                    accelerator='Ctrl+A',
+                                    command=self._edit_zone.on_edit_select_all)
+        self._edit_menu.add_separator()
+        self._edit_menu.add_command(label='Rechercher...', underline=0,
+                                    accelerator='Ctrl+F',
+                                    command=self.on_edit_find)
+        menu_bar.add_cascade(label='Edition', underline=1, menu=self._edit_menu)
 
         self.tk_root.config(menu=menu_bar)
 
@@ -66,6 +96,19 @@ class RootWindow():
         self.tk_root.bind('<Control-S>', self._file.on_file_save)
         self.tk_root.bind('<Control-s>', self._file.on_file_save)
         self.tk_root.bind('Alt-Keypress-F4', self.exit)
+
+        self._edit_zone._scrolled_text.bind('<Control-Y>',
+                                            self._edit_zone.on_edit_redo)
+        self._edit_zone._scrolled_text.bind('<Control-y>',
+                                            self._edit_zone.on_edit_redo)
+            # rem: if bound at root level: ctrl+y will do 'paste', not 'redo'
+        self._edit_zone._scrolled_text.bind('<Control-A>',
+                                            self._edit_zone.on_edit_select_all)
+        self._edit_zone._scrolled_text.bind('<Control-a>',
+                                            self._edit_zone.on_edit_select_all)
+        self.tk_root.bind('<Control-F>', self.on_edit_find)
+        self.tk_root.bind('<Control-f>', self.on_edit_find)
+
 
         self.tk_root.protocol('WM_DELETE_WINDOW', self.exit)
 
@@ -115,6 +158,9 @@ class RootWindow():
             self._favrecent_nb -= 1
         # Re-create them
         self._build_fav_recent_menu_entries()
+
+    def on_edit_find(self, event=None):
+        find.find_text(self.tk_root, self._edit_zone._scrolled_text)
 
     def maximize(self):
         """Maximize the root window"""

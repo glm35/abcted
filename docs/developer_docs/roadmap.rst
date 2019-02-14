@@ -4,6 +4,11 @@ Roadmap
 Prochains développements
 ------------------------
 
+* Menu Edition
+
+* Couleurs idem colorscheme 'desert' de gvim (notamment: sélection, recherche,
+  curseur)
+
 * Playback d'un tune ou d'une partie d'un tune
 
 ** demo_music_box.py

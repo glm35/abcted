@@ -79,3 +79,6 @@ class EditZoneBuffer:
             last_line = self._scrolled_text.get('{0}.{1}'.format(line - 1, 0), '{0}.{1}'.format(line - 1, 'end'))
             if last_line == '':
                 self._scrolled_text.delete('{0}.{1}'.format(int(line) - 2, 'end'))
+
+        # Clear the undo stack
+        self._scrolled_text.edit_reset()

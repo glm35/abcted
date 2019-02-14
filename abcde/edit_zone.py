@@ -26,7 +26,11 @@ class EditZone():
             #insertwidth=8, # Cursor width
 
             # Selection configuration:
-            selectbackground=theme.selectbg)
+            selectbackground=theme.selectbg,
+
+            # Enable undo
+            undo=1
+        )
 
         self._shift = False
         self._control = False
@@ -91,3 +95,27 @@ class EditZone():
 
         if self._check_text_change_since_last_save_cb:
             self._check_text_change_since_last_save_cb()
+
+    def on_edit_cut(self, event=None):
+        self._scrolled_text.event_generate("<<Cut>>")
+        return "break"
+
+    def on_edit_copy(self, event=None):
+        self._scrolled_text.event_generate("<<Copy>>")
+        return "break"
+
+    def on_edit_paste(self, event=None):
+        self._scrolled_text.event_generate("<<Paste>>")
+        return "break"
+
+    def on_edit_undo(self, event=None):
+        self._scrolled_text.event_generate("<<Undo>>")
+        return "break"
+
+    def on_edit_redo(self, event=None):
+        self._scrolled_text.event_generate("<<Redo>>")
+        return "break"
+
+    def on_edit_select_all(self, event=None):
+        self._scrolled_text.tag_add('sel', '1.0', 'end')
+        return "break"
