@@ -232,3 +232,60 @@ TPB=240, on a tps=960 proche de la valeur par défaut de 1000::
   bpm=180 -> tps=720.0
   bpm=200 -> tps=800.0
   bpm=240 -> tps=960.0
+
+
+Recherche
+---------
+
+* Exemples de mise en oeuvre:
+
+  * PyCharm (le design idéal?).  On en reprend un certain nombre d'éléménts ici.
+
+  * Zim
+
+* Ctrl+F fait apparaître la barre de recherche en haut de la fenêtre
+  d'édition.
+
+* La barre de recherche::
+
+    Rechercher: [<needle widget>] [ ] Sensible à la _c_asse *<nb de match>*
+
+* Lors de l'apparition de la barre de recherche,
+  le focus est placé dans le widget de saisie du terme à rechercher
+  (widget needle).
+
+* Contenu du widget needle (terme de recherche):
+
+  * Si une recherche précédente a déjà eu lieu, le
+    terme de la recherche précédente est replacé dans le widget needle.
+
+  * A défaut, le widget needle est vide.
+
+  * Si du texte est placé dans le widget needle, il est sélectionné pour
+    pouvoir être facilement remplacé par un nouveau terme de recherche.
+
+* Si la barre de recherche est déjà affichée lors d'un appui sur Ctrl+F, le
+  focus est replacé dans le widget needle avec le terme de recherche
+  sélectionné.
+
+* Lorsque la barre de recherche a le focus, un appui sur Esc fait disparaître
+  la barre et arrêter le surlignage des termes de recherche trouvés dans
+  le texte.  Le curseur est placé à la fin du dernier terme de recherche
+  visité, et ce terme est sélectionnée.
+
+* La recherche est incrémentale: après chaque modification du terme de
+  recherche, une nouvelle recherche a lieu automatiquement sans avoir
+  besoin de valider le terme de recherche.  La recherche commence à partir
+  de la position courante dans la zone d'édition: le curseur est placé sur
+  la première occurence trouvée.
+
+* F3 recherche l'occurence suivante du terme de recherche.
+  F3 ne fonctionne que lorsque la barre de
+  recherche est activée.  Si la dernière occurence est atteinte, un appui
+  sur F3 ne fait rien.  Mais l'appui suivant reprend la recherche en début
+  de fichier.
+
+* Return (focus dans le widget needle) ou ArrowDown (focus dans la barre de
+  recherche) joue le même rôle que F3
+
+* ArrowUp permet de chercher vers le haut, avec la même règle de wrap que F3.

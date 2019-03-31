@@ -4,10 +4,13 @@ Roadmap
 Prochains développements
 ------------------------
 
-* Menu Edition
-
 * Couleurs idem colorscheme 'desert' de gvim (notamment: sélection, recherche,
   curseur)
+
+* Documenter les raccourcis clavier de l'application (menu édition, barre de
+  recherche, ...)
+
+* Tune list (outline)
 
 * Playback d'un tune ou d'une partie d'un tune
 
@@ -22,8 +25,6 @@ Prochains développements
 
 ** attention à l'ordre de création du séquenceur et du chargement des
    soundfont.
-
-* Fichiers récents et favoris v1 (cf. :ref:`Fichiers récents et favoris`)
 
 * Le nom abcde est déjà pris (paquet abcde "A Better CD Encoder" sous debian/ubuntu/mint):
   trouver un autre nom. "abcted" (ou "abcTed", ou "ABCtED" ou "ABCted") semble un bon candidat pas encore pris
@@ -44,15 +45,11 @@ Main features
 
 * Tune playback (whole tune, selection, with loop, with tick)
 
-* Tune list
-
 * "Print" tune to external PDF viewer
 
 
 Random desired features for abcde
 ---------------------------------
-
-* Fichiers récents et favoris v2 (cf. :ref:`Fichiers récents et favoris`)
 
 * Display current line and column number (useful for located issues
   in an ABC file reported by an external tool).

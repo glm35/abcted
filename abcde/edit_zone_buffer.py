@@ -82,3 +82,6 @@ class EditZoneBuffer:
 
         # Clear the undo stack
         self._scrolled_text.edit_reset()
+
+        # Position the cursor at the beginning of the text
+        self._scrolled_text.mark_set(tk.INSERT, 1.0)

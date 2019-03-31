@@ -6,10 +6,10 @@ import tkinter as tk
 import os
 
 import edit_zone
-import find
 import file
 import file_utils
 import recent_files
+import search_bar
 import theme
 
 
@@ -28,6 +28,12 @@ class RootWindow():
         self._theme = theme.Theme()
 
         self._edit_zone = edit_zone.EditZone(self.tk_root, self._theme)
+        self._search_bar = search_bar.SearchBar(self.tk_root,
+                                                self._edit_zone._scrolled_text)
+
+        # Allow text cell to grow when more space is available
+        self.tk_root.columnconfigure(0, weight=1)
+        self.tk_root.rowconfigure(1, weight=1)   # edit zone
 
         self._file = file.File(self, self._edit_zone.get_buffer())
         self._file.set_root_window_title()
@@ -84,7 +90,7 @@ class RootWindow():
         self._edit_menu.add_separator()
         self._edit_menu.add_command(label='Rechercher...', underline=0,
                                     accelerator='Ctrl+F',
-                                    command=self.on_edit_find)
+                                    command=self._search_bar.on_edit_search)
         menu_bar.add_cascade(label='Edition', underline=1, menu=self._edit_menu)
 
         self.tk_root.config(menu=menu_bar)
@@ -106,8 +112,8 @@ class RootWindow():
                                             self._edit_zone.on_edit_select_all)
         self._edit_zone._scrolled_text.bind('<Control-a>',
                                             self._edit_zone.on_edit_select_all)
-        self.tk_root.bind('<Control-F>', self.on_edit_find)
-        self.tk_root.bind('<Control-f>', self.on_edit_find)
+        self.tk_root.bind('<Control-F>', self._search_bar.on_edit_search)
+        self.tk_root.bind('<Control-f>', self._search_bar.on_edit_search)
 
 
         self.tk_root.protocol('WM_DELETE_WINDOW', self.exit)
@@ -158,9 +164,6 @@ class RootWindow():
             self._favrecent_nb -= 1
         # Re-create them
         self._build_fav_recent_menu_entries()
-
-    def on_edit_find(self, event=None):
-        find.find_text(self.tk_root, self._edit_zone._scrolled_text)
 
     def maximize(self):
         """Maximize the root window"""

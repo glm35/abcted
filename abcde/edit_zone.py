@@ -36,12 +36,12 @@ class EditZone():
         self._control = False
         self._alt = False
 
-        self._scrolled_text.focus() # Set the focus on the edit zone
+        self._scrolled_text.focus()  # Set focus on text area
 
         self._scrolled_text.bind('<Key>', self._on_key_press)
         self._scrolled_text.bind('<KeyRelease>', self._on_key_release)
 
-        self._scrolled_text.pack(expand=tk.YES, fill=tk.BOTH)
+        self._scrolled_text.grid(row=1, sticky=tk.N + tk.S + tk.E + tk.W)
 
         self._buffer = edit_zone_buffer.EditZoneBuffer(self._scrolled_text)
 
