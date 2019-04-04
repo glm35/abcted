@@ -4,9 +4,6 @@ Roadmap
 Prochains développements
 ------------------------
 
-* Couleurs idem colorscheme 'desert' de gvim (notamment: sélection, recherche,
-  curseur)
-
 * Documenter les raccourcis clavier de l'application (menu édition, barre de
   recherche, ...)
 

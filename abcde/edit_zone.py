@@ -21,11 +21,13 @@ class EditZone():
             background=theme.bg, foreground=theme.fg,
 
             # Cursor configuration:
+            # insertforeground=theme.insertfg, # does not exist
             insertbackground=theme.insertbg,
             #insertofftime=0, # Disable blinking
             #insertwidth=8, # Cursor width
 
             # Selection configuration:
+            selectforeground=theme.selectfg,
             selectbackground=theme.selectbg,
 
             # Enable undo

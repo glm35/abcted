@@ -30,6 +30,8 @@ class RootWindow():
         self._edit_zone = edit_zone.EditZone(self.tk_root, self._theme)
         self._search_bar = search_bar.SearchBar(self.tk_root,
                                                 self._edit_zone._scrolled_text)
+        self._search_bar.match_color_bg = self._theme.hlsearchbg
+        self._search_bar.match_color_fg = self._theme.hlsearchfg
 
         # Allow text cell to grow when more space is available
         self.tk_root.columnconfigure(0, weight=1)
