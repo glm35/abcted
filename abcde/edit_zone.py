@@ -34,10 +34,6 @@ class EditZone():
             undo=1
         )
 
-        self._shift = False
-        self._control = False
-        self._alt = False
-
         self._scrolled_text.focus()  # Set focus on text area
 
         self._scrolled_text.bind('<Key>', self._on_key_press)
@@ -74,27 +70,28 @@ class EditZone():
         self._check_text_change_since_last_save_cb = callback
 
     def _on_key_press(self, event):
-        logging.debug("key pressed: " + event.keysym)
-        if event.keysym in ['Shift_R','Shift_L']:
-            self._shift = True
-        elif event.keysym in ['Control_L','Control_R']:
-            self._control = True
-        elif event.keysym in ['Alt_L']:
-            self._alt = True
-        elif not self._control and not self._alt:
+        """
+        When an ABC note is input, play that note in order to get a musical
+        feedback.
+
+        Args:
+            event: KeyPress event
+
+        Returns:
+            None
+        """
+        logging.debug('key pressed: ' + event.keysym)
+        logging.debug('modifier keys: 0x%04x', event.state)
+        ctrl_alt_modifiers = 0x0004 | 0x0008 | 0x0080
+        if event.state & ctrl_alt_modifiers == 0:
+            # Key press without Ctrl/Left Alt/Right Alt modifiers
+            # (rem: when a single Ctrl/Alt modifier key is pressed,
+            # event.state does not include that key; but we do not care)
             abc_note = abcparser.get_note_to_play(self._buffer, event.char)
             if abc_note is not None:
                 self._snap.play_midi_note(abc2midi.get_midi_note(abc_note))
 
     def _on_key_release(self, event):
-        logging.debug("key released: " + event.keysym)
-        if event.keysym in ['Shift_R','Shift_L']:
-            self._shift = False
-        elif event.keysym in ['Control_L','Control_R']:
-            self._control = False
-        elif event.keysym in ['Alt_L']:
-            self._alt = False
-
         if self._check_text_change_since_last_save_cb:
             self._check_text_change_since_last_save_cb()
 
