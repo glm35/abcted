@@ -27,6 +27,13 @@ Prochains développements
   trouver un autre nom. "abcted" (ou "abcTed", ou "ABCtED" ou "ABCted") semble un bon candidat pas encore pris
   (cf. http://abcnotation.com/software
 
+* License au format SPDX dans les fichiers: https://spdx.org/ids-how
+
+* refactoring avec tuple unpacking
+** https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
+** Boucles for
+** Index codés en dur, yc dans un contexte de Slicing (=> utiliser l’opérateur *)
+
 
 pyfluidsynth3 features & fixes
 ------------------------------
