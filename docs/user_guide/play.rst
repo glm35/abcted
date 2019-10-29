@@ -21,13 +21,17 @@ ABC "Q:".  Si ce tempo n'est pas défini, abcde utilise par défaut une valeur
 qui dépend du type de morceau (champ informatif ABC "R:").  Table des valeurs
 par défaut:
 
-    Reel    TBD
-    Jig     TBD
-    Hornpipe    TBD
-    Slide       TBD
-    Polka       TBD
-    Valse       TBD
-    Mazurka     TBD
+============= ================
+Type d'air    Tempo par défaut
+============= ================
+Reel          TBD
+Jig           TBD
+Hornpipe      TBD
+Slide         TBD
+Polka         TBD
+Valse         TBD
+Mazurka       TBD
+============= ================
 
 Si ni le champ "Q:" ni le champ "R:" ne sont définis, ou si le champ "R:"
 contient une valeur non reconnue par abcde, le tempo du playback est 90.

@@ -11,28 +11,31 @@ Prochains développements
 
 * Playback d'un tune ou d'une partie d'un tune
 
-** demo_music_box.py
+  * demo_music_box.py
 
-** vérifier que si on charge la soundfont avant la création du séquenceur,
-   il n'y a pas de son (à tester juste après un reboot de la machine).
+  * vérifier que si on charge la soundfont avant la création du séquenceur,
+    il n'y a pas de son (à tester juste après un reboot de la machine).
 
 * Prendre en compte les enseignements généraux de demo_music_box.py:
 
-** arrêter proprement fluidsynth à la fin d'abcde;
+  * arrêter proprement fluidsynth à la fin d'abcde;
 
-** attention à l'ordre de création du séquenceur et du chargement des
-   soundfont.
+  * attention à l'ordre de création du séquenceur et du chargement des
+    soundfont.
 
 * Le nom abcde est déjà pris (paquet abcde "A Better CD Encoder" sous debian/ubuntu/mint):
   trouver un autre nom. "abcted" (ou "abcTed", ou "ABCtED" ou "ABCted") semble un bon candidat pas encore pris
-  (cf. http://abcnotation.com/software
+  (cf. http://abcnotation.com/software)
 
 * License au format SPDX dans les fichiers: https://spdx.org/ids-how
 
 * refactoring avec tuple unpacking
-** https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
-** Boucles for
-** Index codés en dur, yc dans un contexte de Slicing (=> utiliser l’opérateur *)
+
+  * https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
+
+  * Boucles for
+
+  * Index codés en dur, yc dans un contexte de Slicing (=> utiliser l’opérateur \*)
 
 
 pyfluidsynth3 features & fixes
