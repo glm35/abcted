@@ -13,9 +13,9 @@ ABCde: un éditeur de fichiers ABC
    user_guide/about_abc
    user_guide/file
    user_guide/play
+   user_guide/shortcuts
 .. TODO kesako
 .. TODO fonctionnalités supportées
-.. TODO raccourcis clavier
 
 
 .. toctree::
