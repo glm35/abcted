@@ -37,7 +37,7 @@ def get_note_to_play(edit_buffer, keysym):
 
     # Check whether we are in an information line
     if len(raw_abc_line) >= 2:
-        if raw_abc_line[1] is ':':
+        if raw_abc_line[1] == ':':
             if 'A' <= raw_abc_line[0] <= 'Z':
                 return None
 

@@ -175,7 +175,7 @@ class File():
     def get_menu_state(self, menu_name):
         menu_state = tk.ACTIVE
 
-        if menu_name is 'add_to_favorites':
+        if menu_name == 'add_to_favorites':
             # Menu entry enabled if:
             # (1) there is an opened file with a name
             # and (2) it is not already listed in the favorites
@@ -184,7 +184,7 @@ class File():
             elif self._path in recent_files.favorite_files_list:
                 menu_state = tk.DISABLED
 
-        elif menu_name is 'remove_from_favorites':
+        elif menu_name == 'remove_from_favorites':
             # Menu entry enabled if:
             # (1) there is an opened file with a name
             # and (2) it is already listed in the favorites
