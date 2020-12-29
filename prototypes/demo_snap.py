@@ -9,11 +9,11 @@ from getch import getch
 
 # abcde imports
 import abcde.musictheory as musictheory
-import abcde.snap as snap
+import abcde.player as snap
 
 
 def demo_play_interactive(instrument='Acoustic Grand Piano'):
-    player = snap.SingleNoteAbcPlayer()
+    player = snap.Synth()
     player.setup_synth()
     player.select_instrument(instrument)
     print('Press a key for an ABC note from C to b... (Ctrl+C or q or Q to finish)')
@@ -34,7 +34,7 @@ def demo_play_tick():
     # 56: Cowbell
     # ~ 60-62
     # ~ 75-77
-    player = snap.SingleNoteAbcPlayer()
+    player = snap.Synth()
     player.setup_synth()
     player.select_midi_channel(9)
     for note in range(35, 82):

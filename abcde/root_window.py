@@ -3,12 +3,15 @@
 
 import logging as log
 import tkinter as tk
+import tkinter.messagebox as tk_messagebox
+from typing import Optional
 import os
 
 import edit_zone
 import file
 import file_utils
-import play
+import player
+import player_deck
 import recent_files
 import search_bar
 import theme
@@ -23,14 +26,18 @@ def get_star_image():
 
 
 class RootWindow():
-    def __init__(self, raw_path=None):
+    def __init__(self, raw_path=None, libfluidsynth_path=None):
         self.tk_root = tk.Tk()
 
         self._theme = theme.Theme()
 
-        self._edit_zone = edit_zone.EditZone(self.tk_root, self._theme)
-        self._search_bar = search_bar.SearchBar(self.tk_root,
-                                                self._edit_zone._scrolled_text)
+        self._setup_synth(libfluidsynth_path)
+
+        self._edit_zone = edit_zone.EditZone(self.tk_root, self._theme, self._synth)
+
+        self._player_deck = player_deck.PlayerDeck(self.tk_root, self._edit_zone, self._synth)
+
+        self._search_bar = search_bar.SearchBar(self.tk_root, self._edit_zone._scrolled_text)
         self._search_bar.match_color_bg = self._theme.hlsearchbg
         self._search_bar.match_color_fg = self._theme.hlsearchfg
 
@@ -109,7 +116,7 @@ class RootWindow():
 
         play_menu = tk.Menu(menu_bar, tearoff=0)
         play_menu.add_command(label='Jouer', underline=0, accelerator='Ctrl+J',
-                              command=self._on_play)
+                              command=self._player_deck.on_open_deck)
         menu_bar.add_cascade(label='Jouer', underline=0, menu=play_menu)
 
         self.tk_root.config(menu=menu_bar)
@@ -124,7 +131,7 @@ class RootWindow():
         self.tk_root.bind('<Control-o>', self._file.on_file_open)
         self.tk_root.bind('<Control-S>', self._file.on_file_save)
         self.tk_root.bind('<Control-s>', self._file.on_file_save)
-        self.tk_root.bind('<Control-j>', self._on_play)
+        self.tk_root.bind('<Control-j>', self._player_deck.on_open_deck)
         self.tk_root.bind('Alt-Keypress-F4', self.exit)
 
         self._edit_zone._scrolled_text.bind('<Control-Y>',
@@ -139,8 +146,22 @@ class RootWindow():
         self.tk_root.bind('<Control-F>', self._search_bar.on_edit_search)
         self.tk_root.bind('<Control-f>', self._search_bar.on_edit_search)
 
-
         self.tk_root.protocol('WM_DELETE_WINDOW', self.exit)
+
+    def _setup_synth(self, libfluidsynth_path: Optional[str] = None):
+        self._synth = player.Synth(libfluidsynth_path)
+        try:
+            self._synth.setup_synth()
+            self._synth.select_instrument('Acoustic Grand Piano')
+        except player.SingleNoteAbcPlayerException as e:
+            # Under Windows, after we display a messagebox before the mainloop():
+            # 1. the edit zone looses its focus (and it is difficult to get it back).
+            # 2. the global keybindings do not work.
+            #
+            # Workaround : hide the root window before showing the messagebox
+            self.tk_root.withdraw()
+            tk_messagebox.showwarning(title='Erreur lors de l\'initialisation du synthétiseur', message=e)
+            self.tk_root.deiconify()
 
     def _build_fav_recent_menu_entries(self):
         recents = recent_files.get_recent_files()
@@ -220,9 +241,3 @@ class RootWindow():
 
         modified_flag_str = '* ' if modified_flag else ''
         self.tk_root.title(modified_flag_str + pretty_path)
-
-    def _on_play(self, event=None):
-        """'Play => Play...' menu callback"""
-        log.debug('RootWindow._on_play(): entering')
-        play.play(self._edit_zone.get_buffer())
-        log.debug('RootWindow._on_play(): leaving')

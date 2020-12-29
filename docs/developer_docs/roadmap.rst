@@ -4,24 +4,26 @@ Roadmap
 Prochains développements
 ------------------------
 
-* Documenter les raccourcis clavier de l'application (menu édition, barre de
-  recherche, ...)
-
-* Tune list (outline)
+* Refactor file management using pathlib (for better windows compat)
 
 * Playback d'un tune ou d'une partie d'un tune
-
-  * demo_music_box.py
 
   * vérifier que si on charge la soundfont avant la création du séquenceur,
     il n'y a pas de son (à tester juste après un reboot de la machine).
 
-* Prendre en compte les enseignements généraux de demo_music_box.py:
+  * Prendre en compte les enseignements généraux de demo_music_box.py:
 
   * arrêter proprement fluidsynth à la fin d'abcde;
 
   * attention à l'ordre de création du séquenceur et du chargement des
     soundfont.
+
+* Documenter les raccourcis clavier de l'application (menu édition, barre de
+  recherche, ...)
+
+* Voir les nouveautés python 3.8 qui peuvent améliorer la lisibilité du code
+
+* Tune list (outline)
 
 * Le nom abcde est déjà pris (paquet abcde "A Better CD Encoder" sous debian/ubuntu/mint):
   trouver un autre nom. "abcted" (ou "abcTed", ou "ABCtED" ou "ABCted") semble un bon candidat pas encore pris

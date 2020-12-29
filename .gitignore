@@ -93,3 +93,6 @@ ENV/
 
 # Vim temporary files
 *~
+
+# Emacs temporary files
+\#*

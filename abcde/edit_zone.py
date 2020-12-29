@@ -3,19 +3,20 @@
 
 import logging
 import tkinter as tk
-import tkinter.messagebox as tk_messagebox
 import tkinter.scrolledtext as tk_scrolledtext
 
 import abc2midi
 import abcparser
 import edit_zone_buffer
-import snap
+from player import Synth, SingleNoteAbcPlayerException
 import theme
 
 
 class EditZone():
-    def __init__(self, tk_root: tk.Tk, theme: theme.Theme):
+    def __init__(self, tk_root: tk.Tk, theme: theme.Theme, synth: Synth):
         self._theme = theme
+        self._synth = synth
+
         self._scrolled_text = tk_scrolledtext.ScrolledText(
             tk_root, font=theme.get_font(),
             background=theme.bg, foreground=theme.fg,
@@ -45,22 +46,11 @@ class EditZone():
 
         self._check_text_change_since_last_save_cb = None
 
-        self._snap = snap.SingleNoteAbcPlayer()
-        try:
-            self._snap.setup_synth()
-            self._snap.select_instrument('Acoustic Grand Piano')
-        except snap.SingleNoteAbcPlayerException as e:
-            # Under Windows, after we display a messagebox before the mainloop():
-            # 1. the edit zone looses its focus (and it is difficult to get it back).
-            # 2. the global keybindings do not work.
-            #
-            # Workaround : hide the root window before showing the messagebox
-            tk_root.withdraw()
-            tk_messagebox.showwarning(title='Erreur lors de l\'initialisation du synthétiseur', message=e)
-            tk_root.deiconify()
-
     def get_buffer(self):
         return self._buffer
+
+    def focus(self):
+        self._scrolled_text.focus()
 
     def set_check_text_change_since_last_save_cb(self, callback):
         """Set the function that will be called whenever we decide
@@ -89,7 +79,7 @@ class EditZone():
             # event.state does not include that key; but we do not care)
             abc_note = abcparser.get_note_to_play(self._buffer, event.char)
             if abc_note is not None:
-                self._snap.play_midi_note(abc2midi.get_midi_note(abc_note))
+                self._synth.play_midi_note(abc2midi.get_midi_note(abc_note))
 
     def _on_key_release(self, event):
         if self._check_text_change_since_last_save_cb:

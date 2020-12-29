@@ -5,6 +5,12 @@
 Tools to convert data from the ABC world to the MIDI world
 """
 
+import logging as log
+import os
+import subprocess
+import tempfile
+from typing import List
+
 import musictheory
 
 
@@ -51,3 +57,26 @@ def get_midi_note(abc_note):
         abc_note = abc_note.upper()
     midi_note_number += octave_jump + alteration + musictheory.C_MAJOR_SCALE_INTERVALS[abc_note]
     return midi_note_number
+
+
+def abc2midi(abc_lines: List[str]) -> str:
+    with tempfile.NamedTemporaryFile(mode="wt", suffix=".abc", delete=False) as temp_abc_file:
+        temp_abc_file.writelines(line + "\n" for line in abc_lines)
+    log.debug("Wrote raw tune to temp file: " + temp_abc_file.name)
+
+    temp_midi_filename = temp_abc_file.name[:-4] + ".mid"
+    abc2midi_cmd = ("abc2midi", temp_abc_file.name, "-o", temp_midi_filename)
+    out = subprocess.run(abc2midi_cmd, stdout=subprocess.PIPE, universal_newlines=True)
+    if out.returncode != 0:
+        log.warning(f"abc2midi failed with error code {out.returncode}")
+        log.warning("abc2midi command: " + " ".join(abc2midi_cmd))
+        if out.stdout is not None:
+            log.warning("abc2midi stdout:")
+            log.warning(out.stdout)
+        if out.stderr is not None:
+            log.warning("abc2midi stderr:")
+            log.warning(out.stderr)
+
+    os.remove(temp_abc_file.name)
+
+    return temp_midi_filename

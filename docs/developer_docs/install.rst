@@ -31,7 +31,7 @@ Create a venv and install abcde pip dependencies
 
 ::
 
-   $ python3 -m venv ~/.tmp/venv-devel-abcde/
+   $ python3 -m venv --system-site-packages ~/.tmp/venv-devel-abcde/
    $ source ~/.tmp/venv-devel-abcde/bin/activate
    $ pip install py-getch sphinx
 

@@ -15,7 +15,7 @@ from pyfluidsynth3 import fluidevent, fluidsequencer
 import abcde.abc2midi as abc2midi
 import abcde.abcparser as abcparser
 import abcde.musictheory as musictheory
-import abcde.snap as snap
+import abcde.player as snap
 
 
 sporting_nell = \
@@ -33,19 +33,19 @@ K:Amix
 
 
 def demo_play_sporting_nell(bpm=90, instrument='Acoustic Grand Piano'):
-    player = snap.SingleNoteAbcPlayer()
+    player = snap.Synth()
     player.setup_synth()
     player.select_instrument(instrument)
 
     # Setup sequencer over existing player
-    sequencer = fluidsequencer.FluidSequencer(player._handle)
+    sequencer = fluidsequencer.FluidSequencer(player._fluidhandle)
     sequencer.beats_per_minute = bpm
     beat_length = sequencer.ticks_per_beat
     print("BPM: {0}".format(sequencer.beats_per_minute))
     print("TPB: {0}".format(sequencer.ticks_per_beat))
     print("TPS: {0}".format(sequencer.ticks_per_second))
 
-    dest = sequencer.add_synth(player._synth)
+    dest = sequencer.add_synth(player._fluidsynth)
     ticks = sequencer.ticks + 10
 
     abc_key = 'Dmix'
@@ -62,7 +62,7 @@ def demo_play_sporting_nell(bpm=90, instrument='Acoustic Grand Piano'):
             abc_note = alteration + simple_note
             midi_note = abc2midi.get_midi_note(abc_note)
 
-            event = fluidevent.FluidEvent(player._handle)
+            event = fluidevent.FluidEvent(player._fluidhandle)
             event.dest = dest[0]
             event.note(0, midi_note, 127, int(beat_length * 0.25))
 
@@ -73,7 +73,7 @@ def demo_play_sporting_nell(bpm=90, instrument='Acoustic Grand Piano'):
     time.sleep(60 / bpm * 4)
 
     print('Sending event in the past')
-    event = fluidevent.FluidEvent(player._handle)
+    event = fluidevent.FluidEvent(player._fluidhandle)
     event.dest = dest[0]
     event.note(0, midi_note, 127, int(beat_length * 0.25))
     #sequencer.send(event, ticks)
@@ -95,7 +95,7 @@ def demo_play_sporting_nell(bpm=90, instrument='Acoustic Grand Piano'):
 
     del sequencer
     del player._driver
-    del player._synth
+    del player._fluidsynth
 
 
 if __name__ == "__main__":
