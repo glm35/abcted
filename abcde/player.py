@@ -192,8 +192,9 @@ class MidiPlayer:
         """Start playing tunes in the playlist."""
         print("Player: play")
 
-        # If playback is finished (not paused and status is DONE), need to stop first:
-        if self.get_status() == "DONE" and not self._paused:
+        # If playback is finished, need to stop first:
+        if self._fluidplayer is not None and self._paused is False \
+           and self.get_status() == FluidPlayer.Status.DONE:
             self.stop()
 
         if self._fluidplayer is None:
@@ -241,21 +242,6 @@ class MidiPlayer:
         current_tick = self._fluidplayer.get_current_tick()
         total_ticks = self._fluidplayer.get_total_ticks()
         return current_tick, total_ticks
-
-    def get_status(self) -> str:
-        if self._fluidplayer is None:
-            return None
-        status = self._fluidplayer.get_status()
-        if status == FluidPlayer.READY:
-            return "READY"
-        elif status == FluidPlayer.PLAYING:
-            return "PLAYING"
-        elif status == FluidPlayer.STOPPING:
-            return "STOPPING"
-        elif status == FluidPlayer.DONE:
-            return "DONE"
-        else:
-            return f"{status} (Unknown)"
 
     def seek(self, ticks: int):
         if self._fluidplayer is None:
