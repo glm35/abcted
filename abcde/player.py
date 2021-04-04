@@ -11,7 +11,7 @@ import traceback
 # Third-party imports
 from pyfluidsynth3 import fluidaudiodriver, fluidhandle, fluidsettings, fluidsynth
 from pyfluidsynth3.fluiderror import FluidError
-from pyfluidsynth3.fluidplayer import FluidPlayer
+from pyfluidsynth3.fluidplayer import FluidPlayer, PlayerStatus, TempoType
 
 
 # abcde imports
@@ -195,7 +195,7 @@ class MidiPlayer:
 
         # If playback is finished, need to stop first:
         if self._fluidplayer is not None and self._paused is False \
-           and self.get_status() == FluidPlayer.Status.DONE:
+           and self.get_status() == PlayerStatus.DONE:
             self.stop()
 
         if self._fluidplayer is None:
@@ -302,13 +302,13 @@ class MidiPlayer:
 
         if bpm is not None:
             print(f'Player._set_tempo: Set tempo (bpm): {bpm}')
-            self._fluidplayer.set_tempo(FluidPlayer.TempoType.TEMPO_EXTERNAL_BPM, tempo=bpm)
+            self._fluidplayer.set_tempo(TempoType.TEMPO_EXTERNAL_BPM, tempo=bpm)
         elif scale_factor is not None and scale_factor != 1:
             print(f'Player._set_tempo: Set relative tempo: x{scale_factor}')
-            self._fluidplayer.set_tempo(FluidPlayer.TempoType.TEMPO_INTERNAL, tempo=scale_factor)
+            self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=scale_factor)
         else:
             print('Player._set_tempo: Reset tempo (use MIDI file tempo)')
-            self._fluidplayer.set_tempo(FluidPlayer.TempoType.TEMPO_INTERNAL, tempo=1)
+            self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=1)
 
     def get_tempo(self):
         tempo_bpm, midi_tempo = None, None
