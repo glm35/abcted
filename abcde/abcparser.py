@@ -6,7 +6,7 @@ Tools that parse the ABC input
 """
 
 import logging as log
-from typing import List
+from typing import List, Optional
 
 from edit_zone_buffer import EditZoneBuffer
 import musictheory
@@ -246,7 +246,6 @@ def get_current_raw_tune(buffer: EditZoneBuffer) -> List[str]:
                 log.error(msg)
                 raise AbcParserException(msg)
 
-
     # Read lines below the current line until the next reference number or
     # the end of the buffer (empty line).
     # TODO: change get_line() to have an exception when we pass the end of
@@ -261,6 +260,18 @@ def get_current_raw_tune(buffer: EditZoneBuffer) -> List[str]:
         line_no += 1
 
     return raw_tune
+
+
+def get_tune_title(raw_tune: List[str]) -> Optional[str]:
+    """Get ABC tune title.
+
+    Given an ABC tune as a list of strings, one string per line, return the
+    first title of the tune.  Return an empty string if no title can be found.
+    """
+    for line in raw_tune:
+        if line.startswith("T:"):
+            return line[2:].strip()
+    return ""
 
 
 def is_reference_number(line: str) -> bool:

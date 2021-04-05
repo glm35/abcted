@@ -1,17 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-Show how to use a FluidPlayer object to play one or more midi file(s)
-and control their playback.
-
-Run with:
-
-  $ cd /path/to/pyfluidsynth3
-  $ PYTHONPATH=. python3 examples/player_gui.py MIDI_FILES
-
-"""
-
 # PSL imports
 import logging as log
 import os
@@ -58,10 +47,10 @@ class PlayerDeck:
 
         raw_tune = abcparser.get_current_raw_tune(self._edit_zone.get_buffer())
         log.debug("raw_tune: " + str(raw_tune))
+        self._tune_title_label.config(text=abcparser.get_tune_title(raw_tune))
         # TODO: handle AbcParserException: notify user
         self._midi_filename = abc2midi.abc2midi(raw_tune)
         self._midi_player.set_playlist([self._midi_filename])
-        # TODO: add label "Playing: <title>"
         # TODO: clean midi file when switching tune
 
     def _on_close_deck(self, event=None):
@@ -82,6 +71,8 @@ class PlayerDeck:
         tk.Button(button_frame, text='Stop', command=self._midi_player.stop).pack(side=tk.LEFT)
         tk.Button(button_frame, text='Pause', command=self._midi_player.pause).pack(side=tk.LEFT)
         tk.Button(button_frame, text='Play', command=self._on_play).pack(side=tk.LEFT)
+        self._tune_title_label = tk.Label(button_frame, text="")
+        self._tune_title_label.pack(side=tk.LEFT, fill=tk.X)
         tk.Button(button_frame, text='Close', command=self._on_close_deck).pack(side=tk.RIGHT)
         button_frame.pack(fill=tk.X)
 
