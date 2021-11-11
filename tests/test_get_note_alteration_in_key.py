@@ -1,7 +1,7 @@
 import unittest
 
 
-from abcde.musictheory import get_note_alteration_in_key
+from abcted.musictheory import get_note_alteration_in_key
 
 
 class TestGetNoteAlterationInKey(unittest.TestCase):

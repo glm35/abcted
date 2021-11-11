@@ -11,11 +11,11 @@ import time
 # Third-party imports
 from pyfluidsynth3 import fluidevent, fluidsequencer
 
-# abcde imports
-import abcde.abc2midi as abc2midi
-import abcde.abcparser as abcparser
-import abcde.musictheory as musictheory
-import abcde.player as snap
+# abcted imports
+import abcted.abc2midi as abc2midi
+import abcted.abcparser as abcparser
+import abcted.musictheory as musictheory
+import abcted.player as snap
 
 
 sporting_nell = \

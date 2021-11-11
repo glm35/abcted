@@ -42,7 +42,7 @@ On s'appuie sur la terminologie normalisée à l'ISO pour C++17
 Cf. discussion sur stackoverflow:
 https://stackoverflow.com/questions/2235173/file-name-path-name-base-name-naming-standard-for-pieces-of-a-path
 
-Dans le code abcde, tous les noms de fichiers sont absolus et normalisés.
+Dans le code abcted, tous les noms de fichiers sont absolus et normalisés.
 Les noms de variables stockant des chemins venant de l'extérieur du programme
 avant normalisation sont préfixés par ``raw_``.
 

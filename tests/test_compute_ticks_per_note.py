@@ -1,7 +1,7 @@
 import unittest
 
 
-import abcde.abc2seq as abc2seq
+import abcted.abc2seq as abc2seq
 
 
 class TestComputeTicksPerNote(unittest.TestCase):

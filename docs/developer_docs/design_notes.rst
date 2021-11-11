@@ -1,5 +1,5 @@
-Notes de conception pour abcde
-==============================
+Notes de conception pour abcted
+===============================
 
 Retour musical (Musical feedback)
 ---------------------------------
@@ -95,7 +95,7 @@ configurer une translation d'octave
    Dans ce cas, le logiciel fait de la saisie automatique: des caractères non
    entrés par l'utilisateur apparaissent dans la zone d'édition.
 
-La solution retenue pour abcde est l'approche :ref:`jouer deux fois la note
+La solution retenue pour abcted est l'approche :ref:`jouer deux fois la note
 <jouer-deux-fois-la-note>`. A terme, une des autres approches pourrait être
 mise en oeuvre pour gérer les passages musicaux relativement longs nécessitant
 l'usage des marqueurs d'octave. Cette autre approche pourrait être
@@ -107,12 +107,12 @@ complémentaire.
 Encodage des fichiers ABC
 -------------------------
 
-abcde travaille avec le format UTF-8:
+abcted travaille avec le format UTF-8:
 
-* abcde enregistre toujours les fichiers avec l'encodage UTF-8
+* abcted enregistre toujours les fichiers avec l'encodage UTF-8
 
 * abde ne peut ouvrir que des fichiers encodés en UTF-8. Si ce n'est pas le cas, il faut les convertir
-  en UTF-8 avant de les ouvrir avec abcde.
+  en UTF-8 avant de les ouvrir avec abcted.
 
 .. note::
 
@@ -133,7 +133,7 @@ abcde travaille avec le format UTF-8:
 Composition des objets tkinter
 ------------------------------
 
-Les objets d'IHM d'abcde ne sont pas hérités de tkinter: on va plutôt les inclure dans nos classes
+Les objets d'IHM d'abcted ne sont pas hérités de tkinter: on va plutôt les inclure dans nos classes
 (composition plutôt que héritage). La raison est d'éviter une surcharge accidentelle (shadowing?)
 des attributs et méthodes des objets tkinter.
 
@@ -145,7 +145,7 @@ Fichiers favoris et fichiers récemment édités
 Fichiers favoris
 ~~~~~~~~~~~~~~~~
 
-  * les fichiers favoris sont stockés dans ~/.config/abcde/favorite_files.txt
+  * les fichiers favoris sont stockés dans ~/.config/abcted/favorite_files.txt
 
     * favorite_files.txt est encodé en UTF-8. Si ce n'est pas le cas, un warning est affiché
       dans les logs et le fichier n'est pas traité
@@ -153,7 +153,7 @@ Fichiers favoris
     * on peut définir autant de fichiers favoris qu'on le souhaite
 
     * les chemins sont absolus ou relatifs; un chemin relatif sera par rapport au répertoire de
-      démarrage d'abcde; un chemin relatif sera présenté comme un chemin absolu dans le menu
+      démarrage d'abcted; un chemin relatif sera présenté comme un chemin absolu dans le menu
 
     * un chemin peut commencer par ~/: il est alors relatif à la racine du répertoire personnel
       de l'utilisateur courant.
@@ -171,7 +171,7 @@ Fichiers favoris
 Fichiers récents
 ~~~~~~~~~~~~~~~~
 
-  * conserver les 10 fichiers les plus récemment ouverts dans ~/.config/abcde/recent_files.txt
+  * conserver les 10 fichiers les plus récemment ouverts dans ~/.config/abcted/recent_files.txt
 
     * on ajoute un fichier récent dans la liste dès qu'on ouvre un fichier ou qu'on enregistre
       un fichier sous un nouveau nom; on enregistre recent_files.txt immédiatement.
@@ -289,3 +289,12 @@ Recherche
   recherche) joue le même rôle que F3
 
 * ArrowUp permet de chercher vers le haut, avec la même règle de wrap que F3.
+
+
+Nom du projet
+-------------
+
+Initialement appelé abcde, le projet a été renommé abcdted en novembre 2021.  En
+effet, le nom abcde est déjà pris (paquet abcde "A Better CD Encoder" sous
+debian/ubuntu/mint), alors que abcted n'est pas utilisé, en particulier dans le
+monde des logiciels ABC (cf. http://abcnotation.com/software

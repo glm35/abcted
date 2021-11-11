@@ -4,7 +4,7 @@ Faire passer les tests automatiques
 Objectifs
 ---------
 
-* les tests doivent passer sur le code dans ``abcde/`` pas dans un code installé
+* les tests doivent passer sur le code dans ``abcted/`` pas dans un code installé
   quelque part sur le système de fichier
 
 * pouvoir exécuter les tests avec ``make test`` qui fait
@@ -19,7 +19,7 @@ Passer les tests en CLI
 Pour pouvoir dérouler les tests en CLI, il faut ajouter la racine des sources
 à la variable d'environnement ``PYTHONPATH``. Par exemple::
 
-  export PYTHONPATH=$PYTHONPATH:~/code/abcde:~/code/abcde/abcde
+  export PYTHONPATH=$PYTHONPATH:~/code/abcted:~/code/abcted/abcted
 
 Pour automatiser la configuration du ``PYTHONPATH`` lors de l'appel à  ``make test``
 je ne vois pas d'autre moyen que de passer par un script intermédiaire: je ne
@@ -32,7 +32,7 @@ Passer les tests avec PyCharm
 
 Pour pouvoir dérouler les tests avec PyCharm, il faut faire la même chose.
 
-Méthode 1 (générique): il suffit de marquer le répertoire ``abcde/abcde`` comme
+Méthode 1 (générique): il suffit de marquer le répertoire ``abcted/abcted`` comme
 contenant des sources (*clic droit -> Mark Directory As... -> Source Root*).
 Comme dans la section Environments, la case à cocher
 *Add source roots to PYTHONPATH* est cochée par défaut, cette config simple

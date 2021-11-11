@@ -1,8 +1,8 @@
 import unittest
 
 
-from abcde.abcparser import get_note_to_play
-from abcde.edit_zone_buffer import EditZoneBuffer
+from abcted.abcparser import get_note_to_play
+from abcted.edit_zone_buffer import EditZoneBuffer
 
 
 class MockEditZone(EditZoneBuffer):

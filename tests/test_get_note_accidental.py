@@ -1,7 +1,7 @@
 import unittest
 
 
-from abcde.abcparser import get_accidental
+from abcted.abcparser import get_accidental
 
 
 class TestGetNoteAccidental(unittest.TestCase):

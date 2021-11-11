@@ -7,9 +7,9 @@ import time
 # Third-party imports
 from getch import getch
 
-# abcde imports
-import abcde.musictheory as musictheory
-import abcde.player as snap
+# abcted imports
+import abcted.musictheory as musictheory
+import abcted.player as snap
 
 
 def demo_play_interactive(instrument='Acoustic Grand Piano'):

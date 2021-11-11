@@ -8,7 +8,7 @@ from threading import Timer
 import tkinter as tk
 from typing import Optional, Union
 
-# abcde imports
+# abcted imports
 import abc2midi
 import abcparser
 from edit_zone import EditZone

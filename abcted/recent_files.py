@@ -18,7 +18,7 @@ import os
 from file_utils import normalize_path
 
 
-CONFIG_DIR = '~/.config/abcde/'
+CONFIG_DIR = '~/.config/abcted/'
 FAVORITE_FILES_FILENAME = 'favorite_files.txt'
 FAVORITE_FILES_PATH = CONFIG_DIR + FAVORITE_FILES_FILENAME
 RECENT_FILES_FILENAME = 'recent_files.txt'

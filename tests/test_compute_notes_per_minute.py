@@ -1,8 +1,8 @@
 import unittest
 
 
-import abcde.abcparser as abcparser
-from abcde.abc2seq import compute_notes_per_minute, AbcSequencerException
+import abcted.abcparser as abcparser
+from abcted.abc2seq import compute_notes_per_minute, AbcSequencerException
 
 
 class TestComputeNotesPerMinute(unittest.TestCase):

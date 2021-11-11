@@ -14,7 +14,7 @@ from pyfluidsynth3.fluiderror import FluidError
 from pyfluidsynth3.fluidplayer import FluidPlayer, PlayerStatus, TempoType
 
 
-# abcde imports
+# abcted imports
 import abc2midi
 
 

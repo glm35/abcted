@@ -1,10 +1,10 @@
-Installing abcde (development version)
-======================================
+Installing abcted (development version)
+=======================================
 
 Install Python3
 ---------------
 
-To just run abcde:
+To just run abcted:
 
 Under Linux Mint::
 
@@ -26,13 +26,13 @@ Under Fedora::
    $ sudo dnf install fluidsynth fluid-soundfont-gm fluid-soundfont-gs
 
 
-Create a venv and install abcde pip dependencies
-------------------------------------------------
+Create a venv and install abcted pip dependencies
+-------------------------------------------------
 
 ::
 
-   $ python3 -m venv --system-site-packages ~/.tmp/venv-devel-abcde/
-   $ source ~/.tmp/venv-devel-abcde/bin/activate
+   $ python3 -m venv --system-site-packages ~/.tmp/venv-devel-abcted/
+   $ source ~/.tmp/venv-devel-abcted/bin/activate
    $ pip install py-getch sphinx
 
 Install pyfluidsynth3 (in the venv)
@@ -46,18 +46,18 @@ Install pyfluidsynth3 (in the venv)
    $ git checkout --track origin/gl-devel
    $ python setup.py install
 
-Get abcde source code
----------------------
+Get abcted source code
+----------------------
 
 ::
 
    $ cd ~/code
-   $ git clone https://github.com/glm35/abcde.git
+   $ git clone https://github.com/glm35/abcted.git
 
-Start abcde
------------
+Start abcted
+------------
 
 ::
 
-   $ cd ~/code/abcde
-   $ python abcde/main.py
+   $ cd ~/code/abcted
+   $ python abcted/main.py

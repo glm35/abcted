@@ -1,7 +1,7 @@
 import unittest
 
 
-from abcde.abcparser import normalize_abc_key, AbcParserException
+from abcted.abcparser import normalize_abc_key, AbcParserException
 
 
 class TestNormalizeAbcKey(unittest.TestCase):

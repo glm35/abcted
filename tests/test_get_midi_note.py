@@ -1,7 +1,7 @@
 import unittest
 
 
-from abcde.abc2midi import get_midi_note
+from abcted.abc2midi import get_midi_note
 
 
 class TestGetMidiNote(unittest.TestCase):

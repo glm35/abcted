@@ -25,10 +25,6 @@ Prochains développements
 
 * Tune list (outline)
 
-* Le nom abcde est déjà pris (paquet abcde "A Better CD Encoder" sous debian/ubuntu/mint):
-  trouver un autre nom. "abcted" (ou "abcTed", ou "ABCtED" ou "ABCted") semble un bon candidat pas encore pris
-  (cf. http://abcnotation.com/software)
-
 * License au format SPDX dans les fichiers: https://spdx.org/ids-how
 
 * refactoring avec tuple unpacking
@@ -38,7 +34,6 @@ Prochains développements
   * Boucles for
 
   * Index codés en dur, yc dans un contexte de Slicing (=> utiliser l’opérateur \*)
-
 
 pyfluidsynth3 features & fixes
 ------------------------------
@@ -57,8 +52,8 @@ Main features
 * "Print" tune to external PDF viewer
 
 
-Random desired features for abcde
----------------------------------
+Random desired features for abcted
+----------------------------------
 
 * Display current line and column number (useful for located issues
   in an ABC file reported by an external tool).

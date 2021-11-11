@@ -4,7 +4,7 @@ Problèmes connus
 Flag "changed" non testé lors de l'ouverture d'un fichier récent
 ----------------------------------------------------------------
 
-Si le fichier courant est modifié et qu'on ouvre un fichier récent, abcde ne
+Si le fichier courant est modifié et qu'on ouvre un fichier récent, abcted ne
 demande pas si on souhaite enregistrer les modifications.
 
 Retour musical non souhaité dans les champs informatifs
@@ -17,10 +17,10 @@ Typiquement: C quand on veut faire C:
 Création d'un nouveau fichier ABC depuis la CLI
 -----------------------------------------------
 
-Quand depuis la CLI on lance abcde en passant un nom de fichier
+Quand depuis la CLI on lance abcted en passant un nom de fichier
 qui n'existe pas, on obtient une erreur. Le comportement standard
 des éditeurs de texte dans ce cas est de créer un nouveau fichier, et
-il me semble désirable de modifier le comportement d'abcde pour aller
+il me semble désirable de modifier le comportement d'abcted pour aller
 dans ce sens (ex: vim, xed).
 
 Il faudra gérer le cas où le chemin n'existe pas non plus: le créer ou remonter

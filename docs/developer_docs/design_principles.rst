@@ -1,5 +1,5 @@
-Principes de conceptions d'abcde
-================================
+Principes de conceptions d'abcted
+=================================
 
 Principe de conception
 ----------------------
@@ -7,7 +7,7 @@ Principe de conception
 En français
 ~~~~~~~~~~~
 
-La langue maternelle d'abcde est le français:
+La langue maternelle d'abcted est le français:
 
 * l'interface utilisateur est en français;
 
@@ -29,7 +29,7 @@ utiles sont développées en priorité, et on finalise dans un second temps.
 Maintenabilité
 ~~~~~~~~~~~~~~
 
-Je n'ai pas beaucoup de temps disponible pour développer abcde. La maintenabilité et
+Je n'ai pas beaucoup de temps disponible pour développer abcted. La maintenabilité et
 la lisibilité du code sur le long terme sont donc très importantes. Cela guide certains
 choix de conception et de principes de développement:
 
@@ -54,7 +54,7 @@ traduit par "tout sous git": le code, les docs, et les bugs.
 S'amuser
 ~~~~~~~~
 
-Le développement d'abcde est un loisir, il doit conserver une dimension ludique.
+Le développement d'abcted est un loisir, il doit conserver une dimension ludique.
 
 Choix techniques
 ----------------
