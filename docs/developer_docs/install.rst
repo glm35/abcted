@@ -25,6 +25,37 @@ Under Fedora::
 
    $ sudo dnf install fluidsynth fluid-soundfont-gm fluid-soundfont-gs
 
+Build libfluidsynth development version
+---------------------------------------
+
+abcted requires libfluidsynth new tempo API which is not available with Ubuntu 20.04.
+
+Get the code::
+
+    $ mkdir -p ~/code/third-party/
+    $ cd ~/code/third-party/
+    $ git clone https://github.com/FluidSynth/fluidsynth.git
+    $ cd fluidsynth
+    $ git reset --hard b8fb6c81e1ca27c0bba2f6a0168832214f91d497
+
+Install build dependencies (Ubuntu 20.04)::
+
+  $ sudo apt install cmake libglib2.0-dev libasound2-dev \
+        libreadline-dev libsndfile-dev
+
+Build::
+
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    $ make
+    $ make check
+
+Build the docs::
+
+    $ sudo apt install doxygen
+    $ cmake ..
+    $ make doxygen
 
 Create a venv and install abcted pip dependencies
 -------------------------------------------------
@@ -60,4 +91,4 @@ Start abcted
 ::
 
    $ cd ~/code/abcted
-   $ python abcted/main.py
+   $ python abcted/main.py  -l ~/code/third-party/fluidsynth/build/src/libfluidsynth.so.3.0.0
