@@ -5,59 +5,73 @@ Raccourcis clavier
 Gestion de fichiers
 ===================
 
-        self.tk_root.bind('<Control-N>', self._file.on_file_new)
-        self.tk_root.bind('<Control-n>', self._file.on_file_new)
-        self.tk_root.bind('<Control-O>', self._file.on_file_open)
-        self.tk_root.bind('<Control-o>', self._file.on_file_open)
-        self.tk_root.bind('<Control-S>', self._file.on_file_save)
-        self.tk_root.bind('<Control-s>', self._file.on_file_save)
-        self.tk_root.bind('<Control-j>', self._on_play)
-        self.tk_root.bind('Alt-Keypress-F4', self.exit)
++------------------------+-------------------------------------------+
+| Raccourcis             | Commande                                  |
++========================+===========================================+
+| Ctrl+n (ou Ctrl+N)     | Créer un nouveau fichier                  |
++------------------------+-------------------------------------------+
+| Ctrl+o (ou Ctrl+O)     | Ouvrir un fichier existant                |
++------------------------+-------------------------------------------+
+| Ctrl+s (ou Ctrl+S)     | Enregistrer le fichier en cours d'édition |
++------------------------+-------------------------------------------+
+| Alt+F4                 | Quitter l'application                     |
++------------------------+-------------------------------------------+
 
 
 Zone d'édition du texte
 =======================
 
-        self._edit_zone._scrolled_text.bind('<Control-Y>',
-                                            self._edit_zone.on_edit_redo)
-        self._edit_zone._scrolled_text.bind('<Control-y>',
-                                            self._edit_zone.on_edit_redo)
-            # rem: if bound at root level: ctrl+y will do 'paste', not 'redo'
-        self._edit_zone._scrolled_text.bind('<Control-A>',
-                                            self._edit_zone.on_edit_select_all)
-        self._edit_zone._scrolled_text.bind('<Control-a>',
-                                            self._edit_zone.on_edit_select_all)
++------------------------+--------------------------------------------+
+| Raccourcis             | Commande                                   |
++========================+============================================+
+| Ctrl+z (ou Ctrl+Z)     | Undo                                       |
++------------------------+--------------------------------------------+
+| Ctrl+y (ou Ctrl+Y)     | Redo                                       |
++------------------------+--------------------------------------------+
+| Ctrl+a (ou Ctrl+A)     | Sélectionner tout                          |
++------------------------+--------------------------------------------+
+| HOME, END              | Aller au début/à la fin de la ligne        |
++------------------------+--------------------------------------------+
+| Ctrl+HOME, Ctrl+END    | Aller au début/à la fin de la zone         |
+|                        | d'édition                                  |
++------------------------+--------------------------------------------+
+| Ctrl+LEFT, Ctrl+RIGHT  | Aller au début/à la fin du mot             |
++------------------------+--------------------------------------------+
+| Ctrl+UP, Ctrl+DOWN     | Aller au début du paragraphe courant/du    |
+|                        | paragraphe suivant                         |
++------------------------+--------------------------------------------+
+| Shift+FLECHES,         | Sélectionner du texte                      |
+| Shift+Ctrl+FLECHES     |                                            |
++------------------------+--------------------------------------------+
 
-
-.. TODO: raccourcis implicites de tkinter
 
 Recherche
 =========
 
-        self.tk_root.bind('<Control-F>', self._search_bar.on_edit_search)
-        self.tk_root.bind('<Control-f>', self._search_bar.on_edit_search)
-
-Raccourcis de la barre de recherche
------------------------------------
-
-            w.bind('<Escape>', self._on_search_close)
-            w.bind('<F3>', self._on_search_forward)
-            w.bind('<Down>', self._on_search_forward)
-            w.bind('<Up>', self._on_search_backward)
-            w.bind('<Alt-c>', self._on_toggle_match_case)
-            w.bind('<Alt-C>', self._on_toggle_match_case)
-
-
-Raccourcis de la zone de saisie du terme de recherche
------------------------------------------------------
-
-        self._search_entry.bind('<Return>', self._on_search_forward)
-        self._search_entry.bind('<Control-A>', self._on_select_all_search_entry)
-        self._search_entry.bind('<Control-a>', self._on_select_all_search_entry)
++------------------------+-------------------------------------------+
+| Raccourcis             | Commande                                  |
++========================+===========================================+
+| Ctrl+f (ou Ctrl+F)     | Ouvrir la boîte de recherche              |
++------------------------+-------------------------------------------+
+| ESC                    | Fermer la boîte de recherche              |
++------------------------+-------------------------------------------+
+| UP, DOWN               | Aller au résultat suivant/précédent       |
++------------------------+-------------------------------------------+
+| F3                     | Aller au résultat suivant                 |
++------------------------+-------------------------------------------+
+| Alt+C                  | Basculer le mode de recherche entre       |
+|                        | sensible/insensible à la casse            |
++------------------------+-------------------------------------------+
 
 
 Jouer un morceau
 ================
 
-```Ctrl + J```: joue le morceau courant (le morceau dans lequel est le
-curseur clavier)
++------------------------+-------------------------------------------+
+| Raccourcis             | Commande                                  |
++========================+===========================================+
+| Ctrl+j (ou Ctrl+J)     | Ouvrir la boîte de playback du morceau    |
+|                        | courant (le morceau dans lequel est le    |
+|                        | curseur)                                  |
++------------------------+-------------------------------------------+
+
