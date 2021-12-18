@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source ~/.tmp/venv-devel-abcted/bin/activate
+source ~/.tmp/venv/abcted/bin/activate
 python3 ~/code/abcted/abcted/main.py $*
 

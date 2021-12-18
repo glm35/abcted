@@ -62,8 +62,8 @@ Create a venv and install abcted pip dependencies
 
 ::
 
-   $ python3 -m venv --system-site-packages ~/.tmp/venv-devel-abcted/
-   $ source ~/.tmp/venv-devel-abcted/bin/activate
+   $ python3 -m venv --system-site-packages ~/.tmp/venv/abcted/
+   $ source ~/.tmp/venv/abcted/bin/activate
    $ pip install py-getch sphinx sphinx-rtd-theme
 
 Install pyfluidsynth3 (in the venv)
