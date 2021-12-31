@@ -23,6 +23,7 @@ class PlayerDeck:
         self._container_frame = container_frame
         self._edit_zone = edit_zone
         self._player_frame: Optional[tk.Frame] = None
+        self._widgets = []  # play deck widgets that can have focus
 
         self._midi_player = synth.create_midi_player()
         self._midi_filename = None
@@ -62,18 +63,39 @@ class PlayerDeck:
         self._create_playback_control_frame()
         self._create_loop_control_frame()
         self._create_tempo_frame()
+        self._bind_player_deck_keys()
+
+    def _bind_player_deck_keys(self):
+        # Bind player deck keyboard shortcuts to all the widgets in the player
+        # deck that can have focus.
+        for w in self._widgets:
+            w.bind('<Escape>', self._on_stop_playback_or_close_deck)  # TODO
+            w.bind('<Key-space>', self._on_toggle_play_pause)  # TODO
+            w.bind('<Key-l>', self._on_toggle_loop)  # TODO
+            w.bind('<Key-b>', self._on_focus_tempo_bpm_entry)
+            w.bind('<Key-s>', self._on_focus_tempo_scale_factor_entry)
+            w.bind('<Key-plus>', self._on_speed_up)  # TODO: speed up tempo +10%
+            w.bind('<KP_Add>', self._on_speed_up)
+            w.bind('<Key-minus>', self._on_slow_down)  # TODO: slow down tempo -10%
+            w.bind('<KP_Subtract>', self._on_slow_down)
+            w.bind('<Key-equal>', self._on_reset_tempo)
 
     def _create_playback_control_frame(self):
         frame = tk.Frame(self._player_frame)
 
         button_frame = tk.Frame(frame)
-        tk.Button(button_frame, text='Stop', command=self._midi_player.stop).pack(side=tk.LEFT)
-        tk.Button(button_frame, text='Pause', command=self._midi_player.pause).pack(side=tk.LEFT)
+        self._stop_button = tk.Button(button_frame, text='Stop', command=self._midi_player.stop)
+        self._stop_button.pack(side=tk.LEFT)
+        self._pause_button = tk.Button(button_frame, text='Pause', command=self._midi_player.pause)
+        self._pause_button.pack(side=tk.LEFT)
         self._play_button = tk.Button(button_frame, text='Play', command=self._on_play)
         self._play_button.pack(side=tk.LEFT)
         self._tune_title_label = tk.Label(button_frame, text="")
         self._tune_title_label.pack(side=tk.LEFT, fill=tk.X)
-        tk.Button(button_frame, text='Close', command=self._on_close_deck).pack(side=tk.RIGHT)
+        self._close_button = tk.Button(button_frame, text='Close', command=self._on_close_deck)
+        self._close_button.pack(side=tk.RIGHT)
+        self._widgets += [self._stop_button, self._pause_button, self._play_button,
+                          self._close_button]
         button_frame.pack(fill=tk.X)
 
         self._playback_position = tk.Label(frame, text="Playback position:")
@@ -87,6 +109,19 @@ class PlayerDeck:
             self._timer = Timer(interval=1, function=self._on_timeout)
             self._timer.start()
         self._update_get_tempo_label()
+
+    def _on_toggle_play_pause(self, event=None):
+        player_status = self._midi_player.get_status()
+        if player_status == player.MidiPlayer.Status.STOPPED or \
+           player_status == player.MidiPlayer.Status.PAUSED:
+            self._on_play()
+        else:
+            self._midi_player.pause()
+        return 'break'
+
+    def _on_stop_playback_or_close_deck(self, event=None):
+        # TODO
+        log.debug('PlayerDeck: _stop_playback_or_close_deck')
 
     def _update_playback_position(self):
         current, total = self._midi_player.get_ticks()
@@ -105,11 +140,13 @@ class PlayerDeck:
             radio_button = tk.Radiobutton(self._loop_control_frame,
                                           text=txt, variable=self._loop_value, value=val,
                                           command=self._on_loop_control)
+            self._widgets.append(radio_button)
             radio_button.pack(side=tk.LEFT)
 
         self._repeat_entry = tk.Entry(self._loop_control_frame, width=3)
         self._repeat_entry.bind("<Return>", self._on_repeat_entry_return_keypress)
         self._repeat_entry.bind("<KP_Enter>", self._on_repeat_entry_return_keypress)
+        self._widgets.append(self._repeat_entry)
         self._repeat_entry.pack(side=tk.LEFT)
         tk.Label(self._loop_control_frame, text="times").pack(side=tk.LEFT)
 
@@ -126,6 +163,9 @@ class PlayerDeck:
                 self._midi_player.repeat_count = int(self._repeat_entry.get())
             except ValueError:
                 pass
+
+    def _on_toggle_loop(self, event=None):
+        pass
 
     def _on_repeat_entry_return_keypress(self, event=None):
         self._loop_value.set(self.REPEAT)
@@ -151,8 +191,9 @@ class PlayerDeck:
         self._scale_factor_entry.grid(row=4, column=1, sticky=tk.W)
         self._scale_factor_entry.bind("<Return>", self._on_set_tempo_scale_factor)
         self._scale_factor_entry.bind("<KP_Enter>", self._on_set_tempo_scale_factor)
-        tk.Button(self._tempo_frame, text="Speed up/slow down",
-                  command=self._on_set_tempo_scale_factor).grid(row=4, column=2, sticky=tk.W)
+        self._scale_tempo_button = tk.Button(self._tempo_frame, text="Speed up/slow down",
+                                             command=self._on_set_tempo_scale_factor)
+        self._scale_tempo_button.grid(row=4, column=2, sticky=tk.W)
 
         self._reset_tempo_button = tk.Button(self._tempo_frame,
                                              text="Reset tempo (use tempo from midi file)",
@@ -162,19 +203,34 @@ class PlayerDeck:
         self._get_tempo_label = tk.Label(self._tempo_frame, text="Get tempo:")
         self._get_tempo_label.grid(row=6, columnspan=3, sticky=tk.W)
 
+        self._widgets += [self._tempo_bpm_button, self._tempo_bpm_button, self._scale_factor_entry,
+                          self._scale_tempo_button, self._reset_tempo_button]
+
         self._tempo_frame.pack(side=tk.TOP, fill=tk.X)
+
+    def _on_focus_tempo_bpm_entry(self, event=None):
+        self._tempo_bpm_entry.focus()
 
     def _on_set_tempo_bpm(self, event=None):
         self._midi_player.tempo_bpm = int(self._tempo_bpm_entry.get())
         self._scale_factor_entry.delete(0, len(self._scale_factor_entry.get()))
         self._update_get_tempo_label()
 
+    def _on_focus_tempo_scale_factor_entry(self, event=None):
+        self._scale_factor_entry.focus()
+
     def _on_set_tempo_scale_factor(self, event=None):
         self._midi_player.tempo_scale_factor = float(self._scale_factor_entry.get())
         self._tempo_bpm_entry.delete(0, len(self._tempo_bpm_entry.get()))
         self._update_get_tempo_label()
 
-    def _on_reset_tempo(self):
+    def _on_speed_up(self, event=None):
+        pass
+
+    def _on_slow_down(self, event=None):
+        pass
+
+    def _on_reset_tempo(self, event=None):
         self._tempo_bpm_entry.delete(0, len(self._tempo_bpm_entry.get()))
         self._scale_factor_entry.delete(0, len(self._scale_factor_entry.get()))
         self._midi_player.tempo_scale_factor = 1

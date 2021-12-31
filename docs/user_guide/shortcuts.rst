@@ -74,4 +74,25 @@ Jouer un morceau
 |                        | courant (le morceau dans lequel est le    |
 |                        | curseur)                                  |
 +------------------------+-------------------------------------------+
-
+| SPC                    | Démarre le playback ou bascule l'état du  |
+|                        | playback entre play et pause              |
++------------------------+-------------------------------------------+
+| ESC                    |Si le playback est en cours (play ou       |
+|                        |pause), arrête le playback.  Sinon, ferme  |
+|                        |la fenêtre de playback.                    |
++------------------------+-------------------------------------------+
+| l                      |Bascule entre les différents modes de      |
+|                        |bouclage (pas de bouclage, bouclage infini,|
+|                        |définir le nombre de répétitions)          |
++------------------------+-------------------------------------------+
+| b                      |Focalise sur le widget de saisie du tempo  |
+|                        |en bpm                                     |
++------------------------+-------------------------------------------+
+| s                      |Focalise sur le widget de saisie du facteur|
+|                        |d'échelle de tempo                         |
++------------------------+-------------------------------------------+
+| +, -                   |Accélère ou ralenti le tempo avec un       |
+|                        |facteur de 10%                             |
++------------------------+-------------------------------------------+
+| =                      |Restaure le tempo à sa valeur d'origine    |
++------------------------+-------------------------------------------+

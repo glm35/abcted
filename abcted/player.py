@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # PSL imports
+import enum
 import logging as log
 from threading import Timer, Lock
 import time
@@ -189,13 +190,26 @@ class MidiPlayer:
 
     # Playback control
 
+    class Status(enum.Enum):
+        STOPPED = 0
+        PLAYING = 1
+        PAUSED = 2
+
+    def get_status(self):
+        if self._fluidplayer is None:
+            return self.Status.STOPPED
+        elif self._paused:
+            return self.Status.PAUSED
+        else:
+            return self.Status.PLAYING
+
     def play(self):
         """Start playing tunes in the playlist."""
         print("Player: play")
 
         # If playback is finished, need to stop first:
         if self._fluidplayer is not None and self._paused is False \
-           and self.get_status() == PlayerStatus.DONE:
+           and self._fluidplayer.get_status() == PlayerStatus.DONE:
             self.stop()
 
         if self._fluidplayer is None:
