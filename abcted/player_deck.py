@@ -53,7 +53,7 @@ class PlayerDeck:
         # TODO: clean midi file when switching tune
 
     def _on_close_deck(self, event=None):
-        # TODO: stop playback
+        self._midi_player.stop()
         self._player_frame.grid_forget()
         self._edit_zone.focus()
 
