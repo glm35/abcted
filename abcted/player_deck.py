@@ -41,8 +41,7 @@ class PlayerDeck:
         """
         if self._player_frame is None:
             self._create_player_frame()
-        # TODO: focus on "play" button
-        # self._search_entry.focus()
+        self._play_button.focus()
         self._player_frame.grid(row=2, sticky=tk.E + tk.W)
 
         raw_tune = abcparser.get_current_raw_tune(self._edit_zone.get_buffer())
@@ -70,7 +69,8 @@ class PlayerDeck:
         button_frame = tk.Frame(frame)
         tk.Button(button_frame, text='Stop', command=self._midi_player.stop).pack(side=tk.LEFT)
         tk.Button(button_frame, text='Pause', command=self._midi_player.pause).pack(side=tk.LEFT)
-        tk.Button(button_frame, text='Play', command=self._on_play).pack(side=tk.LEFT)
+        self._play_button = tk.Button(button_frame, text='Play', command=self._on_play)
+        self._play_button.pack(side=tk.LEFT)
         self._tune_title_label = tk.Label(button_frame, text="")
         self._tune_title_label.pack(side=tk.LEFT, fill=tk.X)
         tk.Button(button_frame, text='Close', command=self._on_close_deck).pack(side=tk.RIGHT)
