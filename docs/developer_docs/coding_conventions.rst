@@ -61,3 +61,12 @@ Nom de fichier vs chemin vers un fichier
 
 * Les chemins de fichiers ou répertoires (pathlib.Path) terminent par path,
   eg: config_file_path, config_dir_path.
+
+Nommage des gestionnaires d'évènements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Quand une fonction est appellée suite à un évènement et qu'elle prend en
+paramètre un évènement, on préfixe son nom avec ``_on``.  Par exemple:
+``PlayerDeck._on_toggle_play_pause()``.  Quand la fonction est une commande
+appelée directement, par exemple depuis un menu, on ne préfixe pas.  Par
+exemple: ``PlayerDeck._play()``.

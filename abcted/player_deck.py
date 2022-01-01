@@ -88,7 +88,7 @@ class PlayerDeck:
         self._stop_button.pack(side=tk.LEFT)
         self._pause_button = tk.Button(button_frame, text='Pause', command=self._midi_player.pause)
         self._pause_button.pack(side=tk.LEFT)
-        self._play_button = tk.Button(button_frame, text='Play', command=self._on_play)
+        self._play_button = tk.Button(button_frame, text='Play', command=self._play)
         self._play_button.pack(side=tk.LEFT)
         self._tune_title_label = tk.Label(button_frame, text="")
         self._tune_title_label.pack(side=tk.LEFT, fill=tk.X)
@@ -103,10 +103,10 @@ class PlayerDeck:
 
         frame.pack(fill=tk.X)
 
-    def _on_play(self):
+    def _play(self):
         self._midi_player.play()
         if self._timer is None:
-            self._timer = Timer(interval=1, function=self._on_timeout)
+            self._timer = Timer(interval=1, function=self._timeout)
             self._timer.start()
         self._update_get_tempo_label()
 
@@ -114,7 +114,7 @@ class PlayerDeck:
         player_status = self._midi_player.get_status()
         if player_status == player.MidiPlayer.Status.STOPPED or \
            player_status == player.MidiPlayer.Status.PAUSED:
-            self._on_play()
+            self._play()
         else:
             self._midi_player.pause()
         return 'break'
@@ -139,7 +139,7 @@ class PlayerDeck:
                          ("Repeat", self.REPEAT)]:
             radio_button = tk.Radiobutton(self._loop_control_frame,
                                           text=txt, variable=self._loop_value, value=val,
-                                          command=self._on_loop_control)
+                                          command=self._loop_control)
             self._widgets.append(radio_button)
             radio_button.pack(side=tk.LEFT)
 
@@ -152,7 +152,7 @@ class PlayerDeck:
 
         self._loop_control_frame.pack(side=tk.TOP, fill=tk.X)
 
-    def _on_loop_control(self):
+    def _loop_control(self):
         loop_control_mode = self._loop_value.get()
         if loop_control_mode == self.NO_LOOP:
             self._midi_player.repeat_count = 1
@@ -169,7 +169,7 @@ class PlayerDeck:
 
     def _on_repeat_entry_return_keypress(self, event=None):
         self._loop_value.set(self.REPEAT)
-        self._on_loop_control()
+        self._loop_control()
 
     def _create_tempo_frame(self):
         self._tempo_frame = tk.Frame(self._player_frame)
@@ -240,8 +240,8 @@ class PlayerDeck:
         tempo_bpm, midi_tempo = self._midi_player.get_tempo()
         self._get_tempo_label.config(text=f"Get tempo: bpm={tempo_bpm}, MIDI tempo={midi_tempo}")
 
-    def _on_timeout(self):
+    def _timeout(self):
         self._update_playback_position()
         self._update_get_tempo_label()
-        self._timer = Timer(interval=1, function=self._on_timeout)
+        self._timer = Timer(interval=1, function=self._timeout)
         self._timer.start()
