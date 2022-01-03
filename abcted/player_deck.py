@@ -51,7 +51,7 @@ class PlayerDeck:
         # TODO: handle AbcParserException: notify user
         self._midi_filename = abc2midi.abc2midi(raw_tune)
         self._midi_player.set_playlist([self._midi_filename])
-        # TODO: clean midi file when switching tune
+        # TODO: clean midi file when switching tune + stop playback if needed
 
     def _on_close_deck(self, event=None):
         self._midi_player.stop()
@@ -69,8 +69,8 @@ class PlayerDeck:
         # Bind player deck keyboard shortcuts to all the widgets in the player
         # deck that can have focus.
         for w in self._widgets:
-            w.bind('<Escape>', self._on_stop_playback_or_close_deck)  # TODO
-            w.bind('<Key-space>', self._on_toggle_play_pause)  # TODO
+            w.bind('<Escape>', self._on_stop_playback_or_close_deck)
+            w.bind('<Key-space>', self._on_toggle_play_pause)
             w.bind('<Key-l>', self._on_toggle_loop)  # TODO
             w.bind('<Key-b>', self._on_focus_tempo_bpm_entry)
             w.bind('<Key-s>', self._on_focus_tempo_scale_factor_entry)
@@ -120,8 +120,13 @@ class PlayerDeck:
         return 'break'
 
     def _on_stop_playback_or_close_deck(self, event=None):
-        # TODO
-        log.debug('PlayerDeck: _stop_playback_or_close_deck')
+        player_status = self._midi_player.get_status()
+        if player_status == player.MidiPlayer.Status.PLAYING or \
+           player_status == player.MidiPlayer.Status.PAUSED:
+            self._midi_player.stop()
+        else:
+            self._on_close_deck()
+        return 'break'
 
     def _update_playback_position(self):
         current, total = self._midi_player.get_ticks()
