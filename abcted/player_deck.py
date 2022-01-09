@@ -99,10 +99,7 @@ class PlayerDeck:
 
     def exit(self):
         """Stop playback and cleanup (for use on program exit)"""
-        # Stop playback, but don't update the GUI: this would lead to exceptions
-        # in tkinter
-        self._stop(update_gui=False)
-
+        self._stop()
         self._remove_midi_file()
         del self._midi_player
         log.debug("PlayerDeck: leave exit()")
@@ -181,15 +178,16 @@ class PlayerDeck:
         self._midi_player.pause()
         self._update_playback_position()
 
-    def _stop(self, update_gui=True):
+    def _stop(self):
         """Stop playback"""
+        self._stop_button.state(['pressed'])
+        self._pause_button.state(['!pressed'])
+        self._play_button.state(['!pressed'])
+
         self._stop_timer()
         self._midi_player.stop()
-        if update_gui:  # In some cases (program exit), we don't want to update the GUI
-            self._stop_button.state(['pressed'])
-            self._pause_button.state(['!pressed'])
-            self._play_button.state(['!pressed'])
-            self._update_playback_position()
+
+        self._update_playback_position()
 
     def _on_toggle_play_pause(self, event=None):
         player_status = self._midi_player.get_status()
