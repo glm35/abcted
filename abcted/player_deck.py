@@ -6,6 +6,7 @@ import logging as log
 import os
 from threading import Lock, Timer
 import tkinter as tk
+import tkinter.ttk as ttk
 from typing import Optional, Union
 
 # abcted imports
@@ -136,15 +137,15 @@ class PlayerDeck:
         frame = tk.Frame(self._player_frame)
 
         button_frame = tk.Frame(frame)
-        self._stop_button = tk.Button(button_frame, text='Stop', command=self._stop)
+        self._stop_button = ttk.Button(button_frame, text='Stop', command=self._stop)
         self._stop_button.pack(side=tk.LEFT)
-        self._pause_button = tk.Button(button_frame, text='Pause', command=self._pause)
+        self._pause_button = ttk.Button(button_frame, text='Pause', command=self._pause)
         self._pause_button.pack(side=tk.LEFT)
-        self._play_button = tk.Button(button_frame, text='Play', command=self._play)
+        self._play_button = ttk.Button(button_frame, text='Play', command=self._play)
         self._play_button.pack(side=tk.LEFT)
         self._tune_title_label = tk.Label(button_frame, text="")
         self._tune_title_label.pack(side=tk.LEFT, fill=tk.X)
-        self._close_button = tk.Button(button_frame, text='Close', command=self._on_close_deck)
+        self._close_button = ttk.Button(button_frame, text='Close', command=self._on_close_deck)
         self._close_button.pack(side=tk.RIGHT)
         self._widgets += [self._stop_button, self._pause_button, self._play_button,
                           self._close_button]
@@ -156,18 +157,26 @@ class PlayerDeck:
         frame.pack(fill=tk.X)
 
         # TODO:
-        # - stop, play, pause: keep buttons pushed to reflect current playback state
         # - when focus is on the edit zone and when click on the buttons: focus on the buttons?
         # - action the other buttons when called from keyboard shortcuts (same as mouse button)
 
     def _play(self):
         """Start playback"""
+        self._stop_button.state(['!pressed'])
+        self._pause_button.state(['!pressed'])
+        self._play_button.state(['pressed'])
+
         self._midi_player.play()
         self._start_timer()
+
         self._update_get_tempo_label()
 
     def _pause(self):
         """Pause playback"""
+        self._stop_button.state(['!pressed'])
+        self._pause_button.state(['pressed'])
+        self._play_button.state(['!pressed'])
+
         self._stop_timer()
         self._midi_player.pause()
         self._update_playback_position()
@@ -177,6 +186,9 @@ class PlayerDeck:
         self._stop_timer()
         self._midi_player.stop()
         if update_gui:  # In some cases (program exit), we don't want to update the GUI
+            self._stop_button.state(['pressed'])
+            self._pause_button.state(['!pressed'])
+            self._play_button.state(['!pressed'])
             self._update_playback_position()
 
     def _on_toggle_play_pause(self, event=None):
