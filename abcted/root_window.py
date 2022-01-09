@@ -223,7 +223,9 @@ class RootWindow():
             log.debug('RootWindow.exit(): ask save changes cancelled/failed, aborting')
             return 'break'
         else:
+            self._player_deck.exit()
             self.tk_root.destroy()
+            # TODO: fix segfault on exit
 
     def set_title(self, pretty_path, modified_flag):
         """Set the title of the root window

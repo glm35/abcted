@@ -4,7 +4,7 @@
 # PSL imports
 import logging as log
 import os
-from threading import Timer
+from threading import Lock, Timer
 import tkinter as tk
 from typing import Optional, Union
 
@@ -27,36 +27,36 @@ class PlayerDeck:
 
         self._midi_player = synth.create_midi_player()
         self._midi_filename = None
-        self._timer = None  # 1s cyclic timer to update the get tempo label
 
-    def __del__(self):
-        if self._timer is not None:
-            self._timer.cancel()  # TODO: also when hiding player deck
-        del self._midi_player
-        if self._midi_filename is not None:
-            os.remove(self._midi_filename)  # TODO: fix segfault on exit
-            self._midi_filename = None
+        self._timer = None  # 1s cyclic timer to update the get tempo label
+        # Lock to protect resources shared between the main UI thread and the
+        # timer: current position label, tempo label, timer
+        self._timer_lock = Lock()
+
+    # ------------------------------------------------------------------------
+    # Create/show player deck
+    # ------------------------------------------------------------------------
 
     def on_open_deck(self, event=None):
-        """Create the player frame if it does not exist yet, else update tune and focus
-        """
+        """Create the player frame if needed, show it and play current tune"""
+        self._show_player_deck()
+
+        # In case the user requests to open the deck while the deck is already
+        # opened, take it as a "I want to play a new tune" or "I want to play
+        # an updated version of the current tune": stop the current playback (no
+        # effect if the playback is already stopped) and remove the midi file of
+        # the old tune.
+        self._stop()
+
+        self._setup_midi_file()
+        self._play()
+
+    def _show_player_deck(self):
+        """Show player deck and focus on the play button"""
         if self._player_frame is None:
             self._create_player_frame()
         self._play_button.focus()
         self._player_frame.grid(row=2, sticky=tk.E + tk.W)
-
-        raw_tune = abcparser.get_current_raw_tune(self._edit_zone.get_buffer())
-        log.debug("raw_tune: " + str(raw_tune))
-        self._tune_title_label.config(text=abcparser.get_tune_title(raw_tune))
-        # TODO: handle AbcParserException: notify user
-        self._midi_filename = abc2midi.abc2midi(raw_tune)
-        self._midi_player.set_playlist([self._midi_filename])
-        # TODO: clean midi file when switching tune + stop playback if needed
-
-    def _on_close_deck(self, event=None):
-        self._midi_player.stop()
-        self._player_frame.grid_forget()
-        self._edit_zone.focus()
 
     def _create_player_frame(self):
         self._player_frame = tk.Frame(self._container_frame)
@@ -80,13 +80,65 @@ class PlayerDeck:
             w.bind('<KP_Subtract>', self._on_slow_down)
             w.bind('<Key-equal>', self._on_reset_tempo)
 
+        # TODO: bind enter key to all the buttons
+
+    # ------------------------------------------------------------------------
+    # Hide/close/destroy player deck
+    # ------------------------------------------------------------------------
+
+    def _hide_player_deck(self):
+        self._player_frame.grid_forget()
+
+    def _on_close_deck(self, event=None):
+        """Stop playback, hide player deck and focus the edit zone"""
+        self._stop()
+        self._remove_midi_file()
+        self._hide_player_deck()
+        self._edit_zone.focus()
+
+    def exit(self):
+        """Stop playback and cleanup (for use on program exit)"""
+        # Stop playback, but don't update the GUI: this would lead to exceptions
+        # in tkinter
+        self._stop(update_gui=False)
+
+        self._remove_midi_file()
+        del self._midi_player
+        log.debug("PlayerDeck: leave exit()")
+
+    # ------------------------------------------------------------------------
+    # Manage the MIDI file
+    # ------------------------------------------------------------------------
+
+    def _setup_midi_file(self):
+        """Create a MIDI file from the current ABC tune and pass it to the MIDI player"""
+        # In case there is already a MIDI file, remove it
+        self._remove_midi_file()
+
+        raw_tune = abcparser.get_current_raw_tune(self._edit_zone.get_buffer())
+        log.debug("PlayerDeck: raw_tune: " + str(raw_tune))
+        self._tune_title_label.config(text=abcparser.get_tune_title(raw_tune))
+        # TODO: handle AbcParserException: notify user
+        self._midi_filename = abc2midi.abc2midi(raw_tune)
+        self._midi_player.set_playlist([self._midi_filename])
+
+    def _remove_midi_file(self):
+        if self._midi_filename is not None:
+            log.debug(f"PlayerDeck: remove MIDI file: {self._midi_filename}")
+            os.remove(self._midi_filename)
+            self._midi_filename = None
+
+    # ------------------------------------------------------------------------
+    # Playback control: play, stop, pause
+    # ------------------------------------------------------------------------
+
     def _create_playback_control_frame(self):
         frame = tk.Frame(self._player_frame)
 
         button_frame = tk.Frame(frame)
-        self._stop_button = tk.Button(button_frame, text='Stop', command=self._midi_player.stop)
+        self._stop_button = tk.Button(button_frame, text='Stop', command=self._stop)
         self._stop_button.pack(side=tk.LEFT)
-        self._pause_button = tk.Button(button_frame, text='Pause', command=self._midi_player.pause)
+        self._pause_button = tk.Button(button_frame, text='Pause', command=self._pause)
         self._pause_button.pack(side=tk.LEFT)
         self._play_button = tk.Button(button_frame, text='Play', command=self._play)
         self._play_button.pack(side=tk.LEFT)
@@ -103,12 +155,29 @@ class PlayerDeck:
 
         frame.pack(fill=tk.X)
 
+        # TODO:
+        # - stop, play, pause: keep buttons pushed to reflect current playback state
+        # - when focus is on the edit zone and when click on the buttons: focus on the buttons?
+        # - action the other buttons when called from keyboard shortcuts (same as mouse button)
+
     def _play(self):
+        """Start playback"""
         self._midi_player.play()
-        if self._timer is None:
-            self._timer = Timer(interval=1, function=self._timeout)
-            self._timer.start()
+        self._start_timer()
         self._update_get_tempo_label()
+
+    def _pause(self):
+        """Pause playback"""
+        self._stop_timer()
+        self._midi_player.pause()
+        self._update_playback_position()
+
+    def _stop(self, update_gui=True):
+        """Stop playback"""
+        self._stop_timer()
+        self._midi_player.stop()
+        if update_gui:  # In some cases (program exit), we don't want to update the GUI
+            self._update_playback_position()
 
     def _on_toggle_play_pause(self, event=None):
         player_status = self._midi_player.get_status()
@@ -116,21 +185,28 @@ class PlayerDeck:
            player_status == player.MidiPlayer.Status.PAUSED:
             self._play()
         else:
-            self._midi_player.pause()
+            self._pause()
         return 'break'
 
     def _on_stop_playback_or_close_deck(self, event=None):
         player_status = self._midi_player.get_status()
         if player_status == player.MidiPlayer.Status.PLAYING or \
            player_status == player.MidiPlayer.Status.PAUSED:
-            self._midi_player.stop()
+            self._stop()
         else:
             self._on_close_deck()
         return 'break'
 
     def _update_playback_position(self):
-        current, total = self._midi_player.get_ticks()
-        self._playback_position.config(text=f"Playback position (ticks): {current}/{total}")
+        log.debug("PlayerDeck: enter _update_playback_position")
+        with self._timer_lock:
+            current, total = self._midi_player.get_ticks()
+            self._playback_position.config(text=f"Playback position (ticks): {current}/{total}")
+        log.debug("PlayerDeck: leave _update_playback_position")
+
+    # ------------------------------------------------------------------------
+    # Playback loop/repeat control
+    # ------------------------------------------------------------------------
 
     (NO_LOOP, LOOP_FOREVER, REPEAT) = (1, 2, 3)
 
@@ -175,6 +251,10 @@ class PlayerDeck:
     def _on_repeat_entry_return_keypress(self, event=None):
         self._loop_value.set(self.REPEAT)
         self._loop_control()
+
+    # ------------------------------------------------------------------------
+    # Playback tempo control
+    # ------------------------------------------------------------------------
 
     def _create_tempo_frame(self):
         self._tempo_frame = tk.Frame(self._player_frame)
@@ -242,11 +322,49 @@ class PlayerDeck:
         self._update_get_tempo_label()
 
     def _update_get_tempo_label(self):
-        tempo_bpm, midi_tempo = self._midi_player.get_tempo()
-        self._get_tempo_label.config(text=f"Get tempo: bpm={tempo_bpm}, MIDI tempo={midi_tempo}")
+        log.debug("PlayerDeck: enter _update_get_tempo_label()")
+        with self._timer_lock:
+            tempo_bpm, midi_tempo = self._midi_player.get_tempo()
+            self._get_tempo_label.config(
+                text=f"Get tempo: bpm={tempo_bpm}, MIDI tempo={midi_tempo}")
+        log.debug("PlayerDeck: leave _update_get_tempo_label()")
+
+    # ------------------------------------------------------------------------
+    # GUI periodic update
+    #
+    # Remark: here we use "self._timer_lock" to make timer manipulations atomic.
+    # Else concurrent access by the GUI thread and the timer thread could lead
+    # to race conditions and inconsistent behaviour.
+    # ------------------------------------------------------------------------
+
+    def _start_timer(self):
+        """Start the timer if it is not already running"""
+        log.debug("PlayerDeck: enter _start_timer()")
+        with self._timer_lock:
+            if self._timer is None:
+                log.debug("PlayerDeck: _start_timer(): starting")
+                self._timer = Timer(interval=1, function=self._timeout)
+                self._timer.start()
+        log.debug("PlayerDeck: leave _start_timer()")
+
+    def _stop_timer(self):
+        log.debug("PlayerDeck: enter _stop_timer()")
+        with self._timer_lock:
+            if self._timer is not None:
+                log.debug("PlayerDeck: _stop_timer(): stopping")
+                self._timer.cancel()
+                # self._timer.join()
+                self._timer = None
+        log.debug("PlayerDeck: leave _stop_timer()")
 
     def _timeout(self):
+        log.debug("PlayerDeck: enter _timeout()")
         self._update_playback_position()
         self._update_get_tempo_label()
-        self._timer = Timer(interval=1, function=self._timeout)
-        self._timer.start()
+        with self._timer_lock:
+            self._timer = None
+            # Don't restart timer with a call to self._start_timer(): this would
+            # lead to a deadlock
+            self._timer = Timer(interval=1, function=self._timeout)
+            self._timer.start()
+        log.debug("PlayerDeck: leave _timeout()")
