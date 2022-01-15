@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import logging
+import logging as log
 import tkinter as tk
 import tkinter.scrolledtext as tk_scrolledtext
 
@@ -70,8 +70,8 @@ class EditZone():
         Returns:
             None
         """
-        logging.debug('key pressed: ' + event.keysym)
-        logging.debug('modifier keys: 0x%04x', event.state)
+        log.debug('key pressed: ' + event.keysym)
+        log.debug('modifier keys: 0x%04x', event.state)
         ctrl_alt_modifiers = 0x0004 | 0x0008 | 0x0080
         if event.state & ctrl_alt_modifiers == 0:
             # Key press without Ctrl/Left Alt/Right Alt modifiers

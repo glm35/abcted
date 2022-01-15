@@ -45,9 +45,8 @@ class File():
 
     def on_file_new(self, event=None):
         """'File => New' menu callback"""
-        log.debug('File.on_file_new()')
         if self.ask_save_changes() == 'cancel':
-            log.debug('File.on_file_new(): ask save changes cancelled/failed, leaving')
+            log.debug('ask save changes cancelled/failed, leaving')
         else:
             self._path = None
             self._buffer.replace('\n')
@@ -105,7 +104,7 @@ class File():
         Params:
             raw_path(str): file path + filename, not necessarily normalized
         """
-        log.debug('File.open(): opening: ' + raw_path)
+        log.debug('opening: ' + raw_path)
         path = normalize_path(raw_path)
         text = None
         try:
@@ -113,24 +112,24 @@ class File():
                 try:
                     text = file.read()
                 except UnicodeDecodeError as e:
-                    log.debug('File.open(): caught exception UnicodeDecodeError: ' + str(e))
+                    log.debug('caught exception UnicodeDecodeError: ' + str(e))
                     tk_messagebox.showerror('Erreur lors de l\'ouverture du fichier',
                                             'Impossible d\'ouvrir ' + path
                                             + ': il n\'est pas encodé en UTF-8.'
                                             + ' Veuillez corriger l\'encodage et réessayer.')
         except FileNotFoundError as e:
-            log.debug('File.open(): caught exception ' + type(e).__name__ + ' : '+ str(e))
+            log.debug('caught exception ' + type(e).__name__ + ' : '+ str(e))
             tk_messagebox.showerror('Erreur lors de l\'ouverture du fichier',
                                     'Impossible d\'ouvrir ' + path + ': '
                                     + str(e))
             recent_files.remove_recent_file(path)
         except Exception as e:  # Catch-all handler for other file exceptions
-            log.debug('File.open(): caught exception ' + type(e).__name__ + ' : '+ str(e))
+            log.debug('caught exception ' + type(e).__name__ + ' : '+ str(e))
             tk_messagebox.showerror('Erreur lors de l\'ouverture du fichier',
                                     'Impossible d\'ouvrir ' + path + ': ' + str(e))
 
         if text is None:
-            log.debug('File.open(): read failed, leaving')
+            log.debug('read failed, leaving')
         else:
             self._path = path
             self._buffer.replace(text)
@@ -149,20 +148,18 @@ class File():
               is presented to the user.
 
         """
-        log.debug('File.on_file_open(): entering')
-
         if self.ask_save_changes() == 'cancel':
-            log.debug('File.on_file_open(): ask save changes cancelled/failed, leaving')
+            log.debug('ask save changes cancelled/failed, leaving')
             return 'break'
 
         raw_path = path
         if raw_path is None:
             raw_path = tk_filedialog.askopenfilename(  # raw_path is a 'str' object
                 defaultextension='.abc',
-                filetypes = [('Fichiers ABC', '*.abc'), ('Tous les fichiers', '*.*')],
+                filetypes=[('Fichiers ABC', '*.abc'), ('Tous les fichiers', '*.*')],
                 initialdir='.')  # Under Windows, the current dir is not the initial dir
             if not raw_path:
-                log.debug('File.on_file_open(): no file selected, leaving')
+                log.debug('no file selected, leaving')
                 return 'break'
 
         self.open(raw_path)
@@ -197,13 +194,11 @@ class File():
 
     def on_file_add_to_favorites(self, event=None):
         """'File => Add to favorites' menu callback"""
-        log.debug('File.on_file_add_to_favorites(): entering')
         recent_files.add_to_favorites(self._path)
         return 'break'
 
     def on_file_remove_from_favorites(self, event=None):
         """'File => Remove from favorites' menu callback"""
-        log.debug('File.on_file_remove_from_favorites(): entering')
         recent_files.remove_from_favorites(self._path)
         return 'break'
 
@@ -230,7 +225,7 @@ class File():
             self.set_root_window_title()
             recent_files.promote_recent_file(path)
         except IOError as e:
-            log.debug('File._write_to_file(): caught exception ' + type(e).__name__ + ' : '+ str(e))
+            log.debug('caught exception ' + type(e).__name__ + ' : '+ str(e))
             tk_messagebox.showerror('Erreur lors de l\'enregistrement du fichier',
                                     'Impossible d\'enregistrer ' + path + ': '
                                     + str(e))
@@ -272,7 +267,7 @@ class File():
             initialdir='.')  # Under Windows, the current dir is not the initial dir
         if raw_path:
             path = normalize_path(raw_path)
-            log.debug('Saving as: ' + path)
+            log.debug('saving as: ' + path)
             return self._write_to_file(path)
         else:
             return False

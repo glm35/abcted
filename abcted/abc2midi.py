@@ -62,7 +62,7 @@ def get_midi_note(abc_note):
 def abc2midi(abc_lines: List[str]) -> str:
     with tempfile.NamedTemporaryFile(mode="wt", suffix=".abc", delete=False) as temp_abc_file:
         temp_abc_file.writelines(line + "\n" for line in abc_lines)
-    log.debug("Wrote raw tune to temp file: " + temp_abc_file.name)
+    log.debug("wrote raw tune to temp file: " + temp_abc_file.name)
 
     temp_midi_filename = temp_abc_file.name[:-4] + ".mid"
     abc2midi_cmd = ("abc2midi", temp_abc_file.name, "-o", temp_midi_filename)

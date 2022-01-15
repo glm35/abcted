@@ -30,7 +30,7 @@ def get_note_to_play(edit_buffer: EditZoneBuffer, keysym):
              the tune scale. Examples: 'c', "c'", 'C', 'C,,', '^C' (C sharp), '_c' (c flat)
      """
 
-    log.debug('get_note_to_play(): keysym=' + keysym)
+    log.debug('keysym=' + keysym)
 
     # Check whether we are in comment context
     raw_abc_line = edit_buffer.get_current_line_to_cursor()
@@ -75,7 +75,7 @@ def get_note_to_play(edit_buffer: EditZoneBuffer, keysym):
     else:
         # Find the tune key at the insertion point
         raw_key = get_current_raw_key(edit_buffer)
-        log.debug("get_note_to_play(): raw_key at insert: " + raw_key)
+        log.debug("raw_key at insert: " + raw_key)
         try:
             abc_key = normalize_abc_key(raw_key)
         except AbcParserException:
@@ -88,7 +88,7 @@ def get_note_to_play(edit_buffer: EditZoneBuffer, keysym):
 
     abc_note = abc_note + octave_marker
 
-    log.debug('get_note_to_play(): abc_note=' + abc_note)
+    log.debug('abc_note=' + abc_note)
     return abc_note
 
 

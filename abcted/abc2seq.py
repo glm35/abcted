@@ -116,8 +116,8 @@ class AbcParserStateMachine:
         self.seq.npm = compute_notes_per_minute(
             self.default_note_length, self.meter, self.tempo)
         self.seq.tpn = compute_ticks_per_note(self.seq.npm)
-        log.debug('ABC parser: notes_per_minute = ' + str(self.seq.npm))
-        log.debug('ABC parser: ticks_per_note = ' + str(self.seq.tpn))
+        log.debug('notes_per_minute = ' + str(self.seq.npm))
+        log.debug('ticks_per_note = ' + str(self.seq.tpn))
 
     def run(self, line: str):
         line = line.strip()  # Strip leading and trailing spaces
@@ -140,32 +140,32 @@ class AbcParserStateMachine:
 
             if line.startswith('K:'):
                 self.key = abcparser.normalize_abc_key(line[2:])
-                log.debug('ABC parser: key = ' + str(self.key))
+                log.debug('key = ' + str(self.key))
                 self._state = self.S_TUNE
                 self._update_notes_per_minute()
 
             elif line.startswith('L:'):
                 self.default_note_length = \
                     abcparser.parse_default_note_length(line[2:])
-                log.debug('ABC parser: default note length = '
+                log.debug('default note length = '
                           + str(self.default_note_length))
 
             elif line.startswith('M:'):
                 self.meter = abcparser.parse_meter(line[2:])
-                log.debug('Abc parser: meter = ' + str(self.meter))
+                log.debug('meter = ' + str(self.meter))
 
             elif line.startswith('Q:'):
                 self.tempo = abcparser.parse_tempo(line[2:])
-                log.debug('Abc parser: tempo = ' + str(self.tempo))
+                log.debug('tempo = ' + str(self.tempo))
 
             elif abcparser.is_header(line):
                 pass
 
             else:
-                log.warning('ABC parser: unexpected line: \'' + line + '\'')
+                log.warning('unexpected line: \'' + line + '\'')
 
         elif self._state == self.S_TUNE:
-            log.warning('ABC parser: unexpected line: \'' + line + '\'')
+            log.warning('unexpected line: \'' + line + '\'')
 
 
 def abc2seq(raw_abc_tune: List[str]) -> Sequence:

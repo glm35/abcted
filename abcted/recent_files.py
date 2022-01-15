@@ -242,7 +242,7 @@ def _read_file_list(file_list_path):
 
                 file_list.append(path)
     except FileNotFoundError:
-        log.debug('File not found: ' + abs_file_list_name)
+        log.debug('file not found: ' + abs_file_list_name)
 
     # TODO: test not UTF-8 encoded favorite_files.txt + issue warning log message
     # rem: on Windows 7, no prb to read a ISO-8859-1 encoded file

@@ -217,10 +217,10 @@ class RootWindow():
         self.tk_root.geometry("%dx%d+0+0" % (root_w, root_h))
 
     def exit(self, event=None):
-        log.debug('RootWindow.exit()')
+        log.debug('')
 
         if self._file.ask_save_changes() == 'cancel':
-            log.debug('RootWindow.exit(): ask save changes cancelled/failed, aborting')
+            log.debug('ask save changes cancelled/failed, aborting')
             return 'break'
         else:
             self._player_deck.exit()

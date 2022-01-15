@@ -99,10 +99,11 @@ class PlayerDeck:
 
     def exit(self):
         """Stop playback and cleanup (for use on program exit)"""
+        log.debug("begin")
         self._stop()
         self._remove_midi_file()
         del self._midi_player
-        log.debug("PlayerDeck: leave exit()")
+        log.debug("end")
 
     # ------------------------------------------------------------------------
     # Manage the MIDI file
@@ -114,7 +115,7 @@ class PlayerDeck:
         self._remove_midi_file()
 
         raw_tune = abcparser.get_current_raw_tune(self._edit_zone.get_buffer())
-        log.debug("PlayerDeck: raw_tune: " + str(raw_tune))
+        log.debug("raw_tune: " + str(raw_tune))
         self._tune_title_label.config(text=abcparser.get_tune_title(raw_tune))
         # TODO: handle AbcParserException: notify user
         self._midi_filename = abc2midi.abc2midi(raw_tune)
@@ -122,7 +123,7 @@ class PlayerDeck:
 
     def _remove_midi_file(self):
         if self._midi_filename is not None:
-            log.debug(f"PlayerDeck: remove MIDI file: {self._midi_filename}")
+            log.debug(f"remove MIDI file: {self._midi_filename}")
             os.remove(self._midi_filename)
             self._midi_filename = None
 
@@ -208,11 +209,11 @@ class PlayerDeck:
         return 'break'
 
     def _update_playback_position(self):
-        log.debug("PlayerDeck: enter _update_playback_position")
+        log.debug("begin")
         with self._timer_lock:
             current, total = self._midi_player.get_ticks()
             self._playback_position.config(text=f"Playback position (ticks): {current}/{total}")
-        log.debug("PlayerDeck: leave _update_playback_position")
+        log.debug("end")
 
     # ------------------------------------------------------------------------
     # Playback loop/repeat control
@@ -332,12 +333,12 @@ class PlayerDeck:
         self._update_get_tempo_label()
 
     def _update_get_tempo_label(self):
-        log.debug("PlayerDeck: enter _update_get_tempo_label()")
+        log.debug("begin")
         with self._timer_lock:
             tempo_bpm, midi_tempo = self._midi_player.get_tempo()
             self._get_tempo_label.config(
                 text=f"Get tempo: bpm={tempo_bpm}, MIDI tempo={midi_tempo}")
-        log.debug("PlayerDeck: leave _update_get_tempo_label()")
+        log.debug("end")
 
     # ------------------------------------------------------------------------
     # GUI periodic update
@@ -349,26 +350,26 @@ class PlayerDeck:
 
     def _start_timer(self):
         """Start the timer if it is not already running"""
-        log.debug("PlayerDeck: enter _start_timer()")
+        log.debug("begin")
         with self._timer_lock:
             if self._timer is None:
-                log.debug("PlayerDeck: _start_timer(): starting")
+                log.debug("starting timer")
                 self._timer = Timer(interval=1, function=self._timeout)
                 self._timer.start()
-        log.debug("PlayerDeck: leave _start_timer()")
+        log.debug("end")
 
     def _stop_timer(self):
-        log.debug("PlayerDeck: enter _stop_timer()")
+        log.debug("begin")
         with self._timer_lock:
             if self._timer is not None:
-                log.debug("PlayerDeck: _stop_timer(): stopping")
+                log.debug("stopping timer")
                 self._timer.cancel()
                 # self._timer.join()
                 self._timer = None
-        log.debug("PlayerDeck: leave _stop_timer()")
+        log.debug("end")
 
     def _timeout(self):
-        log.debug("PlayerDeck: enter _timeout()")
+        log.debug("begin")
         self._update_playback_position()
         self._update_get_tempo_label()
         with self._timer_lock:
@@ -377,4 +378,4 @@ class PlayerDeck:
             # lead to a deadlock
             self._timer = Timer(interval=1, function=self._timeout)
             self._timer.start()
-        log.debug("PlayerDeck: leave _timeout()")
+        log.debug("end")

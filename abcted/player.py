@@ -182,7 +182,7 @@ class MidiPlayer:
     def set_playlist(self, playlist):
         self._playlist = []
         for midi_file in playlist:
-            log.debug("Player: set_playlist: add midi file: " + midi_file)
+            log.debug("add midi file: " + midi_file)
             self._playlist.append(midi_file)
 
     def get_playlist(self):
@@ -205,7 +205,7 @@ class MidiPlayer:
 
     def play(self):
         """Start playing tunes in the playlist."""
-        print("Player: play")
+        log.debug("start playing")
 
         # If playback is finished, need to stop first:
         if self._fluidplayer is not None and self._paused is False \
@@ -225,14 +225,14 @@ class MidiPlayer:
 
     def pause(self):
         """Pause playback."""
-        print("Player: pause")
+        log.debug("pause playing")
         if self._fluidplayer is not None:
             self._fluidplayer.stop()  # fluid_player_stop() actually just pauses playback...
             self._paused = True
 
     def stop(self):
         """Stop playing."""
-        print("Player: stop")
+        log.debug("stop playing")
         if self._fluidplayer is not None:
             # No way to stop playback and resume at the beginning of the
             # playlist with fluidsynth, so we just delete the player.
@@ -273,7 +273,7 @@ class MidiPlayer:
     def repeat_count(self, count):
         if count == 0 or count < -1:
             raise ValueError("repeat count must be > 0 or equal to -1 (infinite)")
-        print(f"Player: repeat_count={count}")
+        log.debug(f"repeat_count={count}")
         self._repeat_count = count
         if self._fluidplayer is not None:
             self._fluidplayer.set_loop(self.repeat_count)
@@ -291,10 +291,10 @@ class MidiPlayer:
         self._tempo_bpm = bpm
         self._tempo_scale_factor = 1
         if self._tempo_bpm is not None:
-            print(f"Player: set tempo bpm={bpm}")
+            log.debug(f"set tempo bpm={bpm}")
             self._set_tempo(bpm=bpm)
         else:
-            print("Player: reset tempo (bpm)")
+            log.debug("reset tempo (bpm)")
             self._set_tempo(scale_factor=self._tempo_scale_factor)
 
     @property
@@ -307,7 +307,7 @@ class MidiPlayer:
             raise ValueError
         self._tempo_scale_factor = scale_factor
         self._tempo_bpm = None
-        print(f"Player: set tempo scale factor={scale_factor}")
+        log.debug(f"set tempo scale factor={scale_factor}")
         self._set_tempo(scale_factor=self._tempo_scale_factor)
 
     def _set_tempo(self, bpm: Optional[int] = None, scale_factor: Optional[float] = None):
@@ -315,13 +315,13 @@ class MidiPlayer:
             return
 
         if bpm is not None:
-            print(f'Player._set_tempo: Set tempo (bpm): {bpm}')
+            log.debug(f'set tempo (bpm): {bpm}')
             self._fluidplayer.set_tempo(TempoType.TEMPO_EXTERNAL_BPM, tempo=bpm)
         elif scale_factor is not None and scale_factor != 1:
-            print(f'Player._set_tempo: Set relative tempo: x{scale_factor}')
+            log.debug(f'set relative tempo: x{scale_factor}')
             self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=scale_factor)
         else:
-            print('Player._set_tempo: Reset tempo (use MIDI file tempo)')
+            log.debug('reset tempo (use MIDI file tempo)')
             self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=1)
 
     def get_tempo(self):
