@@ -30,8 +30,10 @@ class PlayerDeck:
         self._midi_filename = None
 
         self._timer = None  # 1s cyclic timer to update the get tempo label
-        # Lock to protect resources shared between the main UI thread and the
-        # timer: current position label, tempo label, timer
+        # Lock to protect self._timer which is shared between the main UI thread
+        # and the timer thread.  It seems that the UI has its own lock, so we
+        # don't attempt to protect against UI concurrent access, we would risk
+        # deadlocks.
         self._timer_lock = Lock()
 
     # ------------------------------------------------------------------------
@@ -99,11 +101,9 @@ class PlayerDeck:
 
     def exit(self):
         """Stop playback and cleanup (for use on program exit)"""
-        log.debug("begin")
         self._stop()
         self._remove_midi_file()
         del self._midi_player
-        log.debug("end")
 
     # ------------------------------------------------------------------------
     # Manage the MIDI file
@@ -181,6 +181,12 @@ class PlayerDeck:
 
     def _stop(self):
         """Stop playback"""
+        if self._player_frame is None:
+            # The player frame has not been created so playback never started:
+            # no need to stop, and bad things would happend if we tried to update
+            # the player frame UI
+            return
+
         self._stop_button.state(['pressed'])
         self._pause_button.state(['!pressed'])
         self._play_button.state(['!pressed'])
@@ -209,11 +215,8 @@ class PlayerDeck:
         return 'break'
 
     def _update_playback_position(self):
-        log.debug("begin")
-        with self._timer_lock:
-            current, total = self._midi_player.get_ticks()
-            self._playback_position.config(text=f"Playback position (ticks): {current}/{total}")
-        log.debug("end")
+        current, total = self._midi_player.get_ticks()
+        self._playback_position.config(text=f"Playback position (ticks): {current}/{total}")
 
     # ------------------------------------------------------------------------
     # Playback loop/repeat control
@@ -333,12 +336,8 @@ class PlayerDeck:
         self._update_get_tempo_label()
 
     def _update_get_tempo_label(self):
-        log.debug("begin")
-        with self._timer_lock:
-            tempo_bpm, midi_tempo = self._midi_player.get_tempo()
-            self._get_tempo_label.config(
-                text=f"Get tempo: bpm={tempo_bpm}, MIDI tempo={midi_tempo}")
-        log.debug("end")
+        tempo_bpm, midi_tempo = self._midi_player.get_tempo()
+        self._get_tempo_label.config(text=f"Get tempo: bpm={tempo_bpm}, MIDI tempo={midi_tempo}")
 
     # ------------------------------------------------------------------------
     # GUI periodic update
@@ -350,32 +349,27 @@ class PlayerDeck:
 
     def _start_timer(self):
         """Start the timer if it is not already running"""
-        log.debug("begin")
         with self._timer_lock:
             if self._timer is None:
-                log.debug("starting timer")
                 self._timer = Timer(interval=1, function=self._timeout)
                 self._timer.start()
-        log.debug("end")
 
     def _stop_timer(self):
-        log.debug("begin")
         with self._timer_lock:
             if self._timer is not None:
-                log.debug("stopping timer")
                 self._timer.cancel()
                 # self._timer.join()
                 self._timer = None
-        log.debug("end")
 
     def _timeout(self):
-        log.debug("begin")
         self._update_playback_position()
         self._update_get_tempo_label()
         with self._timer_lock:
-            self._timer = None
-            # Don't restart timer with a call to self._start_timer(): this would
-            # lead to a deadlock
-            self._timer = Timer(interval=1, function=self._timeout)
-            self._timer.start()
-        log.debug("end")
+            if self._timer is not None:
+                # Restart timer
+                self._timer = Timer(interval=1, function=self._timeout)
+                self._timer.start()
+                # Remark: Don't restart timer with a call to
+                # self._start_timer(): this would lead to a deadlock
+            else:
+                pass  # timer stopped by UI thread: don't restart
