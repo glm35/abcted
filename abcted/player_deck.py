@@ -74,7 +74,7 @@ class PlayerDeck:
         for w in self._widgets:
             w.bind('<Escape>', self._on_stop_playback_or_close_deck)
             w.bind('<Key-space>', self._on_toggle_play_pause)
-            w.bind('<Key-l>', self._on_toggle_loop)  # TODO
+            w.bind('<Key-l>', self._on_toggle_loop)
             w.bind('<Key-b>', self._on_focus_tempo_bpm_entry)
             w.bind('<Key-s>', self._on_focus_tempo_scale_factor_entry)
             w.bind('<Key-plus>', self._on_speed_up)  # TODO: speed up tempo +10%
@@ -239,6 +239,7 @@ class PlayerDeck:
             radio_button.pack(side=tk.LEFT)
 
         self._repeat_entry = tk.Entry(self._loop_control_frame, width=3)
+        self._repeat_entry.insert(0, "3")  # repeat 3 times by default
         self._repeat_entry.bind("<Return>", self._on_repeat_entry_return_keypress)
         self._repeat_entry.bind("<KP_Enter>", self._on_repeat_entry_return_keypress)
         self._widgets.append(self._repeat_entry)
@@ -260,7 +261,12 @@ class PlayerDeck:
                 pass
 
     def _on_toggle_loop(self, event=None):
-        pass
+        loop_control_mode = self._loop_value.get() + 1
+        if loop_control_mode > self.REPEAT:
+            loop_control_mode = self.NO_LOOP
+        self._loop_value.set(loop_control_mode)
+
+        self._loop_control()
 
     def _on_repeat_entry_return_keypress(self, event=None):
         self._loop_value.set(self.REPEAT)
