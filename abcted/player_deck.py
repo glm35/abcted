@@ -77,9 +77,9 @@ class PlayerDeck:
             w.bind('<Key-l>', self._on_toggle_loop)
             w.bind('<Key-b>', self._on_focus_tempo_bpm_entry)
             w.bind('<Key-s>', self._on_focus_tempo_scale_factor_entry)
-            w.bind('<Key-plus>', self._on_speed_up)  # TODO: speed up tempo +10%
+            w.bind('<Key-plus>', self._on_speed_up)
             w.bind('<KP_Add>', self._on_speed_up)
-            w.bind('<Key-minus>', self._on_slow_down)  # TODO: slow down tempo -10%
+            w.bind('<Key-minus>', self._on_slow_down)
             w.bind('<KP_Subtract>', self._on_slow_down)
             w.bind('<Key-equal>', self._on_reset_tempo)
 
@@ -330,10 +330,36 @@ class PlayerDeck:
         self._update_get_tempo_label()
 
     def _on_speed_up(self, event=None):
-        pass
+        self.quick_change_scale_factor("+")
 
     def _on_slow_down(self, event=None):
-        pass
+        self.quick_change_scale_factor("-")
+
+    def quick_change_scale_factor(self, sign):
+        # Read scale factor entry, and default to 1 if the entry is empty or
+        # contains an invalid value.
+        try:
+            scale_factor = float(self._scale_factor_entry.get())
+        except ValueError:
+            scale_factor = 1.0
+
+        # Depending on sign, increase or decrease scale factor with a 0.1 step.
+        # Limit lower values to ~ 0.1 and upper values to 10.
+        if sign == "+":
+            scale_factor += 0.1
+            if scale_factor >= 10:
+                scale_factor = 10.0
+        else:
+            scale_factor -= 0.1
+            if scale_factor <= 0:
+                scale_factor = 0.1
+
+        # Replace text in scale factor entry with new value
+        self._scale_factor_entry.delete(0, tk.END)
+        self._scale_factor_entry.insert(0, f"{scale_factor:.3}")
+
+        # Apply new scale factor
+        self._on_set_tempo_scale_factor()
 
     def _on_reset_tempo(self, event=None):
         self._tempo_bpm_entry.delete(0, len(self._tempo_bpm_entry.get()))
