@@ -4,7 +4,6 @@
 # PSL imports
 import logging as log
 import os
-from threading import Lock, Timer
 import tkinter as tk
 import tkinter.ttk as ttk
 from typing import Optional, Union
@@ -29,12 +28,7 @@ class PlayerDeck:
         self._midi_player = synth.create_midi_player()
         self._midi_filename = None
 
-        self._timer = None  # 1s cyclic timer to update the get tempo label
-        # Lock to protect self._timer which is shared between the main UI thread
-        # and the timer thread.  It seems that the UI has its own lock, so we
-        # don't attempt to protect against UI concurrent access, we would risk
-        # deadlocks.
-        self._timer_lock = Lock()
+        self._timer_id = None
 
     # ------------------------------------------------------------------------
     # Create/show player deck
@@ -372,36 +366,26 @@ class PlayerDeck:
         self._get_tempo_label.config(text=f"Get tempo: bpm={tempo_bpm}, MIDI tempo={midi_tempo}")
 
     # ------------------------------------------------------------------------
-    # GUI periodic update
+    # GUI periodic update every second
     #
-    # Remark: here we use "self._timer_lock" to make timer manipulations atomic.
-    # Else concurrent access by the GUI thread and the timer thread could lead
-    # to race conditions and inconsistent behaviour.
+    # We use tkinter universal widget method "after()" so that the callback gets
+    # called in the context of the main thread: no risk of race conditions.
     # ------------------------------------------------------------------------
 
     def _start_timer(self):
         """Start the timer if it is not already running"""
-        with self._timer_lock:
-            if self._timer is None:
-                self._timer = Timer(interval=1, function=self._timeout)
-                self._timer.start()
+        if self._timer_id is None:
+            self._timer_id = self._player_frame.after(1000, self._timeout)
 
     def _stop_timer(self):
-        with self._timer_lock:
-            if self._timer is not None:
-                self._timer.cancel()
-                # self._timer.join()
-                self._timer = None
+        """Stop the timer if it is running"""
+        if self._timer_id is not None:
+            self._player_frame.after_cancel(self._timer_id)
+            self._timer_id = None
 
     def _timeout(self):
+        """Update UI and restart timer unless it has been stopped"""
         self._update_playback_position()
         self._update_get_tempo_label()
-        with self._timer_lock:
-            if self._timer is not None:
-                # Restart timer
-                self._timer = Timer(interval=1, function=self._timeout)
-                self._timer.start()
-                # Remark: Don't restart timer with a call to
-                # self._start_timer(): this would lead to a deadlock
-            else:
-                pass  # timer stopped by UI thread: don't restart
+        if self._timer_id is not None:
+            self._timer_id = self._player_frame.after(1000, self._timeout)
