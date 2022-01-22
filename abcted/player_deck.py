@@ -45,7 +45,7 @@ class PlayerDeck:
         # the old tune.
         self._stop()
 
-        self._setup_midi_file()
+        self._setup_tune()
         self._play()
 
     def _show_player_deck(self):
@@ -100,18 +100,28 @@ class PlayerDeck:
         del self._midi_player
 
     # ------------------------------------------------------------------------
-    # Manage the MIDI file
+    # Manage the tune to play
     # ------------------------------------------------------------------------
 
-    def _setup_midi_file(self):
+    def _setup_tune(self):
         """Create a MIDI file from the current ABC tune and pass it to the MIDI player"""
+
         # In case there is already a MIDI file, remove it
         self._remove_midi_file()
 
+        # Get the current ABC tune, ie the tune at the cursor position in the edit zone
         raw_tune = abcparser.get_current_raw_tune(self._edit_zone.get_buffer())
         log.debug("raw_tune: " + str(raw_tune))
-        self._tune_title_label.config(text=abcparser.get_tune_title(raw_tune))
-        # TODO: handle AbcParserException: notify user
+
+        # Parse the ABC tune and display its title on the player deck
+        try:
+            self._abc_tune = abcparser.AbcParser(raw_tune)
+        except abcparser.AbcParserException:
+            # TODO: notify user
+            pass
+        self._tune_title_label.config(text=self._abc_tune.title)
+
+        # Create a MIDI file from the ABC tune and give its name to the player
         self._midi_filename = abc2midi.abc2midi(raw_tune)
         self._midi_player.set_playlist([self._midi_filename])
 
