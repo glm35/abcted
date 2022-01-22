@@ -8,7 +8,7 @@ import tkinter.scrolledtext as tk_scrolledtext
 import abc2midi
 import abcparser
 import edit_zone_buffer
-from player import Synth, SingleNoteAbcPlayerException
+from player import Synth
 import theme
 
 

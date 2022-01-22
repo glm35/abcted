@@ -153,7 +153,7 @@ class RootWindow():
         try:
             self._synth.setup_synth()
             self._synth.select_instrument('Acoustic Grand Piano')
-        except player.SingleNoteAbcPlayerException as e:
+        except player.PlayerException as e:
             # Under Windows, after we display a messagebox before the mainloop():
             # 1. the edit zone looses its focus (and it is difficult to get it back).
             # 2. the global keybindings do not work.

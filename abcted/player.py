@@ -34,7 +34,7 @@ soundfonts = [  # We will use the first sound font that can be found in that lis
 ]
 
 
-class SingleNoteAbcPlayerException(Exception):
+class PlayerException(Exception):
     pass
 
 
@@ -65,7 +65,7 @@ class Synth:
         """Setup the synth so that it can produce sound.
 
            Raises:
-               SingleNoteAbcPlayerException: an error occured during the synth setup.
+               PlayerException: an error occured during the synth setup.
                    Most common errors: fluidsynth library not found, soundfont not found.
         """
         try:
@@ -85,7 +85,7 @@ class Synth:
             message = 'Failed to setup fluidsynth: ' + str(e) + '. Audio output will be disabled.'
             log.warning(message)
             log.debug(traceback.format_exc())
-            raise SingleNoteAbcPlayerException(message)
+            raise PlayerException(message)
 
         self._no_sound = False  # If we can reach that point without exception, we should have sound
         self.select_instrument(self._instrument)
@@ -94,7 +94,7 @@ class Synth:
         """Look for a soundfont and load it into fluidsynth.
 
            Raises:
-               SingleNoteAbcPlayerException: could not find a soundfont
+               PlayerException: could not find a soundfont
         """
         soundfont_found = False
         for soundfont in soundfonts:
@@ -109,7 +109,7 @@ class Synth:
         if not soundfont_found:
             message = 'No soundfont can be found. Audio output will be disabled.'
             log.warning(message)
-            raise SingleNoteAbcPlayerException(message)
+            raise PlayerException(message)
 
     def select_instrument(self, instrument_name):
         self._instrument = instrument_name
@@ -119,7 +119,7 @@ class Synth:
         self._fluidsynth.program_change(self._midi_channel, self._midi_program)
 
     def select_midi_channel(self, midi_channel):
-        """Set the MIDI channel used by the SingleNoteAbcPlayer. Here channel numbering starts at 0,
+        """Set the MIDI channel used by the Player. Here channel numbering starts at 0,
         use 9 for percussions (channel 10)."""
         self._midi_channel = midi_channel
         if self._no_sound:
