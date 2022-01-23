@@ -169,8 +169,8 @@ class MidiPlayer:
 
         self.repeat_count = 1
 
-        # By default, use tempo from midi file or default fluidsynth tempo (120 bpm)
-        self.tempo_bpm = None
+        # By default, use tempo from midi file or default fluidsynth tempo (120)
+        self.tempo = None  # Tempo in quarter notes per minute
         self.tempo_scale_factor = 1
 
     def __del__(self):
@@ -215,7 +215,7 @@ class MidiPlayer:
         if self._fluidplayer is None:
             self._fluidplayer = self._synth.create_fluid_player()
             self._fluidplayer.set_loop(self.repeat_count)
-            self._set_tempo(bpm=self.tempo_bpm, scale_factor=self.tempo_scale_factor)
+            self._set_tempo(tempo=self.tempo, scale_factor=self.tempo_scale_factor)
 
             for midi_file in self._playlist:
                 self._fluidplayer.add(midi_file)
@@ -281,20 +281,21 @@ class MidiPlayer:
     # Tempo control
 
     @property
-    def tempo_bpm(self):
-        return self._tempo_bpm
+    def tempo(self):
+        """Get tempo in quarter notes per minute"""
+        return self._tempo
 
-    @tempo_bpm.setter
-    def tempo_bpm(self, bpm: Optional[int]):
-        if bpm is not None and bpm <= 0:
+    @tempo.setter
+    def tempo(self, tempo: Optional[int]):
+        if tempo is not None and tempo <= 0:
             raise ValueError
-        self._tempo_bpm = bpm
+        self._tempo = tempo
         self._tempo_scale_factor = 1
-        if self._tempo_bpm is not None:
-            log.debug(f"set tempo bpm={bpm}")
-            self._set_tempo(bpm=bpm)
+        if self._tempo is not None:
+            log.debug(f"set tempo={tempo}")
+            self._set_tempo(tempo=tempo)
         else:
-            log.debug("reset tempo (bpm)")
+            log.debug("reset tempo")
             self._set_tempo(scale_factor=self._tempo_scale_factor)
 
     @property
@@ -306,17 +307,17 @@ class MidiPlayer:
         if scale_factor is not None and scale_factor <= 0:
             raise ValueError
         self._tempo_scale_factor = scale_factor
-        self._tempo_bpm = None
+        self._tempo = None
         log.debug(f"set tempo scale factor={scale_factor}")
         self._set_tempo(scale_factor=self._tempo_scale_factor)
 
-    def _set_tempo(self, bpm: Optional[int] = None, scale_factor: Optional[float] = None):
+    def _set_tempo(self, tempo: Optional[int] = None, scale_factor: Optional[float] = None):
         if self._fluidplayer is None:
             return
 
-        if bpm is not None:
-            log.debug(f'set tempo (bpm): {bpm}')
-            self._fluidplayer.set_tempo(TempoType.TEMPO_EXTERNAL_BPM, tempo=bpm)
+        if tempo is not None:
+            log.debug(f'set tempo: {tempo}')
+            self._fluidplayer.set_tempo(TempoType.TEMPO_EXTERNAL_BPM, tempo=tempo)
         elif scale_factor is not None and scale_factor != 1:
             log.debug(f'set relative tempo: x{scale_factor}')
             self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=scale_factor)
@@ -325,8 +326,8 @@ class MidiPlayer:
             self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=1)
 
     def get_tempo(self):
-        tempo_bpm, midi_tempo = None, None
+        tempo, midi_tempo = None, None
         if self._fluidplayer is not None:
-            tempo_bpm = self._fluidplayer.get_bpm()
+            tempo = self._fluidplayer.get_bpm()
             midi_tempo = self._fluidplayer.get_midi_tempo()
-        return tempo_bpm, midi_tempo
+        return tempo, midi_tempo

@@ -8,12 +8,14 @@ Tools that parse the ABC input
 import logging as log
 from typing import List
 
+from abctempo import AbcTempo, AbcTempoException
 from edit_zone_buffer import EditZoneBuffer
 import musictheory
 
 
 class AbcParserException(Exception):
-    pass
+    def __init__(self, msg):
+        self.msg = msg
 
 
 class AbcParser():
@@ -26,7 +28,7 @@ class AbcParser():
         self._rhythm = None
         self._default_note_length = None
         self._meter = None
-        self._tempo = None
+        self.tempo: AbcTempo = None
         self._key = None
 
         self._parse()
@@ -39,24 +41,7 @@ class AbcParser():
         except IndexError:
             return ""
 
-    @property
-    def tempo_bpm(self):
-        """Return tune tempo in beats per minute.
-
-        This is the tempo for humans, it is relative to the tune meter.
-        """
-        return 120
-
-    @property
-    def tempo_qpm(self):
-        """Return tune tempo in quarter notes per minute.
-
-        This is an absolute tempo value for fluidsynth.
-        """
-        return 120
-
     def _parse(self):
-
         """Parse headers of interest in the RAW abc tune."""
         self._init_state_machine()
         for line in self._raw_tune:
@@ -105,8 +90,12 @@ class AbcParser():
                 log.debug(f'default note length = {self._default_note_length}')
 
             elif line.startswith('Q:'):
-                self._tempo = self._parse_tempo(line[2:])
-                log.debug(f'tempo = {self._tempo}')
+                try:
+                    self.tempo = AbcTempo(line[2:])
+                    log.debug(f'tempo = {self.tempo}')
+                except AbcTempoException as e:
+                    log.error(e.msg)
+                    raise AbcParserException(e.msg)
 
             elif line.startswith('K:'):
                 self._key = self.normalize_abc_key(line[2:])
@@ -218,46 +207,6 @@ class AbcParser():
         except ValueError:
             pass
         raise AbcParserException('Invalid default note length: \'' + line + '\'')
-
-    @staticmethod
-    def _parse_tempo(line: str):
-        """Parse tempo header value
-
-        Given a line containing a raw tempo, eg '120' or '3/8=120', return a tuple
-        where the first element is an optional note length tuple and the second
-        element is the number of beats per minute for a beat of the note length.
-        If a note length is not given, the default note length will be used.
-
-        Args:
-            line: raw tempo following the tempo header 'Q:'
-
-        Returns:
-            a tuple (note length, bpm) eg (None, 120) for 'Q:120'
-                or ((3, 8), 120) for 'Q:3/8=120'
-
-        Raises:
-            AbcParserException
-
-        Notes:
-            The forms such as 'C=120' and 'C3=120' found in the ABC 1.6 standard
-            are not supported.
-        """
-        # Form 1: ex 'Q:120'
-        try:
-            bpm = int(line)
-            return None, bpm
-        except ValueError:
-            pass
-
-        # Form 2: ex 'Q:3/8=120'
-        f = line.split('=')
-        if len(f) == 2:
-            try:
-                f2 = [int(s) for s in f[0].split('/')]
-                return tuple(f2), int(f[1])
-            except ValueError:
-                pass
-        raise AbcParserException('Invalid or unsupported tempo: \'' + line + '\'')
 
     @staticmethod
     def normalize_abc_key(raw_key: str):

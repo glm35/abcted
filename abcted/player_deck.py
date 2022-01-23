@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # PSL imports
+from copy import copy
 import logging as log
 import os
 import tkinter as tk
@@ -11,6 +12,7 @@ from typing import Optional, Union
 # abcted imports
 import abc2midi
 import abcparser
+from abctempo import AbcTempo
 from edit_zone import EditZone
 import player
 
@@ -27,6 +29,9 @@ class PlayerDeck:
 
         self._midi_player = synth.create_midi_player()
         self._midi_filename = None
+
+        self._abc_tune = None
+        self._abc_tempo: AbcTempo = None  # Keep track of the current tempo
 
         self._timer_id = None
 
@@ -45,7 +50,14 @@ class PlayerDeck:
         # the old tune.
         self._stop()
 
-        self._setup_tune()
+        try:
+            self._setup_tune()
+        except abcparser.AbcParserException as e:
+            log.error('ABC parser error: %s', e.msg)
+            # TODO: notify user
+            self._hide_player_deck()
+            return
+
         self._play()
 
     def _show_player_deck(self):
@@ -89,14 +101,14 @@ class PlayerDeck:
     def _on_close_deck(self, event=None):
         """Stop playback, hide player deck and focus the edit zone"""
         self._stop()
-        self._remove_midi_file()
+        self._cleanup_tune()
         self._hide_player_deck()
         self._edit_zone.focus()
 
     def exit(self):
         """Stop playback and cleanup (for use on program exit)"""
         self._stop()
-        self._remove_midi_file()
+        self._cleanup_tune()
         del self._midi_player
 
     # ------------------------------------------------------------------------
@@ -106,30 +118,39 @@ class PlayerDeck:
     def _setup_tune(self):
         """Create a MIDI file from the current ABC tune and pass it to the MIDI player"""
 
-        # In case there is already a MIDI file, remove it
-        self._remove_midi_file()
+        # Cleanup if there is already a tune in the player deck
+        self._cleanup_tune()
 
         # Get the current ABC tune, ie the tune at the cursor position in the edit zone
         raw_tune = abcparser.get_current_raw_tune(self._edit_zone.get_buffer())
         log.debug("raw_tune: " + str(raw_tune))
 
-        # Parse the ABC tune and display its title on the player deck
-        try:
-            self._abc_tune = abcparser.AbcParser(raw_tune)
-        except abcparser.AbcParserException:
-            # TODO: notify user
-            pass
+        # Parse the ABC tune, display its title on the player deck and its tempo
+        # in the tempo entry
+        self._abc_tune = abcparser.AbcParser(raw_tune)
+
         self._tune_title_label.config(text=self._abc_tune.title)
+
+        self._abc_tempo = copy(self._abc_tune.tempo)
+        if self._abc_tempo is None:
+            # Default to 120 quarter notes per minutes
+            # (TODO: set a sensible default wrt tune rhythm)
+            self._abc_tempo = AbcTempo("1/4=120")
+        self._tempo_bpm_entry.delete(0, tk.END)
+        self._tempo_bpm_entry.insert(0, str(self._abc_tempo.bpm))
+        self._midi_player.tempo = self._abc_tempo.qpm
 
         # Create a MIDI file from the ABC tune and give its name to the player
         self._midi_filename = abc2midi.abc2midi(raw_tune)
         self._midi_player.set_playlist([self._midi_filename])
 
-    def _remove_midi_file(self):
+    def _cleanup_tune(self):
         if self._midi_filename is not None:
             log.debug(f"remove MIDI file: {self._midi_filename}")
             os.remove(self._midi_filename)
             self._midi_filename = None
+        self._abc_tune = None
+        self._abc_tempo = None
 
     # ------------------------------------------------------------------------
     # Playback control: play, stop, pause
@@ -283,7 +304,7 @@ class PlayerDeck:
     def _create_tempo_frame(self):
         self._tempo_frame = tk.Frame(self._player_frame)
 
-        tk.Label(self._tempo_frame, text="Set tempo:").grid(row=1, columnspan=3, sticky=tk.W)
+        tk.Label(self._tempo_frame, text="Tempo:").grid(row=1, columnspan=3, sticky=tk.W)
 
         tk.Label(self._tempo_frame, text="bpm:",
                  justify=tk.RIGHT).grid(row=2, column=0, sticky=tk.E)
@@ -312,7 +333,7 @@ class PlayerDeck:
         self._get_tempo_label = tk.Label(self._tempo_frame, text="Get tempo:")
         self._get_tempo_label.grid(row=6, columnspan=3, sticky=tk.W)
 
-        self._widgets += [self._tempo_bpm_button, self._tempo_bpm_button, self._scale_factor_entry,
+        self._widgets += [self._tempo_bpm_entry, self._tempo_bpm_button, self._scale_factor_entry,
                           self._scale_tempo_button, self._reset_tempo_button]
 
         self._tempo_frame.pack(side=tk.TOP, fill=tk.X)
@@ -321,7 +342,8 @@ class PlayerDeck:
         self._tempo_bpm_entry.focus()
 
     def _on_set_tempo_bpm(self, event=None):
-        self._midi_player.tempo_bpm = int(self._tempo_bpm_entry.get())
+        self._abc_tempo.bpm = int(self._tempo_bpm_entry.get())
+        self._midi_player.tempo = self._abc_tempo.qpm
         self._scale_factor_entry.delete(0, len(self._scale_factor_entry.get()))
         self._update_get_tempo_label()
 
@@ -372,8 +394,9 @@ class PlayerDeck:
         self._update_get_tempo_label()
 
     def _update_get_tempo_label(self):
-        tempo_bpm, midi_tempo = self._midi_player.get_tempo()
-        self._get_tempo_label.config(text=f"Get tempo: bpm={tempo_bpm}, MIDI tempo={midi_tempo}")
+        tempo_qpm, midi_tempo = self._midi_player.get_tempo()
+        self._get_tempo_label.config(text=f"Get tempo: qpm={tempo_qpm}, MIDI tempo={midi_tempo}")
+        # Remark: "qpm" stands for "quarter note per minute"
 
     # ------------------------------------------------------------------------
     # GUI periodic update every second
