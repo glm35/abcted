@@ -12,7 +12,7 @@ from typing import Optional, Union
 # abcted imports
 import abc2midi
 import abcparser
-from abctempo import AbcTempo
+from abctempo import AbcTempo, default_abc_tempo
 from edit_zone import EditZone
 import player
 
@@ -133,9 +133,9 @@ class PlayerDeck:
 
         self._abc_tempo = copy(self._abc_tune.tempo)
         if self._abc_tempo is None:
-            # Default to 120 quarter notes per minutes
-            # (TODO: set a sensible default wrt tune rhythm)
-            self._abc_tempo = AbcTempo("1/4=120")
+            # The tempo is not specified in the ABC tune (or we failed to parse
+            # it): set a default value depending on the tune rhythm.
+            self._abc_tempo = default_abc_tempo(self._abc_tune.rhythm)
         self._tempo_bpm_entry.delete(0, tk.END)
         self._tempo_bpm_entry.insert(0, str(self._abc_tempo.bpm))
         self._midi_player.tempo = self._abc_tempo.qpm

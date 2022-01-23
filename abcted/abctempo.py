@@ -5,6 +5,8 @@
 sensible default tempo values for trad rhythms.
 """
 
+from typing import Optional
+
 
 class AbcTempoException(Exception):
     def __init__(self, msg):
@@ -74,3 +76,22 @@ class AbcTempo:
         except ValueError:
             pass
         raise AbcTempoException(f"Invalid or unsupported tempo: '{abc_tempo_str}'")
+
+
+def default_abc_tempo(rhythm: Optional[str]):
+    """Provide default tempo values for common rhythms"""
+    default_tempos = {
+        "reel": "1/2=90",
+        "jig": "3/8=110",
+        "hornpipe": "1/2=70",
+        "polka": "1/4=140",
+        "slide": "3/8=140",
+        "fling": "1/2=80"
+    }
+    try:
+        tempo_str = default_tempos[rhythm]
+    except KeyError:
+        # Default to 120 quarter notes per minutes
+        # (rem: this is also the default in abc2midi and fluidsynth)
+        tempo_str = "1/4=120"
+    return AbcTempo(tempo_str)

@@ -41,6 +41,14 @@ class AbcParser():
         except IndexError:
             return ""
 
+    @property
+    def rhythm(self):
+        """Return a normalized representation of the tune rhythm."""
+        if self._rhythm is None:
+            return ""
+        else:
+            return self._rhythm
+
     def _parse(self):
         """Parse headers of interest in the RAW abc tune."""
         self._init_state_machine()
@@ -101,6 +109,10 @@ class AbcParser():
                 self._key = self.normalize_abc_key(line[2:])
                 log.debug('key = ' + str(self._key))
                 self._state = self.S_TUNE
+
+            elif line.startswith('R:'):
+                self._rhythm = line[2:].lower()
+                log.debug(f'rhythm = {self._rhythm}')
 
             elif self._is_header(line):
                 log.debug(f'ignore header line: {line.strip()}')
