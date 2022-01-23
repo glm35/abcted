@@ -81,8 +81,7 @@ class PlayerDeck:
             w.bind('<Escape>', self._on_stop_playback_or_close_deck)
             w.bind('<Key-space>', self._on_toggle_play_pause)
             w.bind('<Key-l>', self._on_toggle_loop)
-            w.bind('<Key-b>', self._on_focus_tempo_bpm_entry)
-            w.bind('<Key-s>', self._on_focus_tempo_scale_factor_entry)
+            w.bind('<Key-b>', self._on_focus_tempo_entry)
             w.bind('<Key-plus>', self._on_speed_up)
             w.bind('<KP_Add>', self._on_speed_up)
             w.bind('<Key-minus>', self._on_slow_down)
@@ -131,14 +130,7 @@ class PlayerDeck:
 
         self._tune_title_label.config(text=self._abc_tune.title)
 
-        self._abc_tempo = copy(self._abc_tune.tempo)
-        if self._abc_tempo is None:
-            # The tempo is not specified in the ABC tune (or we failed to parse
-            # it): set a default value depending on the tune rhythm.
-            self._abc_tempo = default_abc_tempo(self._abc_tune.rhythm)
-        self._tempo_bpm_entry.delete(0, tk.END)
-        self._tempo_bpm_entry.insert(0, str(self._abc_tempo.bpm))
-        self._midi_player.tempo = self._abc_tempo.qpm
+        self._reset_tempo()
 
         # Create a MIDI file from the ABC tune and give its name to the player
         self._midi_filename = abc2midi.abc2midi(raw_tune)
@@ -191,8 +183,6 @@ class PlayerDeck:
 
         self._midi_player.play()
         self._start_timer()
-
-        self._update_get_tempo_label()
 
     def _pause(self):
         """Pause playback"""
@@ -304,99 +294,67 @@ class PlayerDeck:
     def _create_tempo_frame(self):
         self._tempo_frame = tk.Frame(self._player_frame)
 
-        tk.Label(self._tempo_frame, text="Tempo:").grid(row=1, columnspan=3, sticky=tk.W)
+        tk.Label(self._tempo_frame, text="Tempo:").grid(row=1, column=1, sticky=tk.W)
 
-        tk.Label(self._tempo_frame, text="bpm:",
-                 justify=tk.RIGHT).grid(row=2, column=0, sticky=tk.E)
-        self._tempo_bpm_entry = tk.Entry(self._tempo_frame, width=5)
-        self._tempo_bpm_entry.grid(row=2, column=1, sticky=tk.W)
-        self._tempo_bpm_entry.bind("<Return>", self._on_set_tempo_bpm)
-        self._tempo_bpm_entry.bind("<KP_Enter>", self._on_set_tempo_bpm)
-        self._tempo_bpm_button = tk.Button(self._tempo_frame, text="Set tempo (bpm)",
-                                           command=self._on_set_tempo_bpm)
-        self._tempo_bpm_button.grid(row=2, column=2, sticky=tk.W)
+        self._tempo_entry = tk.Entry(self._tempo_frame, width=4)
+        self._tempo_entry.bind("<Return>", self._on_set_tempo)
+        self._tempo_entry.bind("<KP_Enter>", self._on_set_tempo)
+        self._tempo_entry.grid(row=1, column=2, sticky=tk.W)
 
-        tk.Label(self._tempo_frame, text="Scale factor:").grid(row=4, sticky=tk.E)
-        self._scale_factor_entry = tk.Entry(self._tempo_frame, width=8)
-        self._scale_factor_entry.grid(row=4, column=1, sticky=tk.W)
-        self._scale_factor_entry.bind("<Return>", self._on_set_tempo_scale_factor)
-        self._scale_factor_entry.bind("<KP_Enter>", self._on_set_tempo_scale_factor)
-        self._scale_tempo_button = tk.Button(self._tempo_frame, text="Speed up/slow down",
-                                             command=self._on_set_tempo_scale_factor)
-        self._scale_tempo_button.grid(row=4, column=2, sticky=tk.W)
+        tk.Label(self._tempo_frame, text="bpm",
+                 justify=tk.RIGHT).grid(row=1, column=3, sticky=tk.W)
 
-        self._reset_tempo_button = tk.Button(self._tempo_frame,
-                                             text="Reset tempo (use tempo from midi file)",
+        self._tempo_button = tk.Button(self._tempo_frame, text="Set tempo",
+                                       command=self._on_set_tempo)
+        self._tempo_button.grid(row=1, column=4, sticky=tk.W)
+
+        self._reset_tempo_button = tk.Button(self._tempo_frame, text="Reset tempo",
                                              command=self._on_reset_tempo)
-        self._reset_tempo_button.grid(row=5, column=0, columnspan=3, sticky=tk.W+tk.E)
+        self._reset_tempo_button.grid(row=1, column=5, sticky=tk.W)
 
-        self._get_tempo_label = tk.Label(self._tempo_frame, text="Get tempo:")
-        self._get_tempo_label.grid(row=6, columnspan=3, sticky=tk.W)
-
-        self._widgets += [self._tempo_bpm_entry, self._tempo_bpm_button, self._scale_factor_entry,
-                          self._scale_tempo_button, self._reset_tempo_button]
+        self._widgets += [self._tempo_entry, self._tempo_button, self._reset_tempo_button]
 
         self._tempo_frame.pack(side=tk.TOP, fill=tk.X)
 
-    def _on_focus_tempo_bpm_entry(self, event=None):
-        self._tempo_bpm_entry.focus()
+    def _on_focus_tempo_entry(self, event=None):
+        self._tempo_entry.focus()
 
-    def _on_set_tempo_bpm(self, event=None):
-        self._abc_tempo.bpm = int(self._tempo_bpm_entry.get())
-        self._midi_player.tempo = self._abc_tempo.qpm
-        self._scale_factor_entry.delete(0, len(self._scale_factor_entry.get()))
-        self._update_get_tempo_label()
-
-    def _on_focus_tempo_scale_factor_entry(self, event=None):
-        self._scale_factor_entry.focus()
-
-    def _on_set_tempo_scale_factor(self, event=None):
-        self._midi_player.tempo_scale_factor = float(self._scale_factor_entry.get())
-        self._tempo_bpm_entry.delete(0, len(self._tempo_bpm_entry.get()))
-        self._update_get_tempo_label()
+    def _on_set_tempo(self, event=None):
+        try:
+            bpm = int(self._tempo_entry.get())
+        except ValueError:
+            # Keep current tempo in case of invalid input
+            bpm = self._abc_tempo.bpm
+        self._set_tempo(bpm)
 
     def _on_speed_up(self, event=None):
-        self.quick_change_scale_factor("+")
+        self._set_tempo(self._abc_tempo.bpm + 2)
 
     def _on_slow_down(self, event=None):
-        self.quick_change_scale_factor("-")
+        self._set_tempo(self._abc_tempo.bpm - 2)
 
-    def quick_change_scale_factor(self, sign):
-        # Read scale factor entry, and default to 1 if the entry is empty or
-        # contains an invalid value.
-        try:
-            scale_factor = float(self._scale_factor_entry.get())
-        except ValueError:
-            scale_factor = 1.0
+    def _set_tempo(self, bpm: int):
+        if bpm < 1:
+            bpm = 1
+        elif bpm > 999:
+            bpm = 999  # Arbitrary limit
+        self._abc_tempo.bpm = bpm
 
-        # Depending on sign, increase or decrease scale factor with a 0.1 step.
-        # Limit lower values to ~ 0.1 and upper values to 10.
-        if sign == "+":
-            scale_factor += 0.1
-            if scale_factor >= 10:
-                scale_factor = 10.0
-        else:
-            scale_factor -= 0.1
-            if scale_factor <= 0:
-                scale_factor = 0.1
+        self._midi_player.tempo = self._abc_tempo.qpm
 
-        # Replace text in scale factor entry with new value
-        self._scale_factor_entry.delete(0, tk.END)
-        self._scale_factor_entry.insert(0, f"{scale_factor:.3}")
+        self._tempo_entry.delete(0, tk.END)
+        self._tempo_entry.insert(0, str(self._abc_tempo.bpm))
 
-        # Apply new scale factor
-        self._on_set_tempo_scale_factor()
+    def _reset_tempo(self):
+        self._abc_tempo = copy(self._abc_tune.tempo)
+        if self._abc_tempo is None:
+            # The tempo is not specified in the ABC tune (or we failed to parse
+            # it): set a default value depending on the tune rhythm.
+            self._abc_tempo = default_abc_tempo(self._abc_tune.rhythm)
+        self._set_tempo(self._abc_tempo.bpm)
 
     def _on_reset_tempo(self, event=None):
-        self._tempo_bpm_entry.delete(0, len(self._tempo_bpm_entry.get()))
-        self._scale_factor_entry.delete(0, len(self._scale_factor_entry.get()))
-        self._midi_player.tempo_scale_factor = 1
-        self._update_get_tempo_label()
-
-    def _update_get_tempo_label(self):
-        tempo_qpm, midi_tempo = self._midi_player.get_tempo()
-        self._get_tempo_label.config(text=f"Get tempo: qpm={tempo_qpm}, MIDI tempo={midi_tempo}")
-        # Remark: "qpm" stands for "quarter note per minute"
+        self._reset_tempo()
 
     # ------------------------------------------------------------------------
     # GUI periodic update every second
@@ -419,6 +377,5 @@ class PlayerDeck:
     def _timeout(self):
         """Update UI and restart timer unless it has been stopped"""
         self._update_playback_position()
-        self._update_get_tempo_label()
         if self._timer_id is not None:
             self._timer_id = self._player_frame.after(1000, self._timeout)

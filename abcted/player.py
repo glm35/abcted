@@ -292,10 +292,8 @@ class MidiPlayer:
         self._tempo = tempo
         self._tempo_scale_factor = 1
         if self._tempo is not None:
-            log.debug(f"set tempo={tempo}")
             self._set_tempo(tempo=tempo)
         else:
-            log.debug("reset tempo")
             self._set_tempo(scale_factor=self._tempo_scale_factor)
 
     @property
@@ -308,7 +306,6 @@ class MidiPlayer:
             raise ValueError
         self._tempo_scale_factor = scale_factor
         self._tempo = None
-        log.debug(f"set tempo scale factor={scale_factor}")
         self._set_tempo(scale_factor=self._tempo_scale_factor)
 
     def _set_tempo(self, tempo: Optional[int] = None, scale_factor: Optional[float] = None):
