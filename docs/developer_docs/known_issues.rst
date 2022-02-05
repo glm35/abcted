@@ -42,3 +42,10 @@ Les messages d'erreur liés à la gestion des fichiers pourraient être plus exp
 
 * dans file.open(): donner des messages plus clairs pour les causes les plus
   fréquentes de problème: PermissionError, ..
+
+Durée des notes incorrecte lors de la saisie après un playback
+--------------------------------------------------------------
+
+Quand on joue un air avec le player midi et qu'on édite le morceau, la durée des
+notes est trop courte (hyp: le synth garde en mémoire la durée de la dernière
+note jouée par le player midi)
