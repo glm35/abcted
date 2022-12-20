@@ -1,10 +1,10 @@
-.. ABCde documentation master file, created by
+.. abcted documentation master file, created by
    sphinx-quickstart on Mon Mar  6 23:20:45 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-ABCde: un éditeur de fichiers ABC
-=================================
+abcted: un éditeur de fichiers ABC
+==================================
 
 .. toctree::
    :maxdepth: 3
@@ -12,7 +12,7 @@ ABCde: un éditeur de fichiers ABC
 
    user_guide/about_abc
    user_guide/file
-   user_guide/play
+   user_guide/playback
    user_guide/shortcuts
 .. TODO kesako
 .. TODO fonctionnalités supportées

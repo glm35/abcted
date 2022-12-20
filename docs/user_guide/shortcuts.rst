@@ -64,6 +64,8 @@ Recherche
 +------------------------+-------------------------------------------+
 
 
+.. _playback-shortcuts:
+
 Jouer un morceau
 ================
 
@@ -88,11 +90,7 @@ Jouer un morceau
 | b                      |Focalise sur le widget de saisie du tempo  |
 |                        |en bpm                                     |
 +------------------------+-------------------------------------------+
-| s                      |Focalise sur le widget de saisie du facteur|
-|                        |d'échelle de tempo                         |
-+------------------------+-------------------------------------------+
-| +, -                   |Accélère ou ralenti le tempo avec un       |
-|                        |facteur de 10%                             |
+| +, -                   |Accélère ou ralenti le tempo de 2 bpm      |
 +------------------------+-------------------------------------------+
 | =                      |Restaure le tempo à sa valeur d'origine    |
 +------------------------+-------------------------------------------+

@@ -96,3 +96,4 @@ ENV/
 
 # Emacs temporary files
 \#*
+.\#*

@@ -13,7 +13,7 @@ Prochains développements
 
   * Prendre en compte les enseignements généraux de demo_music_box.py:
 
-  * arrêter proprement fluidsynth à la fin d'abcde;
+  * arrêter proprement fluidsynth à la fin d'abcted;
 
   * attention à l'ordre de création du séquenceur et du chargement des
     soundfont.
