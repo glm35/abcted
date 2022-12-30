@@ -5,6 +5,7 @@
 sensible default tempo values for trad rhythms.
 """
 
+import logging as log
 from typing import Optional
 
 
@@ -90,8 +91,10 @@ def default_abc_tempo(rhythm: Optional[str]):
     }
     try:
         tempo_str = default_tempos[rhythm]
+        log.debug('use default tempo for rhythm="%s": "%s"', rhythm, tempo_str)
     except KeyError:
         # Default to 120 quarter notes per minutes
         # (rem: this is also the default in abc2midi and fluidsynth)
         tempo_str = "1/4=120"
+        log.debug('unknown or undefined rhythm="%s", use fallback tempo: "%s"', rhythm, tempo_str)
     return AbcTempo(tempo_str)

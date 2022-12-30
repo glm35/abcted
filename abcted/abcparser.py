@@ -111,7 +111,7 @@ class AbcParser():
                 self._state = self.S_TUNE
 
             elif line.startswith('R:'):
-                self._rhythm = line[2:].lower()
+                self._rhythm = line[2:].strip().lower()
                 log.debug(f'rhythm = {self._rhythm}')
 
             elif self._is_header(line):
