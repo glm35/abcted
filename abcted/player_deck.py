@@ -87,7 +87,9 @@ class PlayerDeck:
             w.bind('<Key-minus>', self._on_slow_down)
             w.bind('<KP_Subtract>', self._on_slow_down)
             w.bind('<Key-equal>', self._on_reset_tempo)
-
+            w.bind('<Key-s>', self._on_set_slow_tempo)
+            w.bind('<Key-m>', self._on_set_medium_tempo)
+            w.bind('<Key-f>', self._on_set_fast_tempo)
         # TODO: bind enter key to all the buttons
 
     # ------------------------------------------------------------------------
@@ -312,7 +314,22 @@ class PlayerDeck:
                                              command=self._on_reset_tempo)
         self._reset_tempo_button.grid(row=1, column=5, sticky=tk.W)
 
-        self._widgets += [self._tempo_entry, self._tempo_button, self._reset_tempo_button]
+        tk.Label(self._tempo_frame, text="Set predefined tempo:").grid(row=1, column=6, sticky=tk.W)
+
+        self._slow_tempo_button = ttk.Button(self._tempo_frame, text="Slow",
+                                            command=self._on_set_slow_tempo)
+        self._slow_tempo_button.grid(row=1, column=7, sticky=tk.W)
+
+        self._medium_tempo_button = ttk.Button(self._tempo_frame, text="Medium",
+                                            command=self._on_set_medium_tempo)
+        self._medium_tempo_button.grid(row=1, column=8, sticky=tk.W)
+
+        self._fast_tempo_button = ttk.Button(self._tempo_frame, text="Fast",
+                                            command=self._on_set_fast_tempo)
+        self._fast_tempo_button.grid(row=1, column=9, sticky=tk.W)
+
+        self._widgets += [self._tempo_entry, self._tempo_button, self._reset_tempo_button,
+                          self._slow_tempo_button, self._medium_tempo_button, self._fast_tempo_button]
 
         self._tempo_frame.pack(side=tk.TOP, fill=tk.X)
 
@@ -326,12 +343,15 @@ class PlayerDeck:
             # Keep current tempo in case of invalid input
             bpm = self._abc_tempo.bpm
         self._set_tempo(bpm)
+        self._press_tempo_button(None)
 
     def _on_speed_up(self, event=None):
         self._set_tempo(self._abc_tempo.bpm + 2)
+        self._press_tempo_button(None)
 
     def _on_slow_down(self, event=None):
         self._set_tempo(self._abc_tempo.bpm - 2)
+        self._press_tempo_button(None)
 
     def _set_tempo(self, bpm: int):
         if bpm < 1:
@@ -347,14 +367,43 @@ class PlayerDeck:
 
     def _reset_tempo(self):
         self._abc_tempo = copy(self._abc_tune.tempo)
-        if self._abc_tempo is None:
+        if self._abc_tempo is not None:
+            self._set_tempo(self._abc_tempo.bpm)
+            self._press_tempo_button(None)
+        else:
             # The tempo is not specified in the ABC tune (or we failed to parse
             # it): set a default value depending on the tune rhythm.
-            self._abc_tempo = default_abc_tempo(self._abc_tune.rhythm)
-        self._set_tempo(self._abc_tempo.bpm)
+            self._on_set_medium_tempo()
 
     def _on_reset_tempo(self, event=None):
         self._reset_tempo()
+
+    def _on_set_slow_tempo(self, event=None):
+        self._abc_tempo = default_abc_tempo(self._abc_tune.rhythm, "slow")
+        self._set_tempo(self._abc_tempo.bpm)
+        self._press_tempo_button("slow")
+
+    def _on_set_medium_tempo(self, event=None):
+        self._abc_tempo = default_abc_tempo(self._abc_tune.rhythm, "medium")
+        self._set_tempo(self._abc_tempo.bpm)
+        self._press_tempo_button("medium")
+
+    def _on_set_fast_tempo(self, event=None):
+        self._abc_tempo = default_abc_tempo(self._abc_tune.rhythm, "fast")
+        self._set_tempo(self._abc_tempo.bpm)
+        self._press_tempo_button("fast")
+
+    def _press_tempo_button(self, speed: Optional[str]):
+        speed_to_button = {
+            "slow": self._slow_tempo_button,
+            "medium": self._medium_tempo_button,
+            "fast": self._fast_tempo_button,
+        }
+        for button in speed_to_button.values():
+            button.state(['!pressed'])
+        if speed is not None:
+            speed_to_button[speed].state(['pressed'])
+
 
     # ------------------------------------------------------------------------
     # GUI periodic update every second

@@ -47,23 +47,17 @@ de répétitions.
 Tempo
 =====
 
-Un morceau est joué au tempo donné par le champ informatif "tempo" (Q).  Si ce
-champ n'est pas défini, un tempo par défaut est utilisé.  Il dépend du type de
-morceau défini par le champ informatif "rythme" (R):
+Un morceau est joué au tempo donné par le champ informatif "tempo" (Q).
 
-============= ================
-Type d'air    Tempo par défaut
-============= ================
-Reel          90
-Jig           110
-Hornpipe      70
-Polka         140
-Fling         80
-autre         120
-============= ================
+Si ce champ n'est pas défini, un tempo par défaut est utilisé.  Il dépend du
+type de morceau défini par le champ informatif "rythme" (R) et correspond au
+:ref:`pre-defined-tempo` "medium".
 
-Si ni le champ "tempo" ni le champ "rythme" ne sont définis, ou si le champ
-"rythme" contient une valeur non reconnue, le tempo du playback est 120.
+Remarque: si ni le champ "tempo" ni le champ "rythme" ne sont définis, ou si le
+champ "rythme" contient une valeur non reconnue, on utilise une pulsation par
+défaut de 120 noires à la minutes (tempo "medium" de la ligne "autre" du tableau
+des valeurs prédéfinies).
+
 
 
 Modifier le tempo
@@ -82,4 +76,46 @@ tempo peut prendre une valeur entre 1 et 999 battements par minute (bpm).
 | +, -                   |Accélère ou ralenti le tempo de 2 bpm      |
 +------------------------+-------------------------------------------+
 | =                      |Restaure le tempo à sa valeur d'origine    |
++------------------------+-------------------------------------------+
+
+
+.. _pre-defined-tempo:
+
+Tempo prédéfini
+---------------
+
+abcted propose des tempos prédéfinis pour quelques rythmes de morceau et permet
+de les appliquer rapidement:
+
+============= ============= ============= =============
+Rythme        Tempo lent    Tempo medium  Tempo rapide
+============= ============= ============= =============
+Reel          60            90            116
+Jig           90            110           130
+Hornpipe      50            70            82
+Slide         100           140           150
+Polka         110           140           156
+Valse         108           146           165
+Mazurka       120           150           160
+Fling         60            80            106
+autre         100           120           140
+============= ============= ============= =============
+
+Le tempo lent permet de s'échauffer ou de travailler à vitesse réduite.
+
+Le tempo rapide correspond à un tempo de ceili.
+
+Pour appliquer un tempo prédéfini, appuyer sur l'un des trois boutons ad-hoc ou
+utiliser un raccourci clavier:
+
++------------------------+-------------------------------------------+
+| Raccourcis             | Commande                                  |
++========================+===========================================+
+| s                      |Applique le tempo lent prédéfini (slow)    |
++------------------------+-------------------------------------------+
+| m                      |Applique le tempo intermédiaire prédéfini  |
+|                        |(medium, modéré)                           |
++------------------------+-------------------------------------------+
+| f                      |Applique le tempo rapide prédéfini         |
+|                        |(fast, tempo de ceili)                     |
 +------------------------+-------------------------------------------+

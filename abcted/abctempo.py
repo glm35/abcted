@@ -79,22 +79,72 @@ class AbcTempo:
         raise AbcTempoException(f"Invalid or unsupported tempo: '{abc_tempo_str}'")
 
 
-def default_abc_tempo(rhythm: Optional[str]):
-    """Provide default tempo values for common rhythms"""
-    default_tempos = {
-        "reel": "1/2=90",
-        "jig": "3/8=110",
-        "hornpipe": "1/2=70",
-        "polka": "1/4=140",
-        "slide": "3/8=140",
-        "fling": "1/2=80"
+def default_abc_tempo(rhythm: Optional[str], speed: str = "medium"):
+    """Provide default tempo values for common rhythms
+
+    Args:
+        rhythm: tune rhythm/type ("reel", "jig", "hornpipe", ...)
+        speed: "slow", "medium" or "fast"
+    """
+    predefined_tempos = {
+        "reel": {
+            "slow": "1/2=60",
+            "medium": "1/2=90",
+            "fast": "1/2=116",
+        },
+        "jig": {
+            "slow": "3/8=90",
+            "medium": "3/8=110",
+            "fast": "3/8=130",
+        },
+        "hornpipe": {
+            "slow": "1/2=50",
+            "medium": "1/2=70",
+            "fast": "1/2=82",
+        },
+        "polka": {
+            "slow": "1/4=110",
+            "medium": "1/4=140",
+            "fast": "1/4=156",
+        },
+        "slide": {
+            "slow": "3/8=100",
+            "medium": "3/8=140",
+            "fast": "3/8=150",
+        },
+        "fling": {
+            "slow": "1/2=60",
+            "medium": "1/2=80",
+            "fast": "1/2=106",
+        },
+        "waltz": {
+            "slow": "1/4=108",
+            "medium": "1/4=146",
+            "fast": "1/4=165",
+        },
+        "mazurka": {
+            "slow": "1/4=120",
+            "medium": "1/4=150",
+            "fast": "1/4=160",
+        },
     }
+
+    fallback_tempos = {
+        # Fallback tempo values for unknown/undefined rhythms
+        # (120 quarter notes per minutes is also the default in abc2midi and fluidsynth)
+        "slow": "1/4=100",
+        "medium": "1/4=120",
+        "fast": "1/4=140"
+    }
+
     try:
-        tempo_str = default_tempos[rhythm]
-        log.debug('use default tempo for rhythm="%s": "%s"', rhythm, tempo_str)
+        tempo_str = predefined_tempos[rhythm][speed]
+        log.debug('use default tempo for %s %s: "%s"', speed, rhythm, tempo_str)
     except KeyError:
-        # Default to 120 quarter notes per minutes
-        # (rem: this is also the default in abc2midi and fluidsynth)
-        tempo_str = "1/4=120"
-        log.debug('unknown or undefined rhythm="%s", use fallback tempo: "%s"', rhythm, tempo_str)
+        tempo_str = fallback_tempos[speed]
+        if rhythm is None or rhythm == "":
+            reason = "undefined rhythm"
+        else:
+            reason = f'unknown rhythm "{rhythm}"'
+        log.debug('%s: use fallback %s tempo: "%s"', reason, speed, tempo_str)
     return AbcTempo(tempo_str)
