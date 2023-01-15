@@ -8,7 +8,7 @@ import root_window
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog="abcted")
     parser.add_argument('-d', '--debug',
                         help='Affiche les messges de log (en anglais)',
                         action='store_true')
