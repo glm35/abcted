@@ -74,7 +74,7 @@ Install pyfluidsynth3 (in the venv)
    $ cd ~/code
    $ git clone https://github.com/glm35/pyfluidsynth3.git
    $ cd ~/code/pyfluidsynth3
-   $ git checkout --track origin/gl-devel
+   $ git checkout --track origin/gl-devel-new-tempo-api
    $ python setup.py install
 
 Get abcted source code
