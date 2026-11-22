@@ -4,11 +4,12 @@ import logging as log
 import time
 import traceback
 from threading import Lock, Timer
+from unittest.mock import Mock
 
-# Third-party imports
-from pyfluidsynth3 import fluidaudiodriver, fluidhandle, fluidsettings, fluidsynth
-from pyfluidsynth3.fluiderror import FluidError
-from pyfluidsynth3.fluidplayer import FluidPlayer, PlayerStatus, TempoType
+# # Third-party imports
+# from pyfluidsynth3 import fluidaudiodriver, fluidhandle, fluidsettings, fluidsynth
+# from pyfluidsynth3.fluiderror import FluidError
+# from pyfluidsynth3.fluidplayer import FluidPlayer, PlayerStatus, TempoType
 
 # abcted imports
 from .abc2midi import get_midi_note
@@ -58,36 +59,37 @@ class Synth:
             PlayerException: an error occured during the synth setup.
                 Most common errors: fluidsynth library not found, soundfont not found.
         """
-        try:
-            if self._libfluidsynth_path is not None:
-                log.info("Using libfluidsynth: " + self._libfluidsynth_path)
-            self._fluidhandle = fluidhandle.FluidHandle(self._libfluidsynth_path)
-            self._fluidsettings = fluidsettings.FluidSettings(self._fluidhandle)
-            self._fluidsettings["synth.gain"] = 0.2
-            self._fluidsynth = fluidsynth.FluidSynth(
-                self._fluidhandle, self._fluidsettings
-            )
-            self._load_soundfont()
-            self._fluidsettings["audio.driver"] = "alsa"
-            self._driver = fluidaudiodriver.FluidAudioDriver(
-                self._fluidhandle, self._fluidsynth, self._fluidsettings
-            )
-        except (AttributeError, FluidError) as e:
-            # rem: under Linux, AttributeError is raised when pyfluidsynth3 is
-            # available but libfluidsynth1 is not.
-            message = (
-                "Failed to setup fluidsynth: "
-                + str(e)
-                + ". Audio output will be disabled."
-            )
-            log.warning(message)
-            log.debug(traceback.format_exc())
-            raise PlayerException(message)
+        # try:
+        #     if self._libfluidsynth_path is not None:
+        #         log.info("Using libfluidsynth: " + self._libfluidsynth_path)
+        #     self._fluidhandle = fluidhandle.FluidHandle(self._libfluidsynth_path)
+        #     self._fluidsettings = fluidsettings.FluidSettings(self._fluidhandle)
+        #     self._fluidsettings["synth.gain"] = 0.2
+        #     self._fluidsynth = fluidsynth.FluidSynth(
+        #         self._fluidhandle, self._fluidsettings
+        #     )
+        #     self._load_soundfont()
+        #     self._fluidsettings["audio.driver"] = "alsa"
+        #     self._driver = fluidaudiodriver.FluidAudioDriver(
+        #         self._fluidhandle, self._fluidsynth, self._fluidsettings
+        #     )
+        # except (AttributeError, FluidError) as e:
+        #     # rem: under Linux, AttributeError is raised when pyfluidsynth3 is
+        #     # available but libfluidsynth1 is not.
+        #     message = (
+        #         "Failed to setup fluidsynth: "
+        #         + str(e)
+        #         + ". Audio output will be disabled."
+        #     )
+        #     log.warning(message)
+        #     log.debug(traceback.format_exc())
+        #     raise PlayerException(message)
 
-        self._no_sound = (
-            False  # If we can reach that point without exception, we should have sound
-        )
-        self.select_instrument(self._instrument)
+        # self._no_sound = (
+        #     False  # If we can reach that point without exception, we should have sound
+        # )
+        # self.select_instrument(self._instrument)
+        self._fluidsynth = Mock()
 
     def _load_soundfont(self):
         """Look for a soundfont and load it into fluidsynth.
@@ -95,20 +97,20 @@ class Synth:
         Raises:
             PlayerException: could not find a soundfont
         """
-        soundfont_found = False
-        for soundfont in soundfonts:
-            try:
-                self._fluidsynth.load_soundfont(soundfont)
-                soundfont_found = True
-                log.info("soundfont: loaded '" + soundfont + "'")
-                break
-            except FluidError:
-                # rem: loading error logged by fluidsynth
-                pass
-        if not soundfont_found:
-            message = "No soundfont can be found. Audio output will be disabled."
-            log.warning(message)
-            raise PlayerException(message)
+        # soundfont_found = False
+        # for soundfont in soundfonts:
+        #     try:
+        #         self._fluidsynth.load_soundfont(soundfont)
+        #         soundfont_found = True
+        #         log.info("soundfont: loaded '" + soundfont + "'")
+        #         break
+        #     except FluidError:
+        #         # rem: loading error logged by fluidsynth
+        #         pass
+        # if not soundfont_found:
+        #     message = "No soundfont can be found. Audio output will be disabled."
+        #     log.warning(message)
+        #     raise PlayerException(message)
 
     def select_instrument(self, instrument_name):
         self._instrument = instrument_name
@@ -156,7 +158,8 @@ class Synth:
         return MidiPlayer(self)
 
     def create_fluid_player(self):
-        return FluidPlayer(self._fluidhandle, self._fluidsynth)
+        return Mock()
+        # return FluidPlayer(self._fluidhandle, self._fluidsynth)
 
 
 class MidiPlayer:
@@ -205,27 +208,28 @@ class MidiPlayer:
             return self.Status.PLAYING
 
     def play(self):
-        """Start playing tunes in the playlist."""
-        log.debug("start playing")
+        ...
+        # """Start playing tunes in the playlist."""
+        # log.debug("start playing")
 
-        # If playback is finished, need to stop first:
-        if (
-            self._fluidplayer is not None
-            and self._paused is False
-            and self._fluidplayer.get_status() == PlayerStatus.DONE
-        ):
-            self.stop()
+        # # If playback is finished, need to stop first:
+        # if (
+        #     self._fluidplayer is not None
+        #     and self._paused is False
+        #     and self._fluidplayer.get_status() == PlayerStatus.DONE
+        # ):
+        #     self.stop()
 
-        if self._fluidplayer is None:
-            self._fluidplayer = self._synth.create_fluid_player()
-            self._fluidplayer.set_loop(self.repeat_count)
-            self._set_tempo(tempo=self.tempo, scale_factor=self.tempo_scale_factor)
+        # if self._fluidplayer is None:
+        #     self._fluidplayer = self._synth.create_fluid_player()
+        #     self._fluidplayer.set_loop(self.repeat_count)
+        #     self._set_tempo(tempo=self.tempo, scale_factor=self.tempo_scale_factor)
 
-            for midi_file in self._playlist:
-                self._fluidplayer.add(midi_file)
+        #     for midi_file in self._playlist:
+        #         self._fluidplayer.add(midi_file)
 
-        self._fluidplayer.play()
-        self._paused = False
+        # self._fluidplayer.play()
+        # self._paused = False
 
     def pause(self):
         """Pause playback."""
@@ -316,15 +320,15 @@ class MidiPlayer:
         if self._fluidplayer is None:
             return
 
-        if tempo is not None:
-            log.debug(f"set tempo: {tempo}")
-            self._fluidplayer.set_tempo(TempoType.TEMPO_EXTERNAL_BPM, tempo=tempo)
-        elif scale_factor is not None and scale_factor != 1:
-            log.debug(f"set relative tempo: x{scale_factor}")
-            self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=scale_factor)
-        else:
-            log.debug("reset tempo (use MIDI file tempo)")
-            self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=1)
+        # if tempo is not None:
+        #     log.debug(f"set tempo: {tempo}")
+        #     self._fluidplayer.set_tempo(TempoType.TEMPO_EXTERNAL_BPM, tempo=tempo)
+        # elif scale_factor is not None and scale_factor != 1:
+        #     log.debug(f"set relative tempo: x{scale_factor}")
+        #     self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=scale_factor)
+        # else:
+        #     log.debug("reset tempo (use MIDI file tempo)")
+        #     self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=1)
 
     def get_tempo(self):
         tempo, midi_tempo = None, None
