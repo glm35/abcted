@@ -1,6 +1,3 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
 Manage ABC files: new, open, save, save as, add to/remove from favorites ...
 """
@@ -10,18 +7,26 @@ import tkinter as tk
 import tkinter.filedialog as tk_filedialog
 import tkinter.messagebox as tk_messagebox
 
-from edit_zone_buffer import EditZoneBuffer
-from file_utils import prettify_path, normalize_path
-import recent_files
+from .edit_zone_buffer import EditZoneBuffer
+from .file_utils import normalize_path, prettify_path
+from .recent_files import (
+    add_to_favorites,
+    favorite_files_list,
+    promote_recent_file,
+    remove_from_favorites,
+    remove_recent_file,
+)
 
 
-class File():
+class File:
     def __init__(self, root_window, buffer: EditZoneBuffer):
         self._root_window = root_window
-        self._buffer = buffer  # Text buffer to be saved in file (this is a EditZoneBuffer object)
+        self._buffer = (
+            buffer  # Text buffer to be saved in file (this is a EditZoneBuffer object)
+        )
         self._path = None  # Path of the file (absolute directory name + filename)
 
-        self._last_saved_text = '\n'  # That's the contents of the empty edit zone
+        self._last_saved_text = "\n"  # That's the contents of the empty edit zone
         self._modified_flag = False  # Whether buffer has been modified since last save
 
     def _update_last_saved_text(self, text):
@@ -30,7 +35,7 @@ class File():
 
     def check_text_change_since_last_save(self, update_ui=True):
         """Check whether the text in the edit zone has changed since the last time
-           the buffer was saved. If so, update the ui.
+        the buffer was saved. If so, update the ui.
         """
         old_modified_flag = self._modified_flag
         text = self._buffer.get()
@@ -45,19 +50,19 @@ class File():
 
     def on_file_new(self, event=None):
         """'File => New' menu callback"""
-        if self.ask_save_changes() == 'cancel':
-            log.debug('ask save changes cancelled/failed, leaving')
+        if self.ask_save_changes() == "cancel":
+            log.debug("ask save changes cancelled/failed, leaving")
         else:
             self._path = None
-            self._buffer.replace('\n')
-            self._update_last_saved_text('\n')
+            self._buffer.replace("\n")
+            self._update_last_saved_text("\n")
             self.set_root_window_title()
-        return 'break'
+        return "break"
 
     def set_root_window_title(self):
         """Set the title of the root window from the file path."""
         if self._path is None:
-            pretty_path = 'Nouveau fichier.abc'
+            pretty_path = "Nouveau fichier.abc"
         else:
             pretty_path = prettify_path(self._path)
         self._root_window.set_title(pretty_path, self._modified_flag)
@@ -81,20 +86,22 @@ class File():
             current operation (open, new, ...)
         """
         if not self._modified_flag:
-            return 'ok'
+            return "ok"
 
-        ret = tk_messagebox.askyesnocancel(title='Modifications non enregistrées',
-            message='Le texte ABC a été modifié et les changement n\'ont pas été enregistrés.'
-                    ' Voulez-vous enregistrer les modifications?')
+        ret = tk_messagebox.askyesnocancel(
+            title="Modifications non enregistrées",
+            message="Le texte ABC a été modifié et les changement n'ont pas été enregistrés."
+            " Voulez-vous enregistrer les modifications?",
+        )
         if ret is None:  # cancel
-            return 'cancel'
+            return "cancel"
         elif ret == False:  # no
-            return 'ok'
+            return "ok"
         else:  # yes (ret == True)
             if self._save() == True:
-                return 'ok'
+                return "ok"
             else:  # Save failed or was cancelled by user
-                return 'cancel'
+                return "cancel"
 
     def open(self, raw_path):
         """Open a file given its path.
@@ -104,38 +111,44 @@ class File():
         Params:
             raw_path(str): file path + filename, not necessarily normalized
         """
-        log.debug('opening: ' + raw_path)
+        log.debug("opening: " + raw_path)
         path = normalize_path(raw_path)
         text = None
         try:
-            with open(path, 'r') as file:
+            with open(path, "r") as file:
                 try:
                     text = file.read()
                 except UnicodeDecodeError as e:
-                    log.debug('caught exception UnicodeDecodeError: ' + str(e))
-                    tk_messagebox.showerror('Erreur lors de l\'ouverture du fichier',
-                                            'Impossible d\'ouvrir ' + path
-                                            + ': il n\'est pas encodé en UTF-8.'
-                                            + ' Veuillez corriger l\'encodage et réessayer.')
+                    log.debug("caught exception UnicodeDecodeError: " + str(e))
+                    tk_messagebox.showerror(
+                        "Erreur lors de l'ouverture du fichier",
+                        "Impossible d'ouvrir "
+                        + path
+                        + ": il n'est pas encodé en UTF-8."
+                        + " Veuillez corriger l'encodage et réessayer.",
+                    )
         except FileNotFoundError as e:
-            log.debug('caught exception ' + type(e).__name__ + ' : '+ str(e))
-            tk_messagebox.showerror('Erreur lors de l\'ouverture du fichier',
-                                    'Impossible d\'ouvrir ' + path + ': '
-                                    + str(e))
-            recent_files.remove_recent_file(path)
+            log.debug("caught exception " + type(e).__name__ + " : " + str(e))
+            tk_messagebox.showerror(
+                "Erreur lors de l'ouverture du fichier",
+                "Impossible d'ouvrir " + path + ": " + str(e),
+            )
+            remove_recent_file(path)
         except Exception as e:  # Catch-all handler for other file exceptions
-            log.debug('caught exception ' + type(e).__name__ + ' : '+ str(e))
-            tk_messagebox.showerror('Erreur lors de l\'ouverture du fichier',
-                                    'Impossible d\'ouvrir ' + path + ': ' + str(e))
+            log.debug("caught exception " + type(e).__name__ + " : " + str(e))
+            tk_messagebox.showerror(
+                "Erreur lors de l'ouverture du fichier",
+                "Impossible d'ouvrir " + path + ": " + str(e),
+            )
 
         if text is None:
-            log.debug('read failed, leaving')
+            log.debug("read failed, leaving")
         else:
             self._path = path
             self._buffer.replace(text)
             self._update_last_saved_text(text)
             self.set_root_window_title()
-            recent_files.promote_recent_file(path)
+            promote_recent_file(path)
 
     def on_file_open(self, event=None, path=None):
         """'File => Open...' menu callback
@@ -148,22 +161,23 @@ class File():
               is presented to the user.
 
         """
-        if self.ask_save_changes() == 'cancel':
-            log.debug('ask save changes cancelled/failed, leaving')
-            return 'break'
+        if self.ask_save_changes() == "cancel":
+            log.debug("ask save changes cancelled/failed, leaving")
+            return "break"
 
         raw_path = path
         if raw_path is None:
             raw_path = tk_filedialog.askopenfilename(  # raw_path is a 'str' object
-                defaultextension='.abc',
-                filetypes=[('Fichiers ABC', '*.abc'), ('Tous les fichiers', '*.*')],
-                initialdir='.')  # Under Windows, the current dir is not the initial dir
+                defaultextension=".abc",
+                filetypes=[("Fichiers ABC", "*.abc"), ("Tous les fichiers", "*.*")],
+                initialdir=".",
+            )  # Under Windows, the current dir is not the initial dir
             if not raw_path:
-                log.debug('no file selected, leaving')
-                return 'break'
+                log.debug("no file selected, leaving")
+                return "break"
 
         self.open(raw_path)
-        return 'break'
+        return "break"
 
     #
     # Add/remove favorite file
@@ -172,35 +186,35 @@ class File():
     def get_menu_state(self, menu_name):
         menu_state = tk.ACTIVE
 
-        if menu_name == 'add_to_favorites':
+        if menu_name == "add_to_favorites":
             # Menu entry enabled if:
             # (1) there is an opened file with a name
             # and (2) it is not already listed in the favorites
             if self._path is None:
                 menu_state = tk.DISABLED
-            elif self._path in recent_files.favorite_files_list:
+            elif self._path in favorite_files_list:
                 menu_state = tk.DISABLED
 
-        elif menu_name == 'remove_from_favorites':
+        elif menu_name == "remove_from_favorites":
             # Menu entry enabled if:
             # (1) there is an opened file with a name
             # and (2) it is already listed in the favorites
             if self._path is None:
                 menu_state = tk.DISABLED
-            elif self._path not in recent_files.favorite_files_list:
+            elif self._path not in favorite_files_list:
                 menu_state = tk.DISABLED
 
         return menu_state
 
     def on_file_add_to_favorites(self, event=None):
         """'File => Add to favorites' menu callback"""
-        recent_files.add_to_favorites(self._path)
-        return 'break'
+        add_to_favorites(self._path)
+        return "break"
 
     def on_file_remove_from_favorites(self, event=None):
         """'File => Remove from favorites' menu callback"""
-        recent_files.remove_from_favorites(self._path)
-        return 'break'
+        remove_from_favorites(self._path)
+        return "break"
 
     #
     # Save file
@@ -218,17 +232,18 @@ class File():
         return_status = True
         try:
             text = self._buffer.get()
-            with open(path, 'w') as file:
+            with open(path, "w") as file:
                 file.write(text)
             self._path = path
             self._update_last_saved_text(text)
             self.set_root_window_title()
-            recent_files.promote_recent_file(path)
+            promote_recent_file(path)
         except IOError as e:
-            log.debug('caught exception ' + type(e).__name__ + ' : '+ str(e))
-            tk_messagebox.showerror('Erreur lors de l\'enregistrement du fichier',
-                                    'Impossible d\'enregistrer ' + path + ': '
-                                    + str(e))
+            log.debug("caught exception " + type(e).__name__ + " : " + str(e))
+            tk_messagebox.showerror(
+                "Erreur lors de l'enregistrement du fichier",
+                "Impossible d'enregistrer " + path + ": " + str(e),
+            )
             return_status = False
         return return_status
 
@@ -249,7 +264,7 @@ class File():
     def on_file_save(self, event=None):
         """'File => Save' menu callback"""
         self._save()
-        return 'break'
+        return "break"
 
     def _save_as(self):
         """Select path (filename) then save text.
@@ -262,12 +277,13 @@ class File():
                 select any filename or if there was an error during the saving.
         """
         raw_path = tk_filedialog.asksaveasfilename(
-            defaultextension='.abc',
-            filetypes=[('Fichiers ABC', '*.abc'), ('Tous les fichiers', '*.*')],
-            initialdir='.')  # Under Windows, the current dir is not the initial dir
+            defaultextension=".abc",
+            filetypes=[("Fichiers ABC", "*.abc"), ("Tous les fichiers", "*.*")],
+            initialdir=".",
+        )  # Under Windows, the current dir is not the initial dir
         if raw_path:
             path = normalize_path(raw_path)
-            log.debug('saving as: ' + path)
+            log.debug("saving as: " + path)
             return self._write_to_file(path)
         else:
             return False
@@ -275,4 +291,4 @@ class File():
     def on_file_save_as(self, event=None):
         """'File => Save As...' menu callback"""
         self._save_as()
-        return 'break'
+        return "break"

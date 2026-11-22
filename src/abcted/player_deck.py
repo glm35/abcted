@@ -1,30 +1,28 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 # PSL imports
-from copy import copy
 import logging as log
 import os
 import tkinter as tk
-import tkinter.ttk as ttk
-from typing import Optional, Union
+from copy import copy
+from tkinter import ttk
 
 # abcted imports
-import abc2midi
-import abcparser
-from abctempo import AbcTempo, default_abc_tempo
-from edit_zone import EditZone
-import player
+from .abc2midi import abc2midi
+from .abcparser import AbcParser, AbcParserException, get_current_raw_tune
+from .abctempo import AbcTempo, default_abc_tempo
+from .edit_zone import EditZone
+from .player import MidiPlayer, Synth
 
 
 class PlayerDeck:
-    def __init__(self,
-                 container_frame: Union[tk.Tk, tk.Frame],
-                 edit_zone: EditZone,
-                 synth: player.Synth):
+    def __init__(
+        self,
+        container_frame: tk.Tk | tk.Frame,
+        edit_zone: EditZone,
+        synth: Synth,
+    ):
         self._container_frame = container_frame
         self._edit_zone = edit_zone
-        self._player_frame: Optional[tk.Frame] = None
+        self._player_frame: tk.Frame | None = None
         self._widgets = []  # play deck widgets that can have focus
 
         self._midi_player = synth.create_midi_player()
@@ -52,8 +50,8 @@ class PlayerDeck:
 
         try:
             self._setup_tune()
-        except abcparser.AbcParserException as e:
-            log.error('ABC parser error: %s', e.msg)
+        except AbcParserException as e:
+            log.error("ABC parser error: %s", e.msg)
             # TODO: notify user
             self._hide_player_deck()
             return
@@ -78,18 +76,18 @@ class PlayerDeck:
         # Bind player deck keyboard shortcuts to all the widgets in the player
         # deck that can have focus.
         for w in self._widgets:
-            w.bind('<Escape>', self._on_stop_playback_or_close_deck)
-            w.bind('<Key-space>', self._on_toggle_play_pause)
-            w.bind('<Key-l>', self._on_toggle_loop)
-            w.bind('<Key-b>', self._on_focus_tempo_entry)
-            w.bind('<Key-plus>', self._on_speed_up)
-            w.bind('<KP_Add>', self._on_speed_up)
-            w.bind('<Key-minus>', self._on_slow_down)
-            w.bind('<KP_Subtract>', self._on_slow_down)
-            w.bind('<Key-equal>', self._on_reset_tempo)
-            w.bind('<Key-s>', self._on_set_slow_tempo)
-            w.bind('<Key-m>', self._on_set_medium_tempo)
-            w.bind('<Key-f>', self._on_set_fast_tempo)
+            w.bind("<Escape>", self._on_stop_playback_or_close_deck)
+            w.bind("<Key-space>", self._on_toggle_play_pause)
+            w.bind("<Key-l>", self._on_toggle_loop)
+            w.bind("<Key-b>", self._on_focus_tempo_entry)
+            w.bind("<Key-plus>", self._on_speed_up)
+            w.bind("<KP_Add>", self._on_speed_up)
+            w.bind("<Key-minus>", self._on_slow_down)
+            w.bind("<KP_Subtract>", self._on_slow_down)
+            w.bind("<Key-equal>", self._on_reset_tempo)
+            w.bind("<Key-s>", self._on_set_slow_tempo)
+            w.bind("<Key-m>", self._on_set_medium_tempo)
+            w.bind("<Key-f>", self._on_set_fast_tempo)
         # TODO: bind enter key to all the buttons
 
     # ------------------------------------------------------------------------
@@ -123,19 +121,19 @@ class PlayerDeck:
         self._cleanup_tune()
 
         # Get the current ABC tune, ie the tune at the cursor position in the edit zone
-        raw_tune = abcparser.get_current_raw_tune(self._edit_zone.get_buffer())
+        raw_tune = get_current_raw_tune(self._edit_zone.get_buffer())
         log.debug("raw_tune: " + str(raw_tune))
 
         # Parse the ABC tune, display its title on the player deck and its tempo
         # in the tempo entry
-        self._abc_tune = abcparser.AbcParser(raw_tune)
+        self._abc_tune = AbcParser(raw_tune)
 
         self._tune_title_label.config(text=self._abc_tune.title)
 
         self._reset_tempo()
 
         # Create a MIDI file from the ABC tune and give its name to the player
-        self._midi_filename = abc2midi.abc2midi(raw_tune)
+        self._midi_filename = abc2midi(raw_tune)
         self._midi_player.set_playlist([self._midi_filename])
 
     def _cleanup_tune(self):
@@ -154,18 +152,24 @@ class PlayerDeck:
         frame = tk.Frame(self._player_frame)
 
         button_frame = tk.Frame(frame)
-        self._stop_button = ttk.Button(button_frame, text='Stop', command=self._stop)
+        self._stop_button = ttk.Button(button_frame, text="Stop", command=self._stop)
         self._stop_button.pack(side=tk.LEFT)
-        self._pause_button = ttk.Button(button_frame, text='Pause', command=self._pause)
+        self._pause_button = ttk.Button(button_frame, text="Pause", command=self._pause)
         self._pause_button.pack(side=tk.LEFT)
-        self._play_button = ttk.Button(button_frame, text='Play', command=self._play)
+        self._play_button = ttk.Button(button_frame, text="Play", command=self._play)
         self._play_button.pack(side=tk.LEFT)
         self._tune_title_label = tk.Label(button_frame, text="")
         self._tune_title_label.pack(side=tk.LEFT, fill=tk.X)
-        self._close_button = ttk.Button(button_frame, text='Close', command=self._on_close_deck)
+        self._close_button = ttk.Button(
+            button_frame, text="Close", command=self._on_close_deck
+        )
         self._close_button.pack(side=tk.RIGHT)
-        self._widgets += [self._stop_button, self._pause_button, self._play_button,
-                          self._close_button]
+        self._widgets += [
+            self._stop_button,
+            self._pause_button,
+            self._play_button,
+            self._close_button,
+        ]
         button_frame.pack(fill=tk.X)
 
         self._playback_position = tk.Label(frame, text="Playback position:")
@@ -179,18 +183,18 @@ class PlayerDeck:
 
     def _play(self):
         """Start playback"""
-        self._stop_button.state(['!pressed'])
-        self._pause_button.state(['!pressed'])
-        self._play_button.state(['pressed'])
+        self._stop_button.state(["!pressed"])
+        self._pause_button.state(["!pressed"])
+        self._play_button.state(["pressed"])
 
         self._midi_player.play()
         self._start_timer()
 
     def _pause(self):
         """Pause playback"""
-        self._stop_button.state(['!pressed'])
-        self._pause_button.state(['pressed'])
-        self._play_button.state(['!pressed'])
+        self._stop_button.state(["!pressed"])
+        self._pause_button.state(["pressed"])
+        self._play_button.state(["!pressed"])
 
         self._stop_timer()
         self._midi_player.pause()
@@ -204,9 +208,9 @@ class PlayerDeck:
             # the player frame UI
             return
 
-        self._stop_button.state(['pressed'])
-        self._pause_button.state(['!pressed'])
-        self._play_button.state(['!pressed'])
+        self._stop_button.state(["pressed"])
+        self._pause_button.state(["!pressed"])
+        self._play_button.state(["!pressed"])
 
         self._stop_timer()
         self._midi_player.stop()
@@ -215,25 +219,31 @@ class PlayerDeck:
 
     def _on_toggle_play_pause(self, event=None):
         player_status = self._midi_player.get_status()
-        if player_status == player.MidiPlayer.Status.STOPPED or \
-           player_status == player.MidiPlayer.Status.PAUSED:
+        if (
+            player_status == MidiPlayer.Status.STOPPED
+            or player_status == MidiPlayer.Status.PAUSED
+        ):
             self._play()
         else:
             self._pause()
-        return 'break'
+        return "break"
 
     def _on_stop_playback_or_close_deck(self, event=None):
         player_status = self._midi_player.get_status()
-        if player_status == player.MidiPlayer.Status.PLAYING or \
-           player_status == player.MidiPlayer.Status.PAUSED:
+        if (
+            player_status == MidiPlayer.Status.PLAYING
+            or player_status == MidiPlayer.Status.PAUSED
+        ):
             self._stop()
         else:
             self._on_close_deck()
-        return 'break'
+        return "break"
 
     def _update_playback_position(self):
         current, total = self._midi_player.get_ticks()
-        self._playback_position.config(text=f"Playback position (ticks): {current}/{total}")
+        self._playback_position.config(
+            text=f"Playback position (ticks): {current}/{total}"
+        )
 
     # ------------------------------------------------------------------------
     # Playback loop/repeat control
@@ -246,12 +256,18 @@ class PlayerDeck:
 
         self._loop_value = tk.IntVar()
         self._loop_value.set(self.NO_LOOP)
-        for txt, val in [("No Loop", self.NO_LOOP),
-                         ("Loop Forever", self.LOOP_FOREVER),
-                         ("Repeat", self.REPEAT)]:
-            radio_button = tk.Radiobutton(self._loop_control_frame,
-                                          text=txt, variable=self._loop_value, value=val,
-                                          command=self._loop_control)
+        for txt, val in [
+            ("No Loop", self.NO_LOOP),
+            ("Loop Forever", self.LOOP_FOREVER),
+            ("Repeat", self.REPEAT),
+        ]:
+            radio_button = tk.Radiobutton(
+                self._loop_control_frame,
+                text=txt,
+                variable=self._loop_value,
+                value=val,
+                command=self._loop_control,
+            )
             self._widgets.append(radio_button)
             radio_button.pack(side=tk.LEFT)
 
@@ -303,33 +319,47 @@ class PlayerDeck:
         self._tempo_entry.bind("<KP_Enter>", self._on_set_tempo)
         self._tempo_entry.grid(row=1, column=2, sticky=tk.W)
 
-        tk.Label(self._tempo_frame, text="bpm",
-                 justify=tk.RIGHT).grid(row=1, column=3, sticky=tk.W)
+        tk.Label(self._tempo_frame, text="bpm", justify=tk.RIGHT).grid(
+            row=1, column=3, sticky=tk.W
+        )
 
-        self._tempo_button = tk.Button(self._tempo_frame, text="Set tempo",
-                                       command=self._on_set_tempo)
+        self._tempo_button = tk.Button(
+            self._tempo_frame, text="Set tempo", command=self._on_set_tempo
+        )
         self._tempo_button.grid(row=1, column=4, sticky=tk.W)
 
-        self._reset_tempo_button = tk.Button(self._tempo_frame, text="Reset tempo",
-                                             command=self._on_reset_tempo)
+        self._reset_tempo_button = tk.Button(
+            self._tempo_frame, text="Reset tempo", command=self._on_reset_tempo
+        )
         self._reset_tempo_button.grid(row=1, column=5, sticky=tk.W)
 
-        tk.Label(self._tempo_frame, text="Set predefined tempo:").grid(row=1, column=6, sticky=tk.W)
+        tk.Label(self._tempo_frame, text="Set predefined tempo:").grid(
+            row=1, column=6, sticky=tk.W
+        )
 
-        self._slow_tempo_button = ttk.Button(self._tempo_frame, text="Slow",
-                                            command=self._on_set_slow_tempo)
+        self._slow_tempo_button = ttk.Button(
+            self._tempo_frame, text="Slow", command=self._on_set_slow_tempo
+        )
         self._slow_tempo_button.grid(row=1, column=7, sticky=tk.W)
 
-        self._medium_tempo_button = ttk.Button(self._tempo_frame, text="Medium",
-                                            command=self._on_set_medium_tempo)
+        self._medium_tempo_button = ttk.Button(
+            self._tempo_frame, text="Medium", command=self._on_set_medium_tempo
+        )
         self._medium_tempo_button.grid(row=1, column=8, sticky=tk.W)
 
-        self._fast_tempo_button = ttk.Button(self._tempo_frame, text="Fast",
-                                            command=self._on_set_fast_tempo)
+        self._fast_tempo_button = ttk.Button(
+            self._tempo_frame, text="Fast", command=self._on_set_fast_tempo
+        )
         self._fast_tempo_button.grid(row=1, column=9, sticky=tk.W)
 
-        self._widgets += [self._tempo_entry, self._tempo_button, self._reset_tempo_button,
-                          self._slow_tempo_button, self._medium_tempo_button, self._fast_tempo_button]
+        self._widgets += [
+            self._tempo_entry,
+            self._tempo_button,
+            self._reset_tempo_button,
+            self._slow_tempo_button,
+            self._medium_tempo_button,
+            self._fast_tempo_button,
+        ]
 
         self._tempo_frame.pack(side=tk.TOP, fill=tk.X)
 
@@ -393,17 +423,16 @@ class PlayerDeck:
         self._set_tempo(self._abc_tempo.bpm)
         self._press_tempo_button("fast")
 
-    def _press_tempo_button(self, speed: Optional[str]):
+    def _press_tempo_button(self, speed: str | None):
         speed_to_button = {
             "slow": self._slow_tempo_button,
             "medium": self._medium_tempo_button,
             "fast": self._fast_tempo_button,
         }
         for button in speed_to_button.values():
-            button.state(['!pressed'])
+            button.state(["!pressed"])
         if speed is not None:
-            speed_to_button[speed].state(['pressed'])
-
+            speed_to_button[speed].state(["pressed"])
 
     # ------------------------------------------------------------------------
     # GUI periodic update every second

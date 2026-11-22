@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 import os
 
 
@@ -37,8 +35,8 @@ def prettify_path(path):
         a string with the prettified filename
     """
     dirname = os.path.dirname(path)
-    home = os.path.expanduser('~')
+    home = os.path.expanduser("~")
     if dirname.startswith(home):
-        dirname = '~' + dirname[len(home):]
-    pretty = '{} ({})'.format(os.path.basename(path), dirname)
+        dirname = "~" + dirname[len(home) :]
+    pretty = "{} ({})".format(os.path.basename(path), dirname)
     return pretty

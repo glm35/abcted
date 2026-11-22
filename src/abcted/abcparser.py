@@ -1,16 +1,12 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
 Tools that parse the ABC input
 """
 
 import logging as log
-from typing import List
 
-from abctempo import AbcTempo, AbcTempoException
-from edit_zone_buffer import EditZoneBuffer
-import musictheory
+from .abctempo import AbcTempo, AbcTempoException
+from .edit_zone_buffer import EditZoneBuffer
+from .musictheory import C_MAJOR_SCALE, MAJOR_SCALES, get_note_alteration_in_key
 
 
 class AbcParserException(Exception):
@@ -18,10 +14,10 @@ class AbcParserException(Exception):
         self.msg = msg
 
 
-class AbcParser():
+class AbcParser:
     """Parse a raw ABC tune and provide access to the tune elements."""
 
-    def __init__(self, raw_tune: List[str]):
+    def __init__(self, raw_tune: list[str]):
         self._raw_tune = raw_tune
 
         self._titles = []  # List of tune titles
@@ -57,10 +53,10 @@ class AbcParser():
 
     def _init_state_machine(self):
         # States of the "line processing" state machine
-        self.S_BEGIN = 'BEGIN'
-        self.S_HEADER = 'HEADER'
-        self.S_TUNE = 'TUNE'
-        self.S_END = 'END'
+        self.S_BEGIN = "BEGIN"
+        self.S_HEADER = "HEADER"
+        self.S_TUNE = "TUNE"
+        self.S_END = "END"
 
         self._state = self.S_BEGIN
 
@@ -71,14 +67,14 @@ class AbcParser():
         line = line.strip()  # Strip leading and trailing spaces
 
         # Skip comments and empty lines
-        if self._is_comment(line) or line == '':
+        if self._is_comment(line) or line == "":
             return
 
         elif self._state == self.S_BEGIN:
             if self.is_reference_number(line):
                 self._state = self.S_HEADER
             else:
-                log.warning('unexpected ABC line: \'' + line + '\'')
+                log.warning("unexpected ABC line: '" + line + "'")
 
         elif self._state == self.S_HEADER:
             # Find userful information in the header: key (K:), default not length (L:),
@@ -89,40 +85,40 @@ class AbcParser():
             if line.startswith("T:"):
                 self._titles.append(line[2:].strip())
 
-            elif line.startswith('M:'):
+            elif line.startswith("M:"):
                 self._meter = self._parse_meter(line[2:])
-                log.debug(f'meter = {self._meter}')
+                log.debug(f"meter = {self._meter}")
 
-            elif line.startswith('L:'):
+            elif line.startswith("L:"):
                 self._default_note_length = self._parse_default_note_length(line[2:])
-                log.debug(f'default note length = {self._default_note_length}')
+                log.debug(f"default note length = {self._default_note_length}")
 
-            elif line.startswith('Q:'):
+            elif line.startswith("Q:"):
                 try:
                     self.tempo = AbcTempo(line[2:])
-                    log.debug(f'tempo = {self.tempo}')
+                    log.debug(f"tempo = {self.tempo}")
                 except AbcTempoException as e:
                     log.error(e.msg)
                     raise AbcParserException(e.msg)
 
-            elif line.startswith('K:'):
+            elif line.startswith("K:"):
                 self._key = self.normalize_abc_key(line[2:])
-                log.debug('key = ' + str(self._key))
+                log.debug("key = " + str(self._key))
                 self._state = self.S_TUNE
 
-            elif line.startswith('R:'):
+            elif line.startswith("R:"):
                 self._rhythm = line[2:].strip().lower()
-                log.debug(f'rhythm = {self._rhythm}')
+                log.debug(f"rhythm = {self._rhythm}")
 
             elif self._is_header(line):
-                log.debug(f'ignore header line: {line.strip()}')
+                log.debug(f"ignore header line: {line.strip()}")
 
             else:
-                log.warning('unexpected ABC line: \'' + line + '\'')
+                log.warning("unexpected ABC line: '" + line + "'")
 
         elif self._state == self.S_TUNE:
             # Currently, our parser only process the header lines: we stop working now.
-            log.debug('stop state machine')
+            log.debug("stop state machine")
             self._state = self.S_END
 
     @staticmethod
@@ -135,7 +131,7 @@ class AbcParser():
         Returns:
             True (line is comment) or False (line is not comment)
         """
-        return line.strip().startswith('%')
+        return line.strip().startswith("%")
 
     @staticmethod
     def _is_header(line: str) -> bool:
@@ -148,9 +144,30 @@ class AbcParser():
             True (line is header) or False (line is not header)
 
         """
-        abc_headers = ['A:', 'B:', 'C:', 'D:', 'E:', 'F:', 'G:', 'H:', 'I:',
-                       'K:', 'L:', 'M:', 'N:', 'O:', 'P:', 'Q:', 'R:', 'S:',
-                       'T:', 'W:', 'X:', 'Z:']
+        abc_headers = [
+            "A:",
+            "B:",
+            "C:",
+            "D:",
+            "E:",
+            "F:",
+            "G:",
+            "H:",
+            "I:",
+            "K:",
+            "L:",
+            "M:",
+            "N:",
+            "O:",
+            "P:",
+            "Q:",
+            "R:",
+            "S:",
+            "T:",
+            "W:",
+            "X:",
+            "Z:",
+        ]
         for header in abc_headers:
             if line.startswith(header):
                 return True
@@ -166,7 +183,7 @@ class AbcParser():
         Returns:
             True if the line is a X: header else False
         """
-        return line.strip().startswith('X:')
+        return line.strip().startswith("X:")
 
     @staticmethod
     def _parse_meter(line: str):
@@ -184,17 +201,17 @@ class AbcParser():
             AbcParserException
         """
         line = line.strip()
-        if line == 'C':
+        if line == "C":
             return 4, 4
-        elif line == 'C|':
+        elif line == "C|":
             return 2, 2
         try:
-            f = [int(s) for s in line.split('/')]
+            f = [int(s) for s in line.split("/")]
             if len(f) == 2:
                 return tuple(f)
         except ValueError:
             pass
-        raise AbcParserException('Invalid meter: \'' + line + '\'')
+        raise AbcParserException("Invalid meter: '" + line + "'")
 
     @staticmethod
     def _parse_default_note_length(line: str):
@@ -213,12 +230,12 @@ class AbcParser():
             AbcParserException
         """
         try:
-            f = [int(s) for s in line.split('/')]
+            f = [int(s) for s in line.split("/")]
             if len(f) == 2 and f[0] == 1 and f[1] in [4, 8, 16, 32]:
                 return tuple(f)
         except ValueError:
             pass
-        raise AbcParserException('Invalid default note length: \'' + line + '\'')
+        raise AbcParserException("Invalid default note length: '" + line + "'")
 
     @staticmethod
     def normalize_abc_key(raw_key: str):
@@ -247,13 +264,13 @@ class AbcParser():
         root = raw_key[0].upper()
         raw_key = raw_key[1:]
 
-        alteration = ''
-        if len(raw_key) >= 1 and raw_key[0] in ('b', '#'):
+        alteration = ""
+        if len(raw_key) >= 1 and raw_key[0] in ("b", "#"):
             alteration = raw_key[0]
             raw_key = raw_key[1:]
 
-        if root + alteration + 'maj' not in musictheory.MAJOR_SCALES.keys():
-            msg = root + alteration + raw_key + ' is not a valid key name'
+        if root + alteration + "maj" not in MAJOR_SCALES.keys():
+            msg = root + alteration + raw_key + " is not a valid key name"
             log.warning(msg)
             raise AbcParserException(msg)
 
@@ -261,22 +278,32 @@ class AbcParser():
 
         mode = None
         if len(raw_key) == 0:
-            mode = 'maj'
-        elif len(raw_key) == 1 and raw_key[0] == 'm':
-            mode = 'min'
+            mode = "maj"
+        elif len(raw_key) == 1 and raw_key[0] == "m":
+            mode = "min"
         elif len(raw_key) >= 3:
-            for prefix in ('maj', 'ion', 'dor', 'phr', 'lyd', 'mix', 'min', 'eol', 'loc'):
+            for prefix in (
+                "maj",
+                "ion",
+                "dor",
+                "phr",
+                "lyd",
+                "mix",
+                "min",
+                "eol",
+                "loc",
+            ):
                 if raw_key.startswith(prefix):
                     mode = prefix
                     break
-            if mode == 'ion':
-                mode = 'maj'
-            if mode == 'eol':
-                mode = 'min'
+            if mode == "ion":
+                mode = "maj"
+            if mode == "eol":
+                mode = "min"
 
         # Raise exception if the mode cannot be understood
         if mode is None:
-            msg = root + alteration + raw_key + ' is not a valid key name'
+            msg = root + alteration + raw_key + " is not a valid key name"
             log.warning(msg)
             raise AbcParserException(msg)
 
@@ -287,7 +314,8 @@ class AbcParser():
 # Get current raw tune in edit buffer
 # --------------------------------------------------------------------------------
 
-def get_current_raw_tune(buffer: EditZoneBuffer) -> List[str]:
+
+def get_current_raw_tune(buffer: EditZoneBuffer) -> list[str]:
     """Return the current tune around the cursor.
 
     Args:
@@ -316,7 +344,7 @@ def get_current_raw_tune(buffer: EditZoneBuffer) -> List[str]:
         else:
             line_no -= 1
             if line_no == 0:  # line numbers start at 1
-                msg = 'Reference number (X: header) missing in current tune'
+                msg = "Reference number (X: header) missing in current tune"
                 log.error(msg)
                 raise AbcParserException(msg)
 
@@ -328,7 +356,7 @@ def get_current_raw_tune(buffer: EditZoneBuffer) -> List[str]:
     line_no = cur_line_no + 1
     while True:
         line = buffer.get_line(line_no)
-        if AbcParser.is_reference_number(line) or line.strip() == '':
+        if AbcParser.is_reference_number(line) or line.strip() == "":
             break
         raw_tune.append(line)
         line_no += 1
@@ -340,59 +368,61 @@ def get_current_raw_tune(buffer: EditZoneBuffer) -> List[str]:
 # Get note to play in edit buffer
 # --------------------------------------------------------------------------------
 
+
 def get_note_to_play(edit_buffer: EditZoneBuffer, keysym):
     """Given a keysym following a key press, check whether there is a
-     note to play. If so, return the note.
+    note to play. If so, return the note.
 
-     :param edit_buffer: The buffer containing the text being edited
+    :param edit_buffer: The buffer containing the text being edited
 
-     :param keysym The key pressed. It has to be a valid ABC note, ie its
-                   lower-case value must belong to musictheory.c_major_scale
+    :param keysym The key pressed. It has to be a valid ABC note, ie its
+                  lower-case value must belong to musictheory.c_major_scale
 
-     :return a String with the note to play in ABC-normalized format, or None
-             if there is no note to play. The note is absolute, ie not relative to
-             the tune scale. Examples: 'c', "c'", 'C', 'C,,', '^C' (C sharp), '_c' (c flat)
-     """
+    :return a String with the note to play in ABC-normalized format, or None
+            if there is no note to play. The note is absolute, ie not relative to
+            the tune scale. Examples: 'c', "c'", 'C', 'C,,', '^C' (C sharp), '_c' (c flat)
+    """
 
-    log.debug('keysym=' + keysym)
+    log.debug("keysym=" + keysym)
 
     # Check whether we are in comment context
     raw_abc_line = edit_buffer.get_current_line_to_cursor()
-    if raw_abc_line.find('%') != -1:
+    if raw_abc_line.find("%") != -1:
         # There is a '%' before the text cursor => we are in comment context
         return None
 
     # Check whether we are in an information line
     if len(raw_abc_line) >= 2:
-        if raw_abc_line[1] == ':':
-            if 'A' <= raw_abc_line[0] <= 'Z':
+        if raw_abc_line[1] == ":":
+            if "A" <= raw_abc_line[0] <= "Z":
                 return None
 
     # Handle octave markers
-    octave_marker = ''
-    if keysym == "'" or keysym == ',':
+    octave_marker = ""
+    if keysym == "'" or keysym == ",":
         try:
             tentative_note = raw_abc_line[-1]
         except IndexError:
             return None
-        if tentative_note.upper() in musictheory.C_MAJOR_SCALE:
+        if tentative_note.upper() in C_MAJOR_SCALE:
             raw_abc_line = raw_abc_line[:-1]
             simple_note = tentative_note
             octave_marker = keysym
-            if ((simple_note.islower() and octave_marker == ',')
-                    or (simple_note.isupper() and octave_marker == "'")):
+            if (simple_note.islower() and octave_marker == ",") or (
+                simple_note.isupper() and octave_marker == "'"
+            ):
                 return None
         else:
             return None
-    elif keysym.upper() in musictheory.C_MAJOR_SCALE:
+    elif keysym.upper() in C_MAJOR_SCALE:
         simple_note = keysym
     else:
         return None
 
     # Find whether there is an accidental before the note
     accidental = get_accidental(raw_abc_line)
-    if accidental != '':
-        if accidental == '=':  # natural
+    if accidental != "":
+        if accidental == "=":  # natural
             abc_note = simple_note
         else:  # (double) sharp, (double) flat
             abc_note = accidental + simple_note
@@ -407,12 +437,12 @@ def get_note_to_play(edit_buffer: EditZoneBuffer, keysym):
 
         # Get the note to play with all the useful attributes (accidentals,
         # octave changes, ...)
-        alteration = musictheory.get_note_alteration_in_key(simple_note, abc_key)
+        alteration = get_note_alteration_in_key(simple_note, abc_key)
         abc_note = alteration + simple_note
 
     abc_note = abc_note + octave_marker
 
-    log.debug('abc_note=' + abc_note)
+    log.debug("abc_note=" + abc_note)
     return abc_note
 
 
@@ -425,7 +455,7 @@ def get_current_raw_key(edit_buffer: EditZoneBuffer):
     """
 
     # Assume 'C major' if no key is specified
-    key = 'C'
+    key = "C"
 
     # For each line going upward until until the line starts with 'X:'
     # (beginning of the tune found) or until there are no more lines,
@@ -434,10 +464,10 @@ def get_current_raw_key(edit_buffer: EditZoneBuffer):
     line_no = edit_buffer.get_line_no_at_cursor()
     while line_no > 0:
         line = edit_buffer.get_line(line_no)
-        if line.startswith('K:'):
+        if line.startswith("K:"):
             key = line[2:]
             break
-        if line.startswith('X:'):
+        if line.startswith("X:"):
             # We reached the beginning of the tune
             break
         line_no -= 1
@@ -455,13 +485,13 @@ def get_accidental(raw_abc: str):
         '^^' (double sharp), '_' (flat), '__' (double flat)
     """
 
-    accidental = ''
+    accidental = ""
 
     try:
         c = raw_abc[-1]
-        if c == '=':
+        if c == "=":
             accidental = c
-        elif c == '^' or c == '_':
+        elif c == "^" or c == "_":
             accidental = c
             try:
                 d = raw_abc[-2]

@@ -1,36 +1,26 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 # PSL imports
 import enum
 import logging as log
-from threading import Timer, Lock
 import time
-from typing import Optional
 import traceback
+from threading import Lock, Timer
 
 # Third-party imports
 from pyfluidsynth3 import fluidaudiodriver, fluidhandle, fluidsettings, fluidsynth
 from pyfluidsynth3.fluiderror import FluidError
 from pyfluidsynth3.fluidplayer import FluidPlayer, PlayerStatus, TempoType
 
-
 # abcted imports
-import abc2midi
+from .abc2midi import get_midi_note
 
 
 # midi utils
 
-midi_programs = {
-    'Acoustic Grand Piano': 0,
-    'Accordion': 21,
-    'Flute': 73,
-    'Fiddle': 110
-}
+midi_programs = {"Acoustic Grand Piano": 0, "Accordion": 21, "Flute": 73, "Fiddle": 110}
 
 soundfonts = [  # We will use the first sound font that can be found in that list:
-    '/usr/share/sounds/sf2/FluidR3_GM.sf2',
-    '/usr/share/sounds/sf2/default.sf2'  # Fedora: symlink to '/usr/share/soundfonts/FluidR3_GM.sf2'
+    "/usr/share/sounds/sf2/FluidR3_GM.sf2",
+    "/usr/share/sounds/sf2/default.sf2",  # Fedora: symlink to '/usr/share/soundfonts/FluidR3_GM.sf2'
 ]
 
 
@@ -39,18 +29,18 @@ class PlayerException(Exception):
 
 
 class Synth:
-    def __init__(self, libfluidsynth_path: str = None):
+    def __init__(self, libfluidsynth_path: str | None = None):
         """Create a soundless player. This object cannot produce a sound (yet), but
-           it can be used as a stub in soundless setups.
+        it can be used as a stub in soundless setups.
         """
         self._libfluidsynth_path = libfluidsynth_path
 
-        self._instrument = 'Acoustic Grand Piano'
+        self._instrument = "Acoustic Grand Piano"
         self._midi_note = None  # MIDI note number
         self._midi_channel = 0  # MIDI channel to play the note
         self._midi_program = midi_programs[self._instrument]
-        self._velocity = 1.0    # MIDI note velocity
-        self._delay_s = 0.5     # Note duration in seconds
+        self._velocity = 1.0  # MIDI note velocity
+        self._delay_s = 0.5  # Note duration in seconds
 
         self._timer = None
 
@@ -64,50 +54,59 @@ class Synth:
     def setup_synth(self):
         """Setup the synth so that it can produce sound.
 
-           Raises:
-               PlayerException: an error occured during the synth setup.
-                   Most common errors: fluidsynth library not found, soundfont not found.
+        Raises:
+            PlayerException: an error occured during the synth setup.
+                Most common errors: fluidsynth library not found, soundfont not found.
         """
         try:
             if self._libfluidsynth_path is not None:
                 log.info("Using libfluidsynth: " + self._libfluidsynth_path)
             self._fluidhandle = fluidhandle.FluidHandle(self._libfluidsynth_path)
             self._fluidsettings = fluidsettings.FluidSettings(self._fluidhandle)
-            self._fluidsettings['synth.gain'] = 0.2
-            self._fluidsynth = fluidsynth.FluidSynth(self._fluidhandle, self._fluidsettings)
+            self._fluidsettings["synth.gain"] = 0.2
+            self._fluidsynth = fluidsynth.FluidSynth(
+                self._fluidhandle, self._fluidsettings
+            )
             self._load_soundfont()
-            self._fluidsettings['audio.driver'] = 'alsa'
-            self._driver = fluidaudiodriver.FluidAudioDriver(self._fluidhandle,
-                                                             self._fluidsynth, self._fluidsettings)
+            self._fluidsettings["audio.driver"] = "alsa"
+            self._driver = fluidaudiodriver.FluidAudioDriver(
+                self._fluidhandle, self._fluidsynth, self._fluidsettings
+            )
         except (AttributeError, FluidError) as e:
             # rem: under Linux, AttributeError is raised when pyfluidsynth3 is
             # available but libfluidsynth1 is not.
-            message = 'Failed to setup fluidsynth: ' + str(e) + '. Audio output will be disabled.'
+            message = (
+                "Failed to setup fluidsynth: "
+                + str(e)
+                + ". Audio output will be disabled."
+            )
             log.warning(message)
             log.debug(traceback.format_exc())
             raise PlayerException(message)
 
-        self._no_sound = False  # If we can reach that point without exception, we should have sound
+        self._no_sound = (
+            False  # If we can reach that point without exception, we should have sound
+        )
         self.select_instrument(self._instrument)
 
     def _load_soundfont(self):
         """Look for a soundfont and load it into fluidsynth.
 
-           Raises:
-               PlayerException: could not find a soundfont
+        Raises:
+            PlayerException: could not find a soundfont
         """
         soundfont_found = False
         for soundfont in soundfonts:
             try:
                 self._fluidsynth.load_soundfont(soundfont)
                 soundfont_found = True
-                log.info('soundfont: loaded \'' + soundfont + '\'')
+                log.info("soundfont: loaded '" + soundfont + "'")
                 break
             except FluidError:
                 # rem: loading error logged by fluidsynth
                 pass
         if not soundfont_found:
-            message = 'No soundfont can be found. Audio output will be disabled.'
+            message = "No soundfont can be found. Audio output will be disabled."
             log.warning(message)
             raise PlayerException(message)
 
@@ -143,7 +142,7 @@ class Synth:
             self._lock.release()
 
     def play_abc_note(self, abc_note):
-        self.play_midi_note(abc2midi.get_midi_note(abc_note))
+        self.play_midi_note(get_midi_note(abc_note))
 
     def _on_timeout(self):
         try:
@@ -164,7 +163,9 @@ class MidiPlayer:
     def __init__(self, synth: Synth):
         self._synth = synth
         self._fluidplayer = None
-        self._paused = False  # Whether the player is paused (needed to detect end of playback)
+        self._paused = (
+            False  # Whether the player is paused (needed to detect end of playback)
+        )
         self._playlist = []
 
         self.repeat_count = 1
@@ -208,8 +209,11 @@ class MidiPlayer:
         log.debug("start playing")
 
         # If playback is finished, need to stop first:
-        if self._fluidplayer is not None and self._paused is False \
-           and self._fluidplayer.get_status() == PlayerStatus.DONE:
+        if (
+            self._fluidplayer is not None
+            and self._paused is False
+            and self._fluidplayer.get_status() == PlayerStatus.DONE
+        ):
             self.stop()
 
         if self._fluidplayer is None:
@@ -286,7 +290,7 @@ class MidiPlayer:
         return self._tempo
 
     @tempo.setter
-    def tempo(self, tempo: Optional[int]):
+    def tempo(self, tempo: int | None):
         if tempo is not None and tempo <= 0:
             raise ValueError
         self._tempo = tempo
@@ -301,25 +305,25 @@ class MidiPlayer:
         return self._tempo_scale_factor
 
     @tempo_scale_factor.setter
-    def tempo_scale_factor(self, scale_factor: Optional[float]):
+    def tempo_scale_factor(self, scale_factor: float | None):
         if scale_factor is not None and scale_factor <= 0:
             raise ValueError
         self._tempo_scale_factor = scale_factor
         self._tempo = None
         self._set_tempo(scale_factor=self._tempo_scale_factor)
 
-    def _set_tempo(self, tempo: Optional[int] = None, scale_factor: Optional[float] = None):
+    def _set_tempo(self, tempo: int | None = None, scale_factor: float | None = None):
         if self._fluidplayer is None:
             return
 
         if tempo is not None:
-            log.debug(f'set tempo: {tempo}')
+            log.debug(f"set tempo: {tempo}")
             self._fluidplayer.set_tempo(TempoType.TEMPO_EXTERNAL_BPM, tempo=tempo)
         elif scale_factor is not None and scale_factor != 1:
-            log.debug(f'set relative tempo: x{scale_factor}')
+            log.debug(f"set relative tempo: x{scale_factor}")
             self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=scale_factor)
         else:
-            log.debug('reset tempo (use MIDI file tempo)')
+            log.debug("reset tempo (use MIDI file tempo)")
             self._fluidplayer.set_tempo(TempoType.TEMPO_INTERNAL, tempo=1)
 
     def get_tempo(self):

@@ -1,6 +1,3 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
 Tools to convert data from the ABC world to the MIDI world
 """
@@ -9,13 +6,12 @@ import logging as log
 import os
 import subprocess
 import tempfile
-from typing import List
 
-import musictheory
+from .musictheory import C_MAJOR_SCALE_INTERVALS
 
 
 def get_midi_note(abc_note):
-    """"Convert an ABC note to a midi number
+    """ "Convert an ABC note to a midi number
 
     :param abc_note: A normalized ABC note eg 'b', '_E,', '__e', '^c', '^^c'
 
@@ -27,7 +23,7 @@ def get_midi_note(abc_note):
     # letter before "'".
     octave_jump = 0
     tentative_octave_marker = abc_note[-1]
-    if tentative_octave_marker == ',':
+    if tentative_octave_marker == ",":
         octave_jump = -12
     elif tentative_octave_marker == "'":
         octave_jump = 12
@@ -35,15 +31,15 @@ def get_midi_note(abc_note):
         abc_note = abc_note[:-1]
 
     alteration = 0
-    if abc_note[0] == '^':
-        if abc_note[1] == '^':
+    if abc_note[0] == "^":
+        if abc_note[1] == "^":
             alteration = 2
             abc_note = abc_note[2:]
         else:
             alteration = 1
             abc_note = abc_note[1:]
-    elif abc_note[0] == '_':
-        if abc_note[1] == '_':
+    elif abc_note[0] == "_":
+        if abc_note[1] == "_":
             alteration = -2
             abc_note = abc_note[2:]
         else:
@@ -55,12 +51,14 @@ def get_midi_note(abc_note):
     if abc_note.islower():
         midi_note_number += 12
         abc_note = abc_note.upper()
-    midi_note_number += octave_jump + alteration + musictheory.C_MAJOR_SCALE_INTERVALS[abc_note]
+    midi_note_number += octave_jump + alteration + C_MAJOR_SCALE_INTERVALS[abc_note]
     return midi_note_number
 
 
-def abc2midi(abc_lines: List[str]) -> str:
-    with tempfile.NamedTemporaryFile(mode="wt", suffix=".abc", delete=False) as temp_abc_file:
+def abc2midi(abc_lines: list[str]) -> str:
+    with tempfile.NamedTemporaryFile(
+        mode="wt", suffix=".abc", delete=False
+    ) as temp_abc_file:
         temp_abc_file.writelines(line + "\n" for line in abc_lines)
     log.debug("wrote raw tune to temp file: " + temp_abc_file.name)
 

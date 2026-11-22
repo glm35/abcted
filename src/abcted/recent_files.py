@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding:utf-8 -*-
-
 """
 Manage the lists of recent files and favorite files.
 """
@@ -15,13 +12,13 @@ import collections
 import logging as log
 import os
 
-from file_utils import normalize_path
+from .file_utils import normalize_path
 
 
-CONFIG_DIR = '~/.config/abcted/'
-FAVORITE_FILES_FILENAME = 'favorite_files.txt'
+CONFIG_DIR = "~/.config/abcted/"
+FAVORITE_FILES_FILENAME = "favorite_files.txt"
 FAVORITE_FILES_PATH = CONFIG_DIR + FAVORITE_FILES_FILENAME
-RECENT_FILES_FILENAME = 'recent_files.txt'
+RECENT_FILES_FILENAME = "recent_files.txt"
 RECENT_FILES_PATH = CONFIG_DIR + RECENT_FILES_FILENAME
 MAX_RECENT_FILES_NB = 10
 
@@ -194,15 +191,15 @@ def _write_file_list(file_list: list, filename: str):
     # Create the config dir if it does not exist
     try:
         os.makedirs(os.path.expanduser(CONFIG_DIR))
-        log.info('Created dir ' + CONFIG_DIR)
+        log.info("Created dir " + CONFIG_DIR)
     except OSError:
         pass
 
     # Write the list of file paths:
     path = os.path.expanduser(CONFIG_DIR + filename)
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         for file_path in file_list:
-            f.write(file_path + '\n')
+            f.write(file_path + "\n")
 
 
 def _read_file_list(file_list_path):
@@ -222,16 +219,16 @@ def _read_file_list(file_list_path):
     abs_file_list_name = os.path.expanduser(file_list_path)
 
     try:
-        with open(abs_file_list_name, 'r') as f:
+        with open(abs_file_list_name, "r") as f:
             for line in f:
                 line = line.strip()
-                if line == '':
+                if line == "":
                     continue
-                if line.startswith('#'):
+                if line.startswith("#"):
                     continue
                 raw_path = line
 
-                if raw_path.startswith('~'):
+                if raw_path.startswith("~"):
                     raw_path = os.path.expanduser(line)
 
                 path = normalize_path(raw_path)
@@ -242,7 +239,7 @@ def _read_file_list(file_list_path):
 
                 file_list.append(path)
     except FileNotFoundError:
-        log.debug('file not found: ' + abs_file_list_name)
+        log.debug("file not found: " + abs_file_list_name)
 
     # TODO: test not UTF-8 encoded favorite_files.txt + issue warning log message
     # rem: on Windows 7, no prb to read a ISO-8859-1 encoded file
